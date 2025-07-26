@@ -1,6 +1,5 @@
 import assert from "assert";
 import { State } from "./behavior/State";
-import type { ComputedBehavior } from "./ComputedBehavior";
 import type { Effect } from "./event/Effect";
 import type { Event, EventEmission } from "./event/Event";
 import { Source } from "./event/Source";
@@ -38,6 +37,7 @@ export class Timeline {
 		while (eventEmissions.length > 0) {
 			while (true) {
 				const nextEventEmissions: EventEmission<unknown>[] = [];
+
 				for (const { event, value } of eventEmissions) {
 					if (!event.isActive) continue;
 
@@ -49,7 +49,7 @@ export class Timeline {
 						stateUpdates.push([state, value]);
 					}
 
-					for (const { to: child, propagate } of event.children) {
+					for (const { to: child, propagate } of event.deriveEvents) {
 						if (!child.isActive) continue;
 
 						const childEmission = propagate(value);

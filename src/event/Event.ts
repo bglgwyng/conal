@@ -4,9 +4,8 @@ import type { Timeline } from "../Timeline";
 
 export class Event<T> {
 	timeline: Timeline;
-	children: Set<EventRelation<T, unknown>> = new Set();
 
-	childrenEvents: Set<Event<T>> = new Set();
+	deriveEvents: Set<EventRelation<T, any>> = new Set();
 	dependenedStates: Set<State<T>> = new Set();
 
 	effects: ((value: T) => unknown)[] = [];
@@ -15,16 +14,20 @@ export class Event<T> {
 		this.timeline = timeline;
 	}
 
-	listen(fn: EventRelation<T, unknown>): () => void {
-		this.children.add(fn);
+	listen<U>(fn: EventRelation<T, U>): () => void {
+		this.deriveEvents.add(fn);
 
 		return () => {
-			this.children.delete(fn);
+			this.deriveEvents.delete(fn);
 		};
 	}
 
 	get isActive() {
-		return this.effects.length > 0 || this.dependenedStates.size > 0;
+		return (
+			this.effects.length > 0 ||
+			this.dependenedStates.size > 0 ||
+			this.deriveEvents.size > 0
+		);
 	}
 
 	push<U>(_fn: (value: T) => Event<U>): Event<U> {
