@@ -30,14 +30,6 @@ export class Event<T> {
 		);
 	}
 
-	push<U>(_fn: (value: T) => Event<U>): Event<U> {
-		assert.fail();
-	}
-
-	pushAlways<U>(_fn: (value: T) => Event<U>): Event<U> {
-		assert.fail();
-	}
-
 	on(fn: (value: T) => unknown): () => void {
 		this.effects.push(fn);
 
