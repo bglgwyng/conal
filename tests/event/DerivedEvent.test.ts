@@ -57,4 +57,28 @@ describe("DerivedEvent", () => {
 
 		expect(mockCallback).toHaveBeenCalledWith("Number: 42!");
 	});
+
+	it("should not propagate when Discard is thrown", async () => {
+		const { Discard } = await import("../../src/event/DerivedEvent");
+
+		const transformFn = (n: number) => {
+			if (n % 2 === 0) throw Discard;
+			return `Number: ${n}`;
+		};
+
+		derivedEvent = new DerivedEvent(timeline, parentEvent, transformFn);
+
+		const mockCallback = vitest.fn();
+		derivedEvent.on(mockCallback);
+
+		// This should be discarded (even number)
+		parentEvent.emit(42);
+		timeline.flush();
+		expect(mockCallback).not.toHaveBeenCalled();
+
+		// This should propagate (odd number)
+		parentEvent.emit(7);
+		timeline.flush();
+		expect(mockCallback).toHaveBeenCalledWith("Number: 7");
+	});
 });

@@ -13,11 +13,21 @@ export class DerivedEvent<T, U> extends Event<T> {
 		const _dispose = parent.listen<T>({
 			to: this as Event<T>,
 			propagate: (value) => {
-				return {
-					type: "emit",
-					value: fn(value),
-				};
+				try {
+					const transformedValue = fn(value);
+
+					return {
+						type: "emit",
+						value: transformedValue,
+					};
+				} catch (error) {
+					if (error === Discard) return;
+
+					throw error;
+				}
 			},
 		});
 	}
 }
+
+export const Discard = Symbol("Discard");
