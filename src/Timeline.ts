@@ -1,0 +1,86 @@
+import assert from "assert";
+import type { ComputedBehavior } from "./ComputedBehavior";
+import type { Effect } from "./Effect";
+import type { Event, EventEmission } from "./Event";
+import { Source } from "./Source";
+import { State } from "./State";
+
+export class Timeline {
+	timestamp = 0;
+
+	emittingSources = new Set<Source<unknown>>();
+
+	state<T>(initialValue: T, updated: Event<T>): State<T> {
+		return new State(this, initialValue, updated);
+	}
+
+	source<T>(): Source<T> {
+		return new Source(this);
+	}
+
+	markEmitting(event: Source<unknown>) {
+		this.emittingSources.add(event);
+	}
+
+	flush() {
+		let eventEmissions: EventEmission<unknown>[] = [];
+		for (const source of this.emittingSources) {
+			eventEmissions.push({
+				event: source,
+				value: source.instantContext!.value,
+			});
+			source.instantContext = undefined;
+		}
+
+		const pendingEffects: Effect[] = [];
+
+		while (eventEmissions.length > 0) {
+			const stateUpdates: StateUpdate<unknown>[] = [];
+
+			while (true) {
+				const nextEventEmissions: EventEmission<unknown>[] = [];
+				for (const { event, value } of eventEmissions) {
+					if (!event.isActive) continue;
+
+					for (const effect of event.effects) {
+						pendingEffects.push(() => effect(value));
+					}
+
+					for (const state of event.dependenedStates) {
+						stateUpdates.push([state, state.value]);
+					}
+
+					for (const { to: child, propagate } of event.children) {
+						if (!child.isActive) continue;
+
+						const childEmission = propagate(value);
+						if (childEmission) {
+							nextEventEmissions.push(childEmission);
+						}
+					}
+				}
+				if (nextEventEmissions.length === 0) break;
+
+				eventEmissions = nextEventEmissions;
+			}
+
+			eventEmissions = [];
+		}
+
+		for (const effect of pendingEffects) {
+			effect();
+		}
+
+		this.timestamp++;
+	}
+
+	beforeFlush() {
+		assert.fail();
+	}
+
+	afterFlush() {
+		assert.fail();
+	}
+}
+
+type StateUpdate<T> = readonly [state: State<T>, newValue: T];
