@@ -38,13 +38,11 @@ export class Event<T> {
 		};
 	}
 
-	write(state: State<T>) {
+	writeOn(state: State<T>) {
 		this.dependenedStates.add(state);
 
 		return () => {
 			this.dependenedStates.delete(state);
-			if (!this.isActive) {
-			}
 		};
 	}
 }
