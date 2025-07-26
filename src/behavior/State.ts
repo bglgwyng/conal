@@ -1,6 +1,6 @@
+import type { Event } from "../event/Event";
+import type { Timeline } from "../Timeline";
 import type { Behavior } from "./Behavior";
-import type { Event } from "./Event";
-import type { Timeline } from "./Timeline";
 
 export class State<T> implements Behavior<T> {
 	value: T;

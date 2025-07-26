@@ -1,9 +1,9 @@
 import assert from "assert";
+import { State } from "./behavior/State";
 import type { ComputedBehavior } from "./ComputedBehavior";
-import type { Effect } from "./Effect";
-import type { Event, EventEmission } from "./Event";
-import { Source } from "./Source";
-import { State } from "./State";
+import type { Effect } from "./event/Effect";
+import type { Event, EventEmission } from "./event/Event";
+import { Source } from "./event/Source";
 
 export class Timeline {
 	timestamp = 0;
@@ -67,7 +67,6 @@ export class Timeline {
 		}
 
 		for (const [state, newValue] of stateUpdates) {
-			console.info("##", state, newValue);
 			state.value = newValue;
 		}
 

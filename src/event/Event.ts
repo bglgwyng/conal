@@ -1,6 +1,6 @@
 import assert from "assert";
-import type { State } from "./State";
-import type { Timeline } from "./Timeline";
+import type { State } from "../behavior/State";
+import type { Timeline } from "../Timeline";
 
 export class Event<T> {
 	timeline: Timeline;
