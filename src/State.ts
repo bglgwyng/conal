@@ -11,6 +11,7 @@ export class State<T> implements Behavior<T> {
 		public updated: Event<T>,
 	) {
 		this.value = initialValue;
+		this.updated.dependenedStates.add(this);
 	}
 
 	read(): T {

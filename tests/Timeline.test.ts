@@ -33,4 +33,16 @@ describe("Timeline", () => {
 
 		expect(effectValue).toBe(1);
 	});
+	test("update state", () => {
+		const timeline = new Timeline();
+		const source = timeline.source<number>();
+
+		const state = timeline.state(0, source);
+		expect(state.read()).toBe(0);
+
+		source.emit(1);
+		timeline.flush();
+
+		expect(state.read()).toBe(1);
+	});
 });

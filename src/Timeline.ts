@@ -33,10 +33,9 @@ export class Timeline {
 		}
 
 		const pendingEffects: Effect[] = [];
+		const stateUpdates: StateUpdate<unknown>[] = [];
 
 		while (eventEmissions.length > 0) {
-			const stateUpdates: StateUpdate<unknown>[] = [];
-
 			while (true) {
 				const nextEventEmissions: EventEmission<unknown>[] = [];
 				for (const { event, value } of eventEmissions) {
@@ -47,7 +46,7 @@ export class Timeline {
 					}
 
 					for (const state of event.dependenedStates) {
-						stateUpdates.push([state, state.value]);
+						stateUpdates.push([state, value]);
 					}
 
 					for (const { to: child, propagate } of event.children) {
@@ -65,6 +64,11 @@ export class Timeline {
 			}
 
 			eventEmissions = [];
+		}
+
+		for (const [state, newValue] of stateUpdates) {
+			console.info("##", state, newValue);
+			state.value = newValue;
 		}
 
 		for (const effect of pendingEffects) {
