@@ -14,7 +14,7 @@ export class DerivedEvent<T, U> extends Event<T> {
 			to: this as Event<T>,
 			propagate: (value) => {
 				return {
-					event: this,
+					type: "emit",
 					value: fn(value),
 				};
 			},

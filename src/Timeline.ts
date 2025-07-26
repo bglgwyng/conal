@@ -53,8 +53,13 @@ export class Timeline {
 						if (!child.isActive) continue;
 
 						const childEmission = propagate(value);
-						if (childEmission) {
-							nextEventEmissions.push(childEmission);
+						if (!childEmission) continue;
+
+						if (childEmission.type === "emit") {
+							nextEventEmissions.push({
+								event: child,
+								value: childEmission.value,
+							});
 						}
 					}
 				}

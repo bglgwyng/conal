@@ -48,7 +48,7 @@ export class Event<T> {
 }
 
 export type EventRelation<T1, T2> = {
-	propagate: (x: T1) => EventEmission<T2> | undefined;
+	propagate: (x: T1) => { type: "emit"; value: T2 } | undefined;
 	to: Event<T2>;
 };
 
