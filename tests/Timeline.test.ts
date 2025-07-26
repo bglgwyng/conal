@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vitest } from "vitest";
 import { Timeline } from "../src/Timeline";
 
 describe("Timeline", () => {
@@ -14,24 +14,23 @@ describe("Timeline", () => {
 	test("run effects", () => {
 		const timeline = new Timeline();
 		const source = timeline.source<number>();
+		const mockEffect = vitest.fn();
 
-		let effectValue: number = 0;
-
-		const dispose = source.on((x) => {
-			effectValue = x;
-		});
+		source.on(mockEffect);
 
 		source.emit(1);
 		timeline.flush();
 
-		expect(effectValue).toBe(1);
+		expect(mockEffect).toHaveBeenCalledWith(1);
+		expect(mockEffect).toHaveBeenCalledTimes(1);
 
-		dispose();
+		mockEffect.mockClear();
 
 		source.emit(2);
 		timeline.flush();
 
-		expect(effectValue).toBe(1);
+		expect(mockEffect).toHaveBeenCalledWith(2); // Update this line
+		expect(mockEffect).toHaveBeenCalledTimes(1); // Update this line
 	});
 	test("update state", () => {
 		const timeline = new Timeline();
