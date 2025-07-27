@@ -4,8 +4,8 @@ import { Causality, Event } from "./Event";
 export class DerivedEvent<T, U> extends Event<T> {
 	constructor(
 		timeline: Timeline,
-		parent: Event<U>,
-		fn: (value: U) => T,
+		private parent: Event<U>,
+		private fn: (value: U) => T,
 		_options?: { debugLabel?: string },
 	) {
 		super(timeline);
@@ -26,6 +26,22 @@ export class DerivedEvent<T, U> extends Event<T> {
 			},
 		});
 	}
+
+	takeEmittedValue() {
+		const emittedValueFn = this.parent.takeEmittedValue();
+		if (!emittedValueFn) return;
+
+		try {
+			const value = this.fn(emittedValueFn());
+			return () => value;
+		} catch (error) {
+			if (error === Discard) return;
+
+			throw error;
+		}
+	}
+
+	cleanUpLastEmittedValue() {}
 }
 
 export const Discard = Symbol("Discard");

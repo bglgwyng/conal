@@ -1,4 +1,3 @@
-import assert from "assert";
 import { Event } from "./Event";
 
 export class Source<T> extends Event<T> {
@@ -14,11 +13,14 @@ export class Source<T> extends Event<T> {
 		this.timeline.markEmitting(this as Source<unknown>);
 	}
 
-	takeLastEmittedValue() {
-		assert(this.instantContext !== undefined, "no instant context!");
-		const { value } = this.instantContext;
-		this.instantContext = undefined;
+	takeEmittedValue() {
+		const { instantContext } = this;
+		if (!instantContext) return;
 
-		return value;
+		return () => instantContext.value;
+	}
+
+	cleanUpLastEmittedValue() {
+		this.instantContext = undefined;
 	}
 }

@@ -2,10 +2,10 @@ import type { State } from "../behavior/State";
 import type { Timeline } from "../Timeline";
 import type { Affine } from "../utils/affine";
 
-export class Event<T> {
+export abstract class Event<T> {
 	timeline: Timeline;
 
-	deriveEvents: Set<EventRelation<T, any>> = new Set();
+	childEvents: Set<Event<any>> = new Set();
 	dependenedStates: Set<State<T>> = new Set();
 	effects: ((value: T) => unknown)[] = [];
 
@@ -14,10 +14,10 @@ export class Event<T> {
 	}
 
 	relate<U>(fn: EventRelation<T, U>): () => void {
-		this.deriveEvents.add(fn);
+		this.childEvents.add(fn.to);
 
 		return () => {
-			this.deriveEvents.delete(fn);
+			this.childEvents.delete(fn.to);
 		};
 	}
 
@@ -25,9 +25,12 @@ export class Event<T> {
 		return (
 			this.effects.length > 0 ||
 			this.dependenedStates.size > 0 ||
-			this.deriveEvents.size > 0
+			this.childEvents.size > 0
 		);
 	}
+
+	abstract takeEmittedValue(): (() => T) | undefined;
+	abstract cleanUpLastEmittedValue(): void;
 
 	on(fn: (value: T) => unknown): () => void {
 		this.effects.push(fn);
@@ -67,8 +70,4 @@ export enum Causality {
 export type EventEmission<T> = {
 	event: Event<T>;
 	value: T;
-};
-
-export type DeferredEmittingEvent<T> = Event<T> & {
-	takeEmittedValue: () => T;
 };

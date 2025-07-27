@@ -1,14 +1,9 @@
 import assert from "assert";
+import { emit } from "process";
 import { State } from "./behavior/State";
 import type { Effect } from "./event/Effect";
-import {
-	Causality,
-	type DeferredEmittingEvent,
-	type Event,
-	type EventEmission,
-} from "./event/Event";
+import type { Event } from "./event/Event";
 import { Source } from "./event/Source";
-import { fixGenerator } from "./utils/fixGenerator";
 
 export class Timeline {
 	timestamp = 0;
@@ -28,31 +23,39 @@ export class Timeline {
 	}
 
 	flush() {
-		const { executeEmission, propagateEvents } = this;
-
-		const eventEmissions: EventEmission<unknown>[] = [];
+		const maybeEmittingEvents: Event<unknown>[] = [];
 		for (const source of this.emittingSources) {
 			if (!source.isActive) continue;
 
-			eventEmissions.push({
-				event: source,
-				value: source.takeLastEmittedValue(),
-			});
+			maybeEmittingEvents.push(source);
 		}
 		this.emittingSources.clear();
 
 		const pendingEffects: Effect[] = [];
 		const stateUpdates: StateUpdate<unknown>[] = [];
+		const processedEvents: Set<Event<unknown>> = new Set();
 
-		fixGenerator(eventEmissions, function* (emissions) {
-			const deferredEventEmissions: Set<DeferredEmittingEvent<unknown>> =
-				propagateEvents(emissions);
+		while (maybeEmittingEvents.length > 0) {
+			const event = maybeEmittingEvents.shift()!;
+			if (processedEvents.has(event)) continue;
+			processedEvents.add(event);
 
-			for (const event of deferredEventEmissions) {
-				const value = event.takeEmittedValue();
-				yield { event, value };
+			const valueFn = event.takeEmittedValue();
+			if (!valueFn) continue;
+
+			const value = valueFn();
+
+			for (const state of event.dependenedStates) {
+				stateUpdates.push([state, value]);
 			}
-		});
+			for (const effect of event.effects) {
+				pendingEffects.push(() => effect(value));
+			}
+
+			for (const childEvent of event.childEvents) {
+				maybeEmittingEvents.push(childEvent);
+			}
+		}
 
 		for (const [state, newValue] of stateUpdates) {
 			state.value = newValue;
@@ -60,6 +63,10 @@ export class Timeline {
 
 		for (const effect of pendingEffects) {
 			effect();
+		}
+
+		for (const event of processedEvents) {
+			event.cleanUpLastEmittedValue();
 		}
 
 		this.timestamp++;
@@ -72,48 +79,6 @@ export class Timeline {
 	afterFlush() {
 		assert.fail();
 	}
-
-	propagateEvents = (emissions: EventEmission<unknown>[]) => {
-		const { executeEmission } = this;
-
-		const deferredEventEmissions = new Set<DeferredEmittingEvent<unknown>>();
-
-		fixGenerator(emissions, function* (emissions) {
-			for (const emission of emissions) {
-				const { event, value } = emission;
-				// TODO: separate it
-				executeEmission(emission);
-
-				for (const { causality, to: child, propagate } of event.deriveEvents) {
-					if (!child.isActive) continue;
-
-					const childEmission = propagate(value);
-
-					if (causality === Causality.Only) {
-						if (!childEmission) continue;
-						yield {
-							event: child,
-							value: childEmission(),
-						};
-					} else {
-						deferredEventEmissions.add(child as DeferredEmittingEvent<unknown>);
-					}
-				}
-			}
-		});
-
-		return deferredEventEmissions;
-	};
-
-	private executeEmission = (emission: EventEmission<unknown>) => {
-		const { event, value } = emission;
-		for (const effect of event.effects) {
-			effect(value);
-		}
-		for (const state of event.dependenedStates) {
-			state.value = value;
-		}
-	};
 }
 
 type StateUpdate<T> = readonly [state: State<T>, newValue: T];

@@ -1,17 +1,14 @@
 import assert from "assert";
 import type { Timeline } from "../Timeline";
-import { Causality, type DeferredEmittingEvent, Event } from "./Event";
+import { Causality, Event } from "./Event";
 
-export class MergedEvent<L, R>
-	extends Event<These<L, R>>
-	implements DeferredEmittingEvent<These<L, R>>
-{
+export class MergedEvent<L, R> extends Event<These<L, R>> {
 	private instantContext?: These<L, R>;
 
 	constructor(
 		timeline: Timeline,
-		left: Event<L>,
-		right: Event<R>,
+		private left: Event<L>,
+		private right: Event<R>,
 		options?: { debugLabel?: string },
 	) {
 		super(timeline, options);
@@ -29,13 +26,24 @@ export class MergedEvent<L, R>
 		});
 	}
 
-	public takeEmittedValue = (): These<L, R> => {
-		const { instantContext } = this;
-		this.instantContext = undefined;
+	public takeEmittedValue = () => {
+		const { left, right } = this;
+		const leftValue = left.takeEmittedValue();
+		const rightValue = right.takeEmittedValue();
 
-		// biome-ignore lint/style/noNonNullAssertion: take only when `intanceContext` exists
-		return instantContext!;
+		if (leftValue && rightValue)
+			return () => ({
+				type: "both" as const,
+				left: leftValue(),
+				right: rightValue(),
+			});
+		if (leftValue) return () => ({ type: "left" as const, value: leftValue() });
+		if (rightValue)
+			return () => ({ type: "right" as const, value: rightValue() });
+		return;
 	};
+
+	cleanUpLastEmittedValue() {}
 
 	private addLeft = (value: L) => {
 		if (this.instantContext) {
