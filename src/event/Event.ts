@@ -7,14 +7,13 @@ export class Event<T> {
 
 	deriveEvents: Set<EventRelation<T, any>> = new Set();
 	dependenedStates: Set<State<T>> = new Set();
-
 	effects: ((value: T) => unknown)[] = [];
 
 	constructor(timeline: Timeline, _options?: { debugLabel?: string }) {
 		this.timeline = timeline;
 	}
 
-	listen<U>(fn: EventRelation<T, U>): () => void {
+	relate<U>(fn: EventRelation<T, U>): () => void {
 		this.deriveEvents.add(fn);
 
 		return () => {

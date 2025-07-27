@@ -10,7 +10,7 @@ export class DerivedEvent<T, U> extends Event<T> {
 	) {
 		super(timeline);
 
-		const _dispose = parent.listen<T>({
+		const _dispose = parent.relate<T>({
 			to: this as Event<T>,
 			propagate: (value) => {
 				try {
