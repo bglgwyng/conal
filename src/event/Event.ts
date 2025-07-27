@@ -1,6 +1,6 @@
-import assert from "assert";
 import type { State } from "../behavior/State";
 import type { Timeline } from "../Timeline";
+import type { Affine } from "../utils/affine";
 
 export class Event<T> {
 	timeline: Timeline;
@@ -47,9 +47,16 @@ export class Event<T> {
 }
 
 export type EventRelation<T1, T2> = {
-	propagate: (x: T1) => { type: "emit"; value: T2 } | undefined;
+	causality: Causality;
 	to: Event<T2>;
+	propagate: (x: T1) => Affine<T2> | undefined;
 };
+
+// TODO: add maybe, always things
+export enum Causality {
+	Only,
+	OneOfMany,
+}
 
 export type EventEmission<T> = {
 	event: Event<T>;

@@ -1,5 +1,5 @@
 import type { Timeline } from "../Timeline";
-import { Event } from "./Event";
+import { Causality, Event } from "./Event";
 
 export class DerivedEvent<T, U> extends Event<T> {
 	constructor(
@@ -11,15 +11,13 @@ export class DerivedEvent<T, U> extends Event<T> {
 		super(timeline);
 
 		const _dispose = parent.relate<T>({
+			causality: Causality.Only,
 			to: this as Event<T>,
 			propagate: (value) => {
 				try {
 					const transformedValue = fn(value);
 
-					return {
-						type: "emit",
-						value: transformedValue,
-					};
+					return () => transformedValue;
 				} catch (error) {
 					if (error === Discard) return;
 

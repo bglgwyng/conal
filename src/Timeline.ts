@@ -55,10 +55,11 @@ export class Timeline {
 						const childEmission = propagate(value);
 						if (!childEmission) continue;
 
-						if (childEmission.type === "emit") {
+						const childValue = childEmission();
+						if (childValue) {
 							nextEventEmissions.push({
 								event: child,
-								value: childEmission.value,
+								value: childValue,
 							});
 						}
 					}
