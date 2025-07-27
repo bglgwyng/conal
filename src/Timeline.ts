@@ -1,7 +1,12 @@
 import assert from "assert";
 import { State } from "./behavior/State";
 import type { Effect } from "./event/Effect";
-import type { Event, EventEmission } from "./event/Event";
+import {
+	Causality,
+	type DeferredEmittingEvent,
+	type Event,
+	type EventEmission,
+} from "./event/Event";
 import { Source } from "./event/Source";
 
 export class Timeline {
@@ -26,50 +31,67 @@ export class Timeline {
 		for (const source of this.emittingSources) {
 			eventEmissions.push({
 				event: source,
-				value: source.instantContext!.value,
+				value: source.takeLastEmittedValue(),
 			});
-			source.instantContext = undefined;
 		}
+		this.emittingSources.clear();
 
 		const pendingEffects: Effect[] = [];
 		const stateUpdates: StateUpdate<unknown>[] = [];
 
 		while (eventEmissions.length > 0) {
-			while (true) {
-				const nextEventEmissions: EventEmission<unknown>[] = [];
+			const deferredEventEmissions: Set<DeferredEmittingEvent<unknown>> =
+				new Set();
 
-				for (const { event, value } of eventEmissions) {
-					if (!event.isActive) continue;
+			while (eventEmissions.length > 0) {
+				while (true) {
+					const nextEventEmissions: EventEmission<unknown>[] = [];
 
-					for (const effect of event.effects) {
-						pendingEffects.push(() => effect(value));
-					}
+					for (const { event, value } of eventEmissions) {
+						if (!event.isActive) continue;
 
-					for (const state of event.dependenedStates) {
-						stateUpdates.push([state, value]);
-					}
+						for (const effect of event.effects) {
+							pendingEffects.push(() => effect(value));
+						}
 
-					for (const { to: child, propagate } of event.deriveEvents) {
-						if (!child.isActive) continue;
+						for (const state of event.dependenedStates) {
+							stateUpdates.push([state, value]);
+						}
 
-						const childEmission = propagate(value);
-						if (!childEmission) continue;
+						for (const {
+							causality,
+							to: child,
+							propagate,
+						} of event.deriveEvents) {
+							if (!child.isActive) continue;
 
-						const childValue = childEmission();
-						if (childValue) {
-							nextEventEmissions.push({
-								event: child,
-								value: childValue,
-							});
+							const childEmission = propagate(value);
+
+							if (causality === Causality.Only) {
+								if (!childEmission) continue;
+								nextEventEmissions.push({
+									event: child,
+									value: childEmission(),
+								});
+							} else {
+								deferredEventEmissions.add(
+									child as DeferredEmittingEvent<unknown>,
+								);
+							}
 						}
 					}
-				}
-				if (nextEventEmissions.length === 0) break;
+					if (nextEventEmissions.length === 0) break;
 
-				eventEmissions = nextEventEmissions;
+					eventEmissions = nextEventEmissions;
+				}
+
+				eventEmissions = [];
 			}
 
-			eventEmissions = [];
+			for (const event of deferredEventEmissions) {
+				const value = event.takeEmittedValue();
+				eventEmissions.push({ event, value });
+			}
 		}
 
 		for (const [state, newValue] of stateUpdates) {

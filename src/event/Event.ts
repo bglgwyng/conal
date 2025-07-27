@@ -46,11 +46,17 @@ export class Event<T> {
 	}
 }
 
-export type EventRelation<T1, T2> = {
-	causality: Causality;
-	to: Event<T2>;
-	propagate: (x: T1) => Affine<T2> | undefined;
-};
+export type EventRelation<T1, T2> =
+	| {
+			causality: Causality.Only;
+			to: Event<T2>;
+			propagate: (x: T1) => Affine<T2> | undefined;
+	  }
+	| {
+			causality: Causality.OneOfMany;
+			to: Event<T2>;
+			propagate: (x: T1) => void;
+	  };
 
 // TODO: add maybe, always things
 export enum Causality {
@@ -61,4 +67,8 @@ export enum Causality {
 export type EventEmission<T> = {
 	event: Event<T>;
 	value: T;
+};
+
+export type DeferredEmittingEvent<T> = Event<T> & {
+	takeEmittedValue: () => T;
 };
