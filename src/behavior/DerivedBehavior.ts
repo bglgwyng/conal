@@ -1,9 +1,9 @@
 import assert from "assert";
 import { Event } from "../event/Event";
 import type { Timeline } from "../Timeline";
-import type { Behavior } from "./Behavior";
+import { Behavior } from "./Behavior";
 
-export class DerivedBehavior<T> implements Behavior<T> {
+export class DerivedBehavior<T> extends Behavior<T> {
 	dependencies: Set<Behavior<any>> = new Set();
 	updated: Event<T>;
 
@@ -13,6 +13,7 @@ export class DerivedBehavior<T> implements Behavior<T> {
 		public timeline: Timeline,
 		private fn: () => T,
 	) {
+		super(timeline);
 		this.updated = new UpdatedEvent(this.timeline);
 	}
 

@@ -1,9 +1,11 @@
 import type { Event } from "../event/Event";
 import type { Timeline } from "../Timeline";
 
-export type Behavior<T> = {
-	timeline: Timeline;
+export abstract class Behavior<T> {
+	dependedBehaviors: Set<Behavior<any>> = new Set();
 
-	read(): T;
-	updated: Event<T>;
-};
+	abstract read(): T;
+	abstract updated: Event<T>;
+
+	constructor(public timeline: Timeline) {}
+}
