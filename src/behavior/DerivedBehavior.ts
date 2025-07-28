@@ -17,9 +17,9 @@ export class DerivedBehavior<T> extends Behavior<T> {
 		this.updated = new UpdatedEvent(this.timeline);
 	}
 
-	read(): T {
+	readNextValue() {
 		if (this.lastUpdate?.at === this.timeline.timestamp)
-			return this.lastUpdate.value;
+			return [this.lastUpdate.value, false] as const;
 
 		this.timeline.reportRead(this);
 
@@ -28,7 +28,7 @@ export class DerivedBehavior<T> extends Behavior<T> {
 			const value = this.fn();
 
 			this.lastUpdate = { at: this.timeline.timestamp, value };
-			return value;
+			return [value, true] as const;
 		} finally {
 			this.dependencies = this.timeline.stopTrackingReads();
 		}

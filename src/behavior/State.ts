@@ -16,9 +16,12 @@ export class State<T> extends Behavior<T> {
 		this.updated.writeOn(this);
 	}
 
-	read(): T {
+	readNextValue(): readonly [value: T, isUpdated: boolean] {
 		this.timeline.reportRead(this);
 
-		return this.value;
+		const valueFn = this.updated.takeEmittedValue();
+		if (!valueFn) return [this.value, false];
+
+		return [valueFn(), true];
 	}
 }

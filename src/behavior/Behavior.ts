@@ -4,8 +4,12 @@ import type { Timeline } from "../Timeline";
 export abstract class Behavior<T> {
 	dependedBehaviors: Set<Behavior<any>> = new Set();
 
-	abstract read(): T;
+	read(): T {
+		return this.readNextValue()[0];
+	}
 	abstract updated: Event<T>;
+
+	abstract readNextValue(): readonly [value: T, isUpdated: boolean];
 
 	constructor(public timeline: Timeline) {}
 }
