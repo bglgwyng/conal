@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DerivedBehavior } from "../../src/behavior/DerivedBehavior";
 import { Timeline } from "../../src/Timeline";
 
