@@ -15,6 +15,8 @@ export class State<T> implements Behavior<T> {
 	}
 
 	read(): T {
+		this.timeline.reportRead(this);
+
 		return this.value;
 	}
 }

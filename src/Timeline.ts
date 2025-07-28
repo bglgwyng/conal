@@ -1,5 +1,6 @@
 import assert from "assert";
 import { emit } from "process";
+import type { Behavior } from "./behavior/Behavior";
 import { State } from "./behavior/State";
 import type { Effect } from "./event/Effect";
 import type { Event } from "./event/Event";
@@ -78,6 +79,23 @@ export class Timeline {
 
 	afterFlush() {
 		assert.fail();
+	}
+
+	reads: Set<Behavior<any>>[] = [];
+
+	reportRead(behavior: Behavior<any>) {
+		this.reads.at(-1)?.add(behavior);
+	}
+
+	startTrackingReads() {
+		this.reads.push(new Set());
+	}
+
+	stopTrackingReads() {
+		const activeReadTracking = this.reads.pop();
+		assert(activeReadTracking, "No active read tracking");
+
+		return activeReadTracking;
 	}
 }
 
