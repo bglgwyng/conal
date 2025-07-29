@@ -2,8 +2,6 @@ import type { Timeline } from "../Timeline";
 import { Event } from "./Event";
 
 export class MergedEvent<L, R> extends Event<These<L, R>> {
-	private instantContext?: These<L, R>;
-
 	constructor(
 		timeline: Timeline,
 		private left: Event<L>,
@@ -11,12 +9,9 @@ export class MergedEvent<L, R> extends Event<These<L, R>> {
 		options?: { debugLabel?: string },
 	) {
 		super(timeline, options);
-
-		const _disposeLeft = left.relate(this);
-
-		const _disposeRight = right.relate(this);
 	}
 
+	// TODO: cache
 	public takeEmittedValue = () => {
 		const { left, right } = this;
 		const maybeLeft = left.takeEmittedValue();
@@ -34,6 +29,21 @@ export class MergedEvent<L, R> extends Event<These<L, R>> {
 
 		return;
 	};
+
+	protected activate(): void {
+		this.disposeLeft = this.listen(this.left);
+		this.disposeRight = this.listen(this.right);
+	}
+
+	protected deactivate(): void {
+		// biome-ignore lint/style/noNonNullAssertion: `disposeLeft` is set in activate
+		this.disposeLeft!();
+		// biome-ignore lint/style/noNonNullAssertion: `disposeRight` is set in activate
+		this.disposeRight!();
+	}
+
+	private disposeLeft?: () => void;
+	private disposeRight?: () => void;
 }
 
 export const Discard = Symbol("Discard");

@@ -1,3 +1,4 @@
+import assert from "assert";
 import type { Timeline } from "../Timeline";
 import { Event } from "./Event";
 
@@ -6,11 +7,9 @@ export class DerivedEvent<T, U> extends Event<T> {
 		timeline: Timeline,
 		private parent: Event<U>,
 		private fn: (value: U) => T,
-		_options?: { debugLabel?: string },
+		options?: { debugLabel?: string },
 	) {
-		super(timeline);
-
-		const _dispose = parent.relate(this);
+		super(timeline, options);
 	}
 
 	takeEmittedValue() {
@@ -26,6 +25,19 @@ export class DerivedEvent<T, U> extends Event<T> {
 			throw error;
 		}
 	}
+
+	protected activate() {
+		assert(this.isActive, "Event is not active");
+		console.info("Activate!!", this.debugLabel);
+		this.dispose = this.listen(this.parent);
+	}
+
+	protected deactivate() {
+		// biome-ignore lint/style/noNonNullAssertion: `dispose` is set in activate
+		this.dispose!();
+	}
+
+	private dispose?: () => void;
 }
 
 export const Discard = Symbol("Discard");
