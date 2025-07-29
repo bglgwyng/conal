@@ -1,6 +1,7 @@
 import type { State } from "../behavior/State";
 import { Node } from "../Node";
 import type { Timeline } from "../Timeline";
+import type { Maybe } from "../utils/Maybe";
 
 export abstract class Event<T> extends Node {
 	debugLabel?: string;
@@ -30,7 +31,7 @@ export abstract class Event<T> extends Node {
 		);
 	}
 
-	abstract takeEmittedValue(): (() => T) | undefined;
+	abstract takeEmittedValue(): Maybe<T>;
 
 	on(fn: (value: T) => unknown): () => void {
 		this.effects.push(fn);

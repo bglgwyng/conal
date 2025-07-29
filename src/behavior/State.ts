@@ -21,10 +21,10 @@ export class State<T> extends Behavior<T> {
 	}
 
 	readNextValue(): { value: T; isUpdated: boolean } {
-		const valueFn = this.updated.takeEmittedValue();
-		if (!valueFn) return { value: this.value, isUpdated: false };
+		const maybeValue = this.updated.takeEmittedValue();
+		if (!maybeValue) return { value: this.value, isUpdated: false };
 
-		return { value: valueFn(), isUpdated: true };
+		return { value: maybeValue(), isUpdated: true };
 	}
 
 	commit(): void {

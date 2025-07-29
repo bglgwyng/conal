@@ -14,11 +14,11 @@ export class DerivedEvent<T, U> extends Event<T> {
 	}
 
 	takeEmittedValue() {
-		const emittedValueFn = this.parent.takeEmittedValue();
-		if (!emittedValueFn) return;
+		const maybeEmittedValue = this.parent.takeEmittedValue();
+		if (!maybeEmittedValue) return;
 
 		try {
-			const value = this.fn(emittedValueFn());
+			const value = this.fn(maybeEmittedValue());
 			return () => value;
 		} catch (error) {
 			if (error === Discard) return;

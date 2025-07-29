@@ -1,6 +1,5 @@
-import assert from "assert";
 import type { Timeline } from "../Timeline";
-import { Causality, Event } from "./Event";
+import { Event } from "./Event";
 
 export class MergedEvent<L, R> extends Event<These<L, R>> {
 	private instantContext?: These<L, R>;
@@ -20,51 +19,20 @@ export class MergedEvent<L, R> extends Event<These<L, R>> {
 
 	public takeEmittedValue = () => {
 		const { left, right } = this;
-		const leftValue = left.takeEmittedValue();
-		const rightValue = right.takeEmittedValue();
+		const maybeLeft = left.takeEmittedValue();
+		const maybeRight = right.takeEmittedValue();
 
-		if (leftValue && rightValue)
+		if (maybeLeft && maybeRight)
 			return () => ({
 				type: "both" as const,
-				left: leftValue(),
-				right: rightValue(),
+				left: maybeLeft(),
+				right: maybeRight(),
 			});
-		if (leftValue) return () => ({ type: "left" as const, value: leftValue() });
-		if (rightValue)
-			return () => ({ type: "right" as const, value: rightValue() });
+		if (maybeLeft) return () => ({ type: "left" as const, value: maybeLeft() });
+		if (maybeRight)
+			return () => ({ type: "right" as const, value: maybeRight() });
+
 		return;
-	};
-
-	private addLeft = (value: L) => {
-		if (this.instantContext) {
-			assert(this.instantContext.type === "right");
-			this.instantContext = {
-				type: "both",
-				left: value,
-				right: this.instantContext.value,
-			};
-		} else {
-			this.instantContext = {
-				type: "left",
-				value,
-			};
-		}
-	};
-
-	private addRight = (value: R) => {
-		if (this.instantContext) {
-			assert(this.instantContext.type === "left");
-			this.instantContext = {
-				type: "both",
-				left: this.instantContext.value,
-				right: value,
-			};
-		} else {
-			this.instantContext = {
-				type: "right",
-				value,
-			};
-		}
 	};
 }
 

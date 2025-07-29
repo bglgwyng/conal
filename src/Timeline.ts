@@ -53,10 +53,10 @@ export class Timeline {
 				if (processedEvents.has(event)) continue;
 				processedEvents.add(event);
 
-				const valueFn = event.takeEmittedValue();
-				if (!valueFn) continue;
+				const maybeValue = event.takeEmittedValue();
+				if (!maybeValue) continue;
 
-				const value = valueFn();
+				const value = maybeValue();
 
 				for (const state of event.dependenedStates) {
 					processedStates.push(state);

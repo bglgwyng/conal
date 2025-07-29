@@ -1,27 +1,28 @@
+import { just, type Maybe } from "../utils/Maybe";
 import { Event } from "./Event";
 
 export class Source<T> extends Event<T> {
-	private instantContext?: { value: T };
+	private maybeLastEmitedValue: Maybe<T>;
 
 	emit(value: T) {
 		const { timeline } = this;
-		if (this.instantContext) {
+		if (this.maybeLastEmitedValue) {
 			// TODO: warn
 			this.timeline.flush();
 		}
-		this.instantContext = { value };
+		this.maybeLastEmitedValue = just(value);
 
 		timeline.markEmitting(this as Source<unknown>);
 	}
 
 	takeEmittedValue() {
-		const { instantContext } = this;
-		if (!instantContext) return;
+		const { maybeLastEmitedValue } = this;
+		if (!maybeLastEmitedValue) return;
 
-		return () => instantContext.value;
+		return maybeLastEmitedValue;
 	}
 
 	commit() {
-		this.instantContext = undefined;
+		this.maybeLastEmitedValue = undefined;
 	}
 }
