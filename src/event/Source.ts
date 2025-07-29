@@ -4,13 +4,14 @@ export class Source<T> extends Event<T> {
 	private instantContext?: { value: T };
 
 	emit(value: T) {
+		const { timeline } = this;
 		if (this.instantContext) {
 			// TODO: warn
 			this.timeline.flush();
 		}
 		this.instantContext = { value };
 
-		this.timeline.markEmitting(this as Source<unknown>);
+		timeline.markEmitting(this as Source<unknown>);
 	}
 
 	takeEmittedValue() {
@@ -20,7 +21,7 @@ export class Source<T> extends Event<T> {
 		return () => instantContext.value;
 	}
 
-	cleanUpLastEmittedValue() {
+	commit() {
 		this.instantContext = undefined;
 	}
 }

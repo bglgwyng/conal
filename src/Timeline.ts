@@ -6,12 +6,14 @@ import { State } from "./behavior/State";
 import type { Effect } from "./event/Effect";
 import type { Event } from "./event/Event";
 import { Source } from "./event/Source";
+import type { Node } from "./Node";
 
 export class Timeline {
 	timestamp = 0;
 
 	emittingSources = new Set<Source<unknown>>();
 
+	isProceeding = false;
 	isTracking = false;
 	isReadingNextValue = false;
 
@@ -28,70 +30,82 @@ export class Timeline {
 	}
 
 	flush() {
-		const maybeEmittingEvents: Event<unknown>[] = [];
-		for (const source of this.emittingSources) {
-			if (!source.isActive) continue;
+		this.isProceeding = true;
 
-			maybeEmittingEvents.push(source);
-		}
-		this.emittingSources.clear();
+		try {
+			const maybeEmittingEvents: Event<unknown>[] = [];
+			for (const source of this.emittingSources) {
+				if (!source.isActive) continue;
 
-		const pendingEffects: Effect[] = [];
-		const stateUpdates: StateUpdate<unknown>[] = [];
-		const processedEvents: Set<Event<unknown>> = new Set();
-		const processedDerivedBehaviors: Set<DerivedBehavior<unknown>> = new Set();
-
-		while (maybeEmittingEvents.length > 0) {
-			const event = maybeEmittingEvents.shift()!;
-			// TODO: recover
-			// assert(event.isActive, "Event is not active");
-			if (processedEvents.has(event)) continue;
-			processedEvents.add(event);
-
-			const valueFn = event.takeEmittedValue();
-			if (!valueFn) continue;
-
-			const value = valueFn();
-
-			for (const state of event.dependenedStates) {
-				stateUpdates.push([state, value]);
+				maybeEmittingEvents.push(source);
 			}
-			for (const effect of event.effects) {
-				pendingEffects.push(() => effect(value));
-			}
+			this.emittingSources.clear();
 
-			for (const state of event.dependenedStates) {
-				for (const behavior of collectAllDependentBehaviors(
-					state.dependedBehaviors,
-				)) {
-					// TODO: recover
-					// if (!behavior.updated.isActive) continue;
-					if (processedDerivedBehaviors.has(behavior)) continue;
-					processedDerivedBehaviors.add(behavior);
+			const pendingEffects: Effect[] = [];
 
-					maybeEmittingEvents.push(behavior.updated);
+			const processedStates: State<unknown>[] = [];
+			const processedEvents: Set<Event<unknown>> = new Set();
+			const processedDerivedBehaviors: Set<DerivedBehavior<unknown>> =
+				new Set();
+
+			while (maybeEmittingEvents.length > 0) {
+				const event = maybeEmittingEvents.shift()!;
+				// TODO: recover
+				// assert(event.isActive, "Event is not active");
+				if (processedEvents.has(event)) continue;
+				processedEvents.add(event);
+
+				const valueFn = event.takeEmittedValue();
+				if (!valueFn) continue;
+
+				const value = valueFn();
+
+				for (const state of event.dependenedStates) {
+					processedStates.push(state);
+				}
+				for (const effect of event.effects) {
+					pendingEffects.push(() => effect(value));
+				}
+
+				for (const state of event.dependenedStates) {
+					for (const behavior of collectAllDependentBehaviors(
+						state.dependedBehaviors,
+					)) {
+						// TODO: recover
+						// if (!behavior.updated.isActive) continue;
+						if (processedDerivedBehaviors.has(behavior)) continue;
+						processedDerivedBehaviors.add(behavior);
+
+						maybeEmittingEvents.push(behavior.updated);
+					}
+				}
+
+				for (const childEvent of event.childEvents) {
+					maybeEmittingEvents.push(childEvent);
 				}
 			}
 
-			for (const childEvent of event.childEvents) {
-				maybeEmittingEvents.push(childEvent);
+			for (const effect of pendingEffects) {
+				try {
+					effect();
+				} catch (ex) {
+					console.error("Effect failed", ex);
+				}
 			}
-		}
 
-		for (const [state, newValue] of stateUpdates) {
-			state.value = newValue;
-		}
+			for (const behavior of processedDerivedBehaviors) {
+				behavior.commit();
+			}
 
-		for (const effect of pendingEffects) {
-			effect();
-		}
+			for (const state of processedStates) {
+				state.commit();
+			}
 
-		for (const behavior of processedDerivedBehaviors) {
-			behavior.commit();
-		}
-
-		for (const event of processedEvents) {
-			event.cleanUpLastEmittedValue();
+			for (const event of processedEvents) {
+				event.commit();
+			}
+		} finally {
+			this.isProceeding = false;
 		}
 
 		this.timestamp = this.nextTimestamp;

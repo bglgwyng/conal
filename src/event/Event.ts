@@ -1,9 +1,9 @@
 import type { State } from "../behavior/State";
+import { Node } from "../Node";
 import type { Timeline } from "../Timeline";
 import type { Affine } from "../utils/affine";
 
-export abstract class Event<T> {
-	timeline: Timeline;
+export abstract class Event<T> extends Node {
 	debugLabel?: string;
 
 	childEvents: Set<Event<any>> = new Set();
@@ -11,7 +11,7 @@ export abstract class Event<T> {
 	effects: ((value: T) => unknown)[] = [];
 
 	constructor(timeline: Timeline, _options?: { debugLabel?: string }) {
-		this.timeline = timeline;
+		super(timeline);
 		this.debugLabel = _options?.debugLabel;
 	}
 
@@ -32,7 +32,6 @@ export abstract class Event<T> {
 	}
 
 	abstract takeEmittedValue(): (() => T) | undefined;
-	abstract cleanUpLastEmittedValue(): void;
 
 	on(fn: (value: T) => unknown): () => void {
 		this.effects.push(fn);

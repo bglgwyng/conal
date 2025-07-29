@@ -1,8 +1,8 @@
 import type { Event } from "../event/Event";
-import type { Timeline } from "../Timeline";
+import { Node } from "../Node";
 import type { DerivedBehavior } from "./DerivedBehavior";
 
-export abstract class Behavior<T> {
+export abstract class Behavior<T> extends Node {
 	dependedBehaviors: Set<DerivedBehavior<any>> = new Set();
 
 	read(): T {
@@ -17,6 +17,4 @@ export abstract class Behavior<T> {
 
 	abstract readCurrentValue(): T;
 	abstract readNextValue(): { value: T; isUpdated: boolean };
-
-	constructor(public timeline: Timeline) {}
 }

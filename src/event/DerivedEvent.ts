@@ -40,8 +40,6 @@ export class DerivedEvent<T, U> extends Event<T> {
 			throw error;
 		}
 	}
-
-	cleanUpLastEmittedValue() {}
 }
 
 export const Discard = Symbol("Discard");

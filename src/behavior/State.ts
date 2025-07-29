@@ -26,4 +26,8 @@ export class State<T> extends Behavior<T> {
 
 		return { value: valueFn(), isUpdated: true };
 	}
+
+	commit(): void {
+		this.value = this.readNextValue().value;
+	}
 }

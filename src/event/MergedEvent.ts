@@ -43,8 +43,6 @@ export class MergedEvent<L, R> extends Event<These<L, R>> {
 		return;
 	};
 
-	cleanUpLastEmittedValue() {}
-
 	private addLeft = (value: L) => {
 		if (this.instantContext) {
 			assert(this.instantContext.type === "right");
