@@ -1,5 +1,6 @@
 import assert from "assert";
-import { Event } from "../event/Event";
+import type { Event } from "../event/Event";
+import { UpdateEvent } from "../event/UpdateEvent";
 import type { Timeline } from "../Timeline";
 import { Behavior } from "./Behavior";
 
@@ -15,7 +16,7 @@ export class DerivedBehavior<T> extends Behavior<T> {
 		private fn: () => T,
 	) {
 		super(timeline);
-		this.updated = new UpdatedEvent(this, { debugLabel: "derived" });
+		this.updated = new UpdateEvent(this, { debugLabel: "derived" });
 	}
 
 	readCurrentValue(): T {
@@ -65,21 +66,5 @@ export class DerivedBehavior<T> extends Behavior<T> {
 		if (!isUpdated) return;
 
 		this.lastRead = { value, at: this.timeline.nextTimestamp };
-	}
-}
-
-export class UpdatedEvent<T> extends Event<T> {
-	constructor(
-		public derivedBehavior: DerivedBehavior<T>,
-		options?: { debugLabel?: string },
-	) {
-		super(derivedBehavior.timeline, options);
-	}
-
-	takeEmittedValue(): (() => T) | undefined {
-		const { value, isUpdated } = this.derivedBehavior.readNextValue();
-		if (!isUpdated) return;
-
-		return () => value;
 	}
 }
