@@ -1,4 +1,5 @@
 import type { Timeline } from "../Timeline";
+import { just } from "../utils/Maybe";
 import { Event } from "./Event";
 
 export class MergedEvent<L, R> extends Event<These<L, R>> {
@@ -18,14 +19,14 @@ export class MergedEvent<L, R> extends Event<These<L, R>> {
 		const maybeRight = right.takeEmittedValue();
 
 		if (maybeLeft && maybeRight)
-			return () => ({
+			return just({
 				type: "both" as const,
 				left: maybeLeft(),
 				right: maybeRight(),
 			});
-		if (maybeLeft) return () => ({ type: "left" as const, value: maybeLeft() });
+		if (maybeLeft) return just({ type: "left" as const, value: maybeLeft() });
 		if (maybeRight)
-			return () => ({ type: "right" as const, value: maybeRight() });
+			return just({ type: "right" as const, value: maybeRight() });
 
 		return;
 	};
