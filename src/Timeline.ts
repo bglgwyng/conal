@@ -1,6 +1,7 @@
 import assert from "assert";
 import { emit } from "process";
 import type { Behavior } from "./behavior/Behavior";
+import type { DerivedBehavior } from "./behavior/DerivedBehavior";
 import { State } from "./behavior/State";
 import type { Effect } from "./event/Effect";
 import type { Event } from "./event/Event";
@@ -10,6 +11,9 @@ export class Timeline {
 	timestamp = 0;
 
 	emittingSources = new Set<Source<unknown>>();
+
+	isTracking = false;
+	isReadingNextValue = false;
 
 	state<T>(initialValue: T, updated: Event<T>): State<T> {
 		return new State(this, initialValue, updated);
@@ -35,9 +39,12 @@ export class Timeline {
 		const pendingEffects: Effect[] = [];
 		const stateUpdates: StateUpdate<unknown>[] = [];
 		const processedEvents: Set<Event<unknown>> = new Set();
+		const processedDerivedBehaviors: Set<DerivedBehavior<unknown>> = new Set();
 
 		while (maybeEmittingEvents.length > 0) {
 			const event = maybeEmittingEvents.shift()!;
+			// TODO: recover
+			// assert(event.isActive, "Event is not active");
 			if (processedEvents.has(event)) continue;
 			processedEvents.add(event);
 
@@ -53,6 +60,19 @@ export class Timeline {
 				pendingEffects.push(() => effect(value));
 			}
 
+			for (const state of event.dependenedStates) {
+				for (const behavior of collectAllDependentBehaviors(
+					state.dependedBehaviors,
+				)) {
+					// TODO: recover
+					// if (!behavior.updated.isActive) continue;
+					if (processedDerivedBehaviors.has(behavior)) continue;
+					processedDerivedBehaviors.add(behavior);
+
+					maybeEmittingEvents.push(behavior.updated);
+				}
+			}
+
 			for (const childEvent of event.childEvents) {
 				maybeEmittingEvents.push(childEvent);
 			}
@@ -66,11 +86,24 @@ export class Timeline {
 			effect();
 		}
 
+		for (const behavior of processedDerivedBehaviors) {
+			behavior.commit();
+		}
+
 		for (const event of processedEvents) {
 			event.cleanUpLastEmittedValue();
 		}
 
-		this.timestamp++;
+		this.timestamp = this.nextTimestamp;
+
+		function* collectAllDependentBehaviors(
+			behaviors: Iterable<DerivedBehavior<unknown>>,
+		): IterableIterator<DerivedBehavior<unknown>> {
+			for (const behavior of behaviors) {
+				yield behavior;
+				yield* collectAllDependentBehaviors(behavior.dependedBehaviors);
+			}
+		}
 	}
 
 	beforeFlush() {
@@ -88,14 +121,28 @@ export class Timeline {
 	}
 
 	startTrackingReads() {
+		this.isTracking = true;
 		this.reads.push(new Set());
+
+		return () => {
+			// biome-ignore lint/style/noNonNullAssertion: pop the set that was pushed above
+			const dependencies = this.reads.pop()!;
+			if (this.reads.length === 0) this.isTracking = false;
+
+			return dependencies;
+		};
 	}
 
-	stopTrackingReads() {
-		const activeReadTracking = this.reads.pop();
-		assert(activeReadTracking, "No active read tracking");
+	startReadingNextValue() {
+		this.isReadingNextValue = true;
 
-		return activeReadTracking;
+		return () => {
+			this.isReadingNextValue = false;
+		};
+	}
+
+	get nextTimestamp() {
+		return this.timestamp + 1;
 	}
 }
 

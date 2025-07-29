@@ -3,7 +3,7 @@ import type { Timeline } from "../Timeline";
 import { Behavior } from "./Behavior";
 
 export class State<T> extends Behavior<T> {
-	private value: T;
+	public value: T;
 
 	constructor(
 		public timeline: Timeline,
@@ -16,12 +16,14 @@ export class State<T> extends Behavior<T> {
 		this.updated.writeOn(this);
 	}
 
-	readNextValue(): readonly [value: T, isUpdated: boolean] {
-		this.timeline.reportRead(this);
+	readCurrentValue(): T {
+		return this.value;
+	}
 
+	readNextValue(): { value: T; isUpdated: boolean } {
 		const valueFn = this.updated.takeEmittedValue();
-		if (!valueFn) return [this.value, false];
+		if (!valueFn) return { value: this.value, isUpdated: false };
 
-		return [valueFn(), true];
+		return { value: valueFn(), isUpdated: true };
 	}
 }

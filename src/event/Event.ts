@@ -4,6 +4,7 @@ import type { Affine } from "../utils/affine";
 
 export abstract class Event<T> {
 	timeline: Timeline;
+	debugLabel?: string;
 
 	childEvents: Set<Event<any>> = new Set();
 	dependenedStates: Set<State<T>> = new Set();
@@ -11,6 +12,7 @@ export abstract class Event<T> {
 
 	constructor(timeline: Timeline, _options?: { debugLabel?: string }) {
 		this.timeline = timeline;
+		this.debugLabel = _options?.debugLabel;
 	}
 
 	relate<U>(fn: EventRelation<T, U>): () => void {
