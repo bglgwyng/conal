@@ -1,7 +1,6 @@
 import type { State } from "../behavior/State";
 import { Node } from "../Node";
 import type { Timeline } from "../Timeline";
-import type { Affine } from "../utils/affine";
 
 export abstract class Event<T> extends Node {
 	debugLabel?: string;
@@ -15,11 +14,11 @@ export abstract class Event<T> extends Node {
 		this.debugLabel = _options?.debugLabel;
 	}
 
-	relate<U>(fn: EventRelation<T, U>): () => void {
-		this.childEvents.add(fn.to);
+	relate(event: Event<any>): () => void {
+		this.childEvents.add(event);
 
 		return () => {
-			this.childEvents.delete(fn.to);
+			this.childEvents.delete(event);
 		};
 	}
 
@@ -49,26 +48,3 @@ export abstract class Event<T> extends Node {
 		};
 	}
 }
-
-export type EventRelation<T1, T2> =
-	| {
-			causality: Causality.Only;
-			to: Event<T2>;
-			propagate: (x: T1) => Affine<T2> | undefined;
-	  }
-	| {
-			causality: Causality.OneOfMany;
-			to: Event<T2>;
-			propagate: (x: T1) => void;
-	  };
-
-// TODO: add maybe, always things
-export enum Causality {
-	Only,
-	OneOfMany,
-}
-
-export type EventEmission<T> = {
-	event: Event<T>;
-	value: T;
-};

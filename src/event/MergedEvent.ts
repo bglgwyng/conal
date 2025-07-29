@@ -13,17 +13,9 @@ export class MergedEvent<L, R> extends Event<These<L, R>> {
 	) {
 		super(timeline, options);
 
-		const _disposeLeft = left.relate({
-			causality: Causality.OneOfMany,
-			to: this,
-			propagate: this.addLeft,
-		});
+		const _disposeLeft = left.relate(this);
 
-		const _disposeRight = right.relate({
-			causality: Causality.OneOfMany,
-			to: this,
-			propagate: this.addRight,
-		});
+		const _disposeRight = right.relate(this);
 	}
 
 	public takeEmittedValue = () => {
