@@ -6,7 +6,7 @@ import type { Effect } from "./event/Effect";
 import type { Event } from "./event/Event";
 import { Source } from "./event/Source";
 import type { Node } from "./Node";
-import { Queue } from "./utils/Queue";
+import { DedupQueue } from "./utils/DedupQueue";
 
 export class Timeline {
 	timestamp = 0;
@@ -32,26 +32,25 @@ export class Timeline {
 	flush() {
 		this.isProceeding = true;
 
+		const eventQueue = new DedupQueue<Event<unknown>>();
+		const processedEvents: Set<Event<unknown>> = new Set();
+
 		try {
-			const maybeEmittingEvents = new Queue<Event<unknown>>();
 			for (const source of this.emittingSources) {
 				if (!source.isActive) continue;
 
-				maybeEmittingEvents.push(source);
+				eventQueue.add(source);
 			}
 			this.emittingSources.clear();
 
 			const pendingEffects: Effect[] = [];
 
-			const processedEvents: Set<Event<unknown>> = new Set();
-			const processedDerivedBehaviors: Set<DerivedBehavior<unknown>> =
-				new Set();
+			while (eventQueue.size > 0) {
+				// biome-ignore lint/style/noNonNullAssertion: size checked
+				const event = eventQueue.take()!;
+				assert(event.isActive, "Event is not active");
+				assert(!processedEvents.has(event), "Event is already processed");
 
-			while (maybeEmittingEvents.length > 0) {
-				const event = maybeEmittingEvents.shift()!;
-				// TODO: recover
-				// assert(event.isActive, "Event is not active");
-				if (processedEvents.has(event)) continue;
 				processedEvents.add(event);
 
 				const maybeValue = event.takeEmittedValue();
@@ -60,21 +59,16 @@ export class Timeline {
 				const value = maybeValue();
 
 				for (const childEvent of event.childEvents) {
-					maybeEmittingEvents.push(childEvent);
+					pushEventToQueue(childEvent);
 				}
 
 				for (const state of event.dependenedStates) {
 					state.prepareUpdate();
 
-					for (const behavior of collectAllDependentBehaviors(
+					for (const behavior of collectAllDependentActiveBehaviors(
 						state.dependedBehaviors,
 					)) {
-						// TODO: recover
-						// if (!behavior.updated.isActive) continue;
-						if (processedDerivedBehaviors.has(behavior)) continue;
-						processedDerivedBehaviors.add(behavior);
-
-						maybeEmittingEvents.push(behavior.updated);
+						pushEventToQueue(behavior.updated);
 					}
 				}
 
@@ -101,12 +95,21 @@ export class Timeline {
 
 		this.timestamp = this.nextTimestamp;
 
-		function* collectAllDependentBehaviors(
+		function pushEventToQueue(event: Event<unknown>) {
+			if (eventQueue.has(event)) return;
+			if (processedEvents.has(event)) return;
+
+			eventQueue.add(event);
+		}
+
+		function* collectAllDependentActiveBehaviors(
 			behaviors: Iterable<DerivedBehavior<unknown>>,
 		): IterableIterator<DerivedBehavior<unknown>> {
 			for (const behavior of behaviors) {
+				if (!behavior.updated.isActive) continue;
+
 				yield behavior;
-				yield* collectAllDependentBehaviors(behavior.dependedBehaviors);
+				yield* collectAllDependentActiveBehaviors(behavior.dependedBehaviors);
 			}
 		}
 	}
