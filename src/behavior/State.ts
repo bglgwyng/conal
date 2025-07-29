@@ -1,9 +1,11 @@
 import type { Event } from "../event/Event";
 import type { Timeline } from "../Timeline";
+import { just, type Maybe } from "../utils/Maybe";
 import { Behavior } from "./Behavior";
 
 export class State<T> extends Behavior<T> {
 	public value: T;
+	public maybeNextValue: Maybe<T>;
 
 	constructor(
 		public timeline: Timeline,
@@ -24,10 +26,22 @@ export class State<T> extends Behavior<T> {
 		const maybeValue = this.updated.takeEmittedValue();
 		if (!maybeValue) return { value: this.value, isUpdated: false };
 
-		return { value: maybeValue(), isUpdated: true };
+		const value = maybeValue();
+		this.maybeNextValue = just(value);
+
+		return { value, isUpdated: true };
+	}
+
+	prepareUpdate() {
+		this.maybeNextValue = this.updated.takeEmittedValue();
+		this.timeline.needCommit(this);
 	}
 
 	commit(): void {
-		this.value = this.readNextValue().value;
+		const { maybeNextValue } = this;
+		if (!maybeNextValue) return;
+
+		this.value = maybeNextValue();
+		this.maybeNextValue = undefined;
 	}
 }

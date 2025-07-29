@@ -36,6 +36,8 @@ export class DerivedBehavior<T> extends Behavior<T> {
 		stopReadingNextValue();
 
 		this.nextUpdate = { value, isUpdated: value !== this.readCurrentValue() };
+		this.timeline.needCommit(this);
+
 		return this.nextUpdate;
 	}
 
@@ -80,6 +82,4 @@ export class UpdatedEvent<T> extends Event<T> {
 
 		return () => value;
 	}
-
-	cleanUpLastEmittedValue(): void {}
 }

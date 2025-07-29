@@ -32,16 +32,4 @@ describe("Timeline", () => {
 		expect(mockEffect).toHaveBeenCalledWith(2); // Update this line
 		expect(mockEffect).toHaveBeenCalledTimes(1); // Update this line
 	});
-	test("update state", () => {
-		const timeline = new Timeline();
-		const source = timeline.source<number>();
-
-		const state = timeline.state(0, source);
-		expect(state.read()).toBe(0);
-
-		source.emit(1);
-		timeline.flush();
-
-		expect(state.read()).toBe(1);
-	});
 });

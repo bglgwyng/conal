@@ -13,6 +13,7 @@ export class Source<T> extends Event<T> {
 		this.maybeLastEmitedValue = just(value);
 
 		timeline.markEmitting(this as Source<unknown>);
+		this.timeline.needCommit(this);
 	}
 
 	takeEmittedValue() {

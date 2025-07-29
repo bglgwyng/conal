@@ -5,6 +5,7 @@ import { State } from "./behavior/State";
 import type { Effect } from "./event/Effect";
 import type { Event } from "./event/Event";
 import { Source } from "./event/Source";
+import type { Node } from "./Node";
 
 export class Timeline {
 	timestamp = 0;
@@ -41,7 +42,6 @@ export class Timeline {
 
 			const pendingEffects: Effect[] = [];
 
-			const processedStates: State<unknown>[] = [];
 			const processedEvents: Set<Event<unknown>> = new Set();
 			const processedDerivedBehaviors: Set<DerivedBehavior<unknown>> =
 				new Set();
@@ -58,14 +58,13 @@ export class Timeline {
 
 				const value = maybeValue();
 
-				for (const state of event.dependenedStates) {
-					processedStates.push(state);
-				}
-				for (const effect of event.effects) {
-					pendingEffects.push(() => effect(value));
+				for (const childEvent of event.childEvents) {
+					maybeEmittingEvents.push(childEvent);
 				}
 
 				for (const state of event.dependenedStates) {
+					state.prepareUpdate();
+
 					for (const behavior of collectAllDependentBehaviors(
 						state.dependedBehaviors,
 					)) {
@@ -78,8 +77,8 @@ export class Timeline {
 					}
 				}
 
-				for (const childEvent of event.childEvents) {
-					maybeEmittingEvents.push(childEvent);
+				for (const effect of event.effects) {
+					pendingEffects.push(() => effect(value));
 				}
 			}
 
@@ -91,17 +90,10 @@ export class Timeline {
 				}
 			}
 
-			for (const behavior of processedDerivedBehaviors) {
-				behavior.commit();
+			for (const node of this.toCommitNodes) {
+				node.commit();
 			}
-
-			for (const state of processedStates) {
-				state.commit();
-			}
-
-			for (const event of processedEvents) {
-				event.commit();
-			}
+			this.toCommitNodes.clear();
 		} finally {
 			this.isProceeding = false;
 		}
@@ -156,6 +148,9 @@ export class Timeline {
 	get nextTimestamp() {
 		return this.timestamp + 1;
 	}
-}
 
-type StateUpdate<T> = readonly [state: State<T>, newValue: T];
+	toCommitNodes: Set<Node> = new Set();
+	needCommit(node: Node) {
+		this.toCommitNodes.add(node);
+	}
+}
