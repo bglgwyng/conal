@@ -1,12 +1,10 @@
 import assert from "assert";
-import { emit } from "process";
 import type { Behavior } from "./behavior/Behavior";
 import type { DerivedBehavior } from "./behavior/DerivedBehavior";
 import { State } from "./behavior/State";
 import type { Effect } from "./event/Effect";
 import type { Event } from "./event/Event";
 import { Source } from "./event/Source";
-import type { Node } from "./Node";
 
 export class Timeline {
 	timestamp = 0;

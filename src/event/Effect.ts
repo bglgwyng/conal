@@ -1,1 +1,1 @@
-export type Effect = () => unknown
+export type Effect = () => unknown;

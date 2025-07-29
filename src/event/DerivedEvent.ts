@@ -1,5 +1,5 @@
 import type { Timeline } from "../Timeline";
-import { Causality, Event } from "./Event";
+import { Event } from "./Event";
 
 export class DerivedEvent<T, U> extends Event<T> {
 	constructor(
