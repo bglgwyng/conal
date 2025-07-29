@@ -6,6 +6,7 @@ import type { Effect } from "./event/Effect";
 import type { Event } from "./event/Event";
 import { Source } from "./event/Source";
 import type { Node } from "./Node";
+import { Queue } from "./utils/Queue";
 
 export class Timeline {
 	timestamp = 0;
@@ -32,7 +33,7 @@ export class Timeline {
 		this.isProceeding = true;
 
 		try {
-			const maybeEmittingEvents: Event<unknown>[] = [];
+			const maybeEmittingEvents = new Queue<Event<unknown>>();
 			for (const source of this.emittingSources) {
 				if (!source.isActive) continue;
 
