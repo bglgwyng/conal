@@ -4,7 +4,7 @@ import type { DerivedBehavior } from "./behavior/DerivedBehavior";
 import { State } from "./behavior/State";
 import type { Effect } from "./event/Effect";
 import type { Event } from "./event/Event";
-import { Never } from "./event/never";
+import { Never } from "./event/Never";
 import { Source } from "./event/Source";
 import type { Node } from "./Node";
 import { DedupQueue } from "./utils/DedupQueue";
