@@ -9,7 +9,7 @@ export abstract class Event<T> extends Node {
 
 	childEvents: Set<Event<any>> = new Set();
 	dependenedStates: Set<State<T>> = new Set();
-	effects: ((value: T) => unknown)[] = [];
+	effects: ((value: any) => unknown)[] = [];
 
 	constructor(timeline: Timeline, _options?: { debugLabel?: string }) {
 		super(timeline);
