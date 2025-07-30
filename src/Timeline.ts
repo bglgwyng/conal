@@ -159,5 +159,5 @@ export class Timeline {
 		this.toCommitNodes.add(node);
 	}
 
-	never = new Never(this);
+	never = new Never<any>(this);
 }
