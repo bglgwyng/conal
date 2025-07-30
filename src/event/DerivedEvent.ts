@@ -35,6 +35,7 @@ export class DerivedEvent<T, U> extends Event<T> {
 	protected deactivate() {
 		// biome-ignore lint/style/noNonNullAssertion: `dispose` is set in activate
 		this.dispose!();
+		this.dispose = undefined;
 	}
 
 	private dispose?: () => void;
