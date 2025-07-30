@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { DerivedEvent, Discard } from "../../src/event/DerivedEvent";
+import { DerivedEvent } from "../../src/event/DerivedEvent";
 import type { EffectEvent } from "../../src/event/Event";
 import { MergedEvent } from "../../src/event/MergedEvent";
 import type { Source } from "../../src/event/Source";
