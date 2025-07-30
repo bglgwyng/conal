@@ -45,8 +45,6 @@ export class Timeline {
 			}
 			this.emittingSources.clear();
 
-			const pendingEffects: Effect[] = [];
-
 			while (eventQueue.size > 0) {
 				// biome-ignore lint/style/noNonNullAssertion: size checked
 				const event = eventQueue.take()!;
@@ -81,14 +79,6 @@ export class Timeline {
 					effectEvent.emit(result);
 
 					eventQueue.add(effectEvent);
-				}
-			}
-
-			for (const effect of pendingEffects) {
-				try {
-					effect();
-				} catch (ex) {
-					console.error("Effect failed", ex);
 				}
 			}
 
