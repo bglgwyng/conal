@@ -33,6 +33,8 @@ describe("DynamicEvent", () => {
 		const callback = vi.fn();
 		dynamicEvent.on(callback);
 
+		timeline.start();
+
 		// Emit from the first source
 		source1.emit(42);
 		timeline.flush();
@@ -43,6 +45,8 @@ describe("DynamicEvent", () => {
 	it("should switch to a new source when behavior updates", () => {
 		const callback = vi.fn();
 		dynamicEvent.on(callback);
+
+		timeline.start();
 
 		// Switch to the second source
 		switchEvent.emit(source2);
@@ -58,6 +62,8 @@ describe("DynamicEvent", () => {
 	it("should not receive events after unsubscribing", () => {
 		const callback = vi.fn();
 		const [unsubscribe] = dynamicEvent.on(callback);
+
+		timeline.start();
 
 		// Emit and verify
 		source1.emit(1);
@@ -77,6 +83,8 @@ describe("DynamicEvent", () => {
 		const callback = vi.fn();
 		dynamicEvent.on(callback);
 
+		timeline.start();
+
 		// Switch to second source
 		source1.emit(1);
 		switchEvent.emit(source2);
@@ -89,6 +97,8 @@ describe("DynamicEvent", () => {
 	it("should clean up old source when switching", () => {
 		const callback = vi.fn();
 		dynamicEvent.on(callback);
+
+		timeline.start();
 
 		// Switch to second source
 		switchEvent.emit(source2);

@@ -22,6 +22,8 @@ describe("DerivedBehavior", () => {
 
 		expect(derived.read()).toBe(0);
 
+		timeline.start();
+
 		// Set initial state value
 		source1.emit(5); // This will update both state1 and state2
 		source2.emit(10);
@@ -70,6 +72,8 @@ describe("DerivedBehavior", () => {
 		// Make it active by adding an effect
 		const [unsubscribe] = derived.updated.on(() => {});
 		expect(derived.isActive).toBe(true);
+
+		timeline.start();
 
 		// Read when active - should track dependencies
 		const result = derived.read();

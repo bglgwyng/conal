@@ -22,6 +22,8 @@ describe("EffectEvent", () => {
 			const spy = vi.fn();
 			const [disposeEffect] = effectEvent.on(spy);
 
+			timeline.start();
+
 			source.emit(21); // effect will transform to 42
 			timeline.flush();
 
@@ -32,6 +34,8 @@ describe("EffectEvent", () => {
 		it("should emit updated values on subsequent source emits", () => {
 			const spy = vi.fn();
 			const [disposeEffect] = effectEvent.on(spy);
+
+			timeline.start();
 
 			source.emit(5); // effect will transform to 10
 			timeline.flush();
@@ -50,6 +54,7 @@ describe("EffectEvent", () => {
 			const spy = vi.fn();
 			const [disposeEffect] = effectEvent.on(spy);
 
+			timeline.start();
 			source.emit(21);
 			timeline.flush();
 
@@ -63,6 +68,8 @@ describe("EffectEvent", () => {
 		it("should not emit after commit until new source emit", () => {
 			const spy = vi.fn();
 			const [disposeEffect] = effectEvent.on(spy);
+
+			timeline.start();
 
 			// First emit
 			source.emit(21);
@@ -86,6 +93,7 @@ describe("EffectEvent", () => {
 			const spy = vi.fn();
 			const [disposeEffect] = effectEvent.on(spy);
 
+			timeline.start();
 			// Should not throw
 			timeline.flush();
 
@@ -101,8 +109,10 @@ describe("EffectEvent", () => {
 	describe("lifecycle", () => {
 		it("should emit, receive, and commit in sequence", () => {
 			const spy = vi.fn();
+
 			const [disposeEffect] = effectEvent.on(spy);
 
+			timeline.start();
 			// Initial state - no emissions yet
 			expect(spy).not.toHaveBeenCalled();
 
@@ -140,6 +150,8 @@ describe("EffectEvent", () => {
 			const spy = vi.fn();
 			const [disposeChain] = effectEvent.on(spy);
 
+			timeline.start();
+
 			source.emit(10); // source -> effect (20) -> spy
 			timeline.flush();
 
@@ -165,6 +177,8 @@ describe("EffectEvent", () => {
 
 			const spy = vi.fn();
 			const [disposeDerived] = derivedEvent.on(spy);
+
+			timeline.start();
 
 			// Source emits -> Effect transforms -> DerivedEvent transforms
 			source.emit(15); // source(15) -> effect(30) -> derived("Result: 30")
@@ -192,6 +206,8 @@ describe("EffectEvent", () => {
 			const spy = vi.fn();
 			const [disposeSecond] = secondDerived.on(spy);
 
+			timeline.start();
+
 			// Test the full chain
 			source.emit(12); // source(12) -> effect(24) -> first("Value: 24") -> second({message: "Value: 24", length: 9})
 			timeline.flush();
@@ -212,6 +228,8 @@ describe("EffectEvent", () => {
 
 			const spy = vi.fn();
 			const [disposeDerived] = derivedEvent.on(spy);
+
+			timeline.start();
 
 			// This should work (25 * 2 = 50, not > 50)
 			source.emit(25);
@@ -246,6 +264,8 @@ describe("EffectEvent", () => {
 			const spy = vi.fn();
 			const [disposeMerged] = mergedEvent.on(spy);
 
+			timeline.start();
+
 			// Only left (EffectEvent) emits
 			source.emit(10); // source(10) -> effect(20) -> merged({type: "left", value: 20})
 			timeline.flush();
@@ -264,6 +284,8 @@ describe("EffectEvent", () => {
 			const spy = vi.fn();
 			const [disposeMerged] = mergedEvent.on(spy);
 
+			timeline.start();
+
 			// Only right source emits
 			rightSource.emit("hello");
 			timeline.flush();
@@ -281,6 +303,8 @@ describe("EffectEvent", () => {
 
 			const spy = vi.fn();
 			const [disposeMerged] = mergedEvent.on(spy);
+
+			timeline.start();
 
 			// Both events emit in same timeline flush
 			source.emit(15); // Will trigger effectEvent with value 30
@@ -301,6 +325,8 @@ describe("EffectEvent", () => {
 
 			const spy = vi.fn();
 			const [disposeMerged] = mergedEvent.on(spy);
+
+			timeline.start();
 
 			// First: left only
 			source.emit(5); // effect will emit 10
@@ -344,6 +370,8 @@ describe("EffectEvent", () => {
 
 			const spy = vi.fn();
 			const [disposeChainedSpy] = chainedEffect.on(spy);
+
+			timeline.start();
 
 			// Test the full chain
 			source.emit(8); // source(8) -> effect(16) -> merged({type: "left", value: 16}) -> chained("Left: 16")

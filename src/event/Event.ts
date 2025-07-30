@@ -42,6 +42,8 @@ export abstract class Event<T> extends Node {
 	abstract takeEmittedValue(): Maybe<T>;
 
 	on<U>(fn: (value: T) => U): readonly [() => void, EffectEvent<U>] {
+		assert(this.timeline.canUpdateNetwork, "Cannot update network");
+
 		const { isActive } = this;
 
 		const effectEvent = new EffectEvent<U>(this.timeline);

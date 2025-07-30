@@ -20,6 +20,8 @@ describe("DerivedEvent", () => {
 		const mockCallback = vitest.fn();
 		derivedEvent.on(mockCallback);
 
+		timeline.start();
+
 		parentEvent.emit(42);
 
 		timeline.flush();
@@ -33,6 +35,8 @@ describe("DerivedEvent", () => {
 
 		const mockCallback = vitest.fn();
 		derivedEvent.on(mockCallback);
+
+		timeline.start();
 
 		parentEvent.emit(42);
 
@@ -51,6 +55,8 @@ describe("DerivedEvent", () => {
 		const mockCallback = vitest.fn();
 		derived2.on(mockCallback);
 
+		timeline.start();
+
 		parentEvent.emit(42);
 		timeline.flush();
 
@@ -67,6 +73,8 @@ describe("DerivedEvent", () => {
 
 		const mockCallback = vitest.fn();
 		derivedEvent.on(mockCallback);
+
+		timeline.start();
 
 		// This should be discarded (even number)
 		parentEvent.emit(42);

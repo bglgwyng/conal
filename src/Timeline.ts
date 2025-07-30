@@ -18,6 +18,20 @@ export class Timeline {
 	isTracking = false;
 	isReadingNextValue = false;
 
+	hasStarted = false;
+	isRunningEffect = true;
+
+	start() {
+		assert(!this.hasStarted, "Timeline has already started");
+
+		this.hasStarted = true;
+		this.isRunningEffect = false;
+	}
+
+	get canUpdateNetwork() {
+		return this.isRunningEffect || !this.hasStarted;
+	}
+
 	state<T>(initialValue: T, updated: Event<T>): State<T> {
 		return new State(this, initialValue, updated);
 	}
@@ -31,6 +45,9 @@ export class Timeline {
 	}
 
 	flush() {
+		assert(this.hasStarted, "Timeline has not started");
+		assert(!this.isProceeding, "Timeline is already proceeding");
+
 		this.isProceeding = true;
 
 		const eventQueue = new DedupQueue<Event<unknown>>();
@@ -72,12 +89,19 @@ export class Timeline {
 				}
 
 				for (const [runEffect, effectEvent] of event.effects) {
-					const result = runEffect(value);
+					try {
+						this.isRunningEffect = true;
+						const result = runEffect(value);
 
-					if (!effectEvent.isActive) continue;
-					effectEvent.emit(result);
+						if (!effectEvent.isActive) continue;
+						effectEvent.emit(result);
 
-					eventQueue.add(effectEvent);
+						eventQueue.add(effectEvent);
+					} catch (ex) {
+						console.warn("Effect failed", ex);
+					} finally {
+						this.isRunningEffect = false;
+					}
 				}
 			}
 
@@ -142,6 +166,14 @@ export class Timeline {
 
 		return affine(() => {
 			this.isReadingNextValue = false;
+		});
+	}
+
+	startAdjusting() {
+		this.isRunningEffect = true;
+
+		return affine(() => {
+			this.isRunningEffect = false;
 		});
 	}
 
