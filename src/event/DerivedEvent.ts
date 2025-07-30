@@ -28,7 +28,6 @@ export class DerivedEvent<T, U> extends Event<T> {
 
 	activate() {
 		assert(this.isActive, "Event is not active");
-		console.info("Activate!!", this.debugLabel);
 		this.dispose = this.listen(this.parent);
 	}
 
