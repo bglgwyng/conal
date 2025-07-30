@@ -39,8 +39,10 @@ export class MergedEvent<L, R> extends Event<These<L, R>> {
 	protected deactivate(): void {
 		// biome-ignore lint/style/noNonNullAssertion: `disposeLeft` is set in activate
 		this.disposeLeft!();
+		this.disposeLeft = undefined;
 		// biome-ignore lint/style/noNonNullAssertion: `disposeRight` is set in activate
 		this.disposeRight!();
+		this.disposeRight = undefined;
 	}
 
 	private disposeLeft?: () => void;
