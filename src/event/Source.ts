@@ -2,7 +2,7 @@ import { just, type Maybe } from "../utils/Maybe";
 import { Event } from "./Event";
 
 export class Source<T> extends Event<T> {
-	private maybeLastEmitedValue: Maybe<T>;
+	maybeLastEmitedValue: Maybe<T>;
 
 	emit(value: T) {
 		const { timeline } = this;

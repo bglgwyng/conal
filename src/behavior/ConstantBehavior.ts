@@ -6,7 +6,7 @@ export class ConstantBehavior<T> extends Behavior<T> {
 	public updated: Event<T>;
 	constructor(
 		public timeline: Timeline,
-		private value: T,
+		public readonly value: T,
 	) {
 		super(timeline);
 

@@ -6,7 +6,7 @@ import { Event } from "./Event";
 export class DynamicEvent<T> extends Event<T> {
 	constructor(
 		timeline: Timeline,
-		private behavior: Behavior<Event<T>>,
+		public readonly behavior: Behavior<Event<T>>,
 		options?: { debugLabel?: string },
 	) {
 		super(timeline, options);
@@ -16,7 +16,7 @@ export class DynamicEvent<T> extends Event<T> {
 		return this.behavior.read().takeEmittedValue();
 	}
 
-	protected activate(): void {
+	activate(): void {
 		this.dispose = this.listen(this.behavior.read());
 		this.disposeBehaviorUpdated = this.behavior.updated.on((event) => {
 			// biome-ignore lint/style/noNonNullAssertion: `dispose` is set in activate
@@ -25,7 +25,7 @@ export class DynamicEvent<T> extends Event<T> {
 		});
 	}
 
-	protected deactivate(): void {
+	deactivate(): void {
 		// biome-ignore lint/style/noNonNullAssertion: `dispose` is set in activate
 		this.dispose!();
 		this.dispose = undefined;
@@ -35,6 +35,6 @@ export class DynamicEvent<T> extends Event<T> {
 		this.disposeBehaviorUpdated = undefined;
 	}
 
-	private dispose?: () => void;
-	private disposeBehaviorUpdated?: () => void;
+	dispose?: () => void;
+	disposeBehaviorUpdated?: () => void;
 }

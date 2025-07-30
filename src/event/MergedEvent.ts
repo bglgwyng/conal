@@ -5,8 +5,8 @@ import { Event } from "./Event";
 export class MergedEvent<L, R> extends Event<These<L, R>> {
 	constructor(
 		timeline: Timeline,
-		private left: Event<L>,
-		private right: Event<R>,
+		public readonly left: Event<L>,
+		public readonly right: Event<R>,
 		options?: { debugLabel?: string },
 	) {
 		super(timeline, options);
@@ -31,12 +31,12 @@ export class MergedEvent<L, R> extends Event<These<L, R>> {
 		return;
 	};
 
-	protected activate(): void {
+	activate(): void {
 		this.disposeLeft = this.listen(this.left);
 		this.disposeRight = this.listen(this.right);
 	}
 
-	protected deactivate(): void {
+	deactivate(): void {
 		// biome-ignore lint/style/noNonNullAssertion: `disposeLeft` is set in activate
 		this.disposeLeft!();
 		this.disposeLeft = undefined;
@@ -45,8 +45,8 @@ export class MergedEvent<L, R> extends Event<These<L, R>> {
 		this.disposeRight = undefined;
 	}
 
-	private disposeLeft?: () => void;
-	private disposeRight?: () => void;
+	disposeLeft?: () => void;
+	disposeRight?: () => void;
 }
 
 export const Discard = Symbol("Discard");

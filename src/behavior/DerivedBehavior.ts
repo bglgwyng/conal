@@ -13,7 +13,7 @@ export class DerivedBehavior<T> extends Behavior<T> {
 
 	constructor(
 		public timeline: Timeline,
-		private fn: () => T,
+		public fn: () => T,
 	) {
 		super(timeline);
 		this.updated = new UpdateEvent(this, { debugLabel: "derived" });

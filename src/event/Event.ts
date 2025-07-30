@@ -1,4 +1,4 @@
-import { assert } from "console";
+import assert from "assert";
 import type { State } from "../behavior/State";
 import { Node } from "../Node";
 import type { Timeline } from "../Timeline";
