@@ -42,15 +42,15 @@ describe("DerivedBehavior", () => {
 			() => state1.read() + state2.read(),
 		);
 
-		expect(derived.dependencies.size).toBe(0);
+		expect(derived.dependencies).toBeUndefined();
 
 		// Initial read should track dependencies
 		const result = derived.read();
 		expect(result).toBe(0);
 
 		// Check if dependencies are tracked
-		expect(derived.dependencies.size).toBe(2);
-		expect(derived.dependencies.has(state1)).toBe(true);
-		expect(derived.dependencies.has(state2)).toBe(true);
+		expect(derived.dependencies?.size).toBe(2);
+		expect(derived.dependencies?.has(state1)).toBe(true);
+		expect(derived.dependencies?.has(state2)).toBe(true);
 	});
 });

@@ -16,4 +16,8 @@ export class UpdateEvent<T> extends Event<T> {
 
 		return just(value);
 	}
+
+	activate(): void {
+		this.derivedBehavior.readCurrentValue();
+	}
 }
