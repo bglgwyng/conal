@@ -18,6 +18,10 @@ export class UpdateEvent<T> extends Event<T> {
 	}
 
 	activate(): void {
-		this.derivedBehavior.readCurrentValue();
+		this.derivedBehavior.activate();
+	}
+
+	deactivate(): void {
+		this.derivedBehavior.deactivate();
 	}
 }

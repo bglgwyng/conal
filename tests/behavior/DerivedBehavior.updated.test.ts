@@ -192,4 +192,107 @@ describe("DerivedBehavior - updated event", () => {
 		// Clean up
 		unsubscribeEffect();
 	});
+
+	it("should call activate and deactivate methods correctly", () => {
+		const source1 = timeline.source<number>();
+		const source2 = timeline.source<number>();
+		const state1 = timeline.state(10, source1);
+		const state2 = timeline.state(20, source2);
+
+		const derived = new DerivedBehavior(
+			timeline,
+			() => state1.read() + state2.read(),
+		);
+
+		// Spy on activate and deactivate methods
+		const activateSpy = vi.spyOn(derived, "activate");
+		const deactivateSpy = vi.spyOn(derived, "deactivate");
+
+		// Initially no dependencies should be tracked
+		expect(derived.dependencies).toBeUndefined();
+		expect(state1.dependedBehaviors.has(derived)).toBe(false);
+		expect(state2.dependedBehaviors.has(derived)).toBe(false);
+
+		// Add an effect - this should trigger activate()
+		const updateSpy = vi.fn();
+		const unsubscribe = derived.updated.on(updateSpy);
+
+		// activate() should have been called
+		expect(activateSpy).toHaveBeenCalledTimes(1);
+
+		// Dependencies should now be tracked
+		expect(derived.dependencies).toBeDefined();
+		expect(derived.dependencies?.size).toBe(2);
+		expect(state1.dependedBehaviors.has(derived)).toBe(true);
+		expect(state2.dependedBehaviors.has(derived)).toBe(true);
+
+		// Remove the effect - this should trigger deactivate()
+		unsubscribe();
+
+		// deactivate() should have been called
+		expect(deactivateSpy).toHaveBeenCalledTimes(1);
+
+		// Dependencies should be cleaned up
+		expect(derived.dependencies).toBeUndefined();
+		expect(state1.dependedBehaviors.has(derived)).toBe(false);
+		expect(state2.dependedBehaviors.has(derived)).toBe(false);
+	});
+
+	it("should handle multiple activations and deactivations", () => {
+		const source = timeline.source<number>();
+		const state = timeline.state(5, source);
+
+		const derived = new DerivedBehavior(timeline, () => state.read() * 2);
+
+		const activateSpy = vi.spyOn(derived, "activate");
+		const deactivateSpy = vi.spyOn(derived, "deactivate");
+
+		// Add first effect
+		const unsubscribe1 = derived.updated.on(() => {});
+		expect(activateSpy).toHaveBeenCalledTimes(1);
+		expect(deactivateSpy).toHaveBeenCalledTimes(0);
+
+		// Add second effect - should not trigger activate again
+		const unsubscribe2 = derived.updated.on(() => {});
+		expect(activateSpy).toHaveBeenCalledTimes(1);
+		expect(deactivateSpy).toHaveBeenCalledTimes(0);
+
+		// Remove first effect - should not trigger deactivate yet
+		unsubscribe1();
+		expect(activateSpy).toHaveBeenCalledTimes(1);
+		expect(deactivateSpy).toHaveBeenCalledTimes(0);
+		expect(state.dependedBehaviors.has(derived)).toBe(true);
+
+		// Remove second effect - should trigger deactivate
+		unsubscribe2();
+		expect(activateSpy).toHaveBeenCalledTimes(1);
+		expect(deactivateSpy).toHaveBeenCalledTimes(1);
+		expect(state.dependedBehaviors.has(derived)).toBe(false);
+	});
+
+	it("should handle activation through writeOn", () => {
+		const source = timeline.source<number>();
+		const state = timeline.state(10, source);
+
+		const derived = new DerivedBehavior(timeline, () => state.read() + 5);
+
+		const activateSpy = vi.spyOn(derived, "activate");
+		const deactivateSpy = vi.spyOn(derived, "deactivate");
+
+		// Create target state using writeOn - this should trigger activate
+		const targetState = timeline.state(0, derived.updated);
+
+		// activate() should have been called
+		expect(activateSpy).toHaveBeenCalledTimes(1);
+		expect(deactivateSpy).toHaveBeenCalledTimes(0);
+
+		// Dependencies should be tracked
+		expect(derived.dependencies).toBeDefined();
+		expect(state.dependedBehaviors.has(derived)).toBe(true);
+
+		// Update source to verify the connection works
+		source.emit(20);
+		timeline.flush();
+		expect(targetState.read()).toBe(25); // 20 + 5
+	});
 });

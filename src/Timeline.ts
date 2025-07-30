@@ -7,6 +7,7 @@ import type { Event } from "./event/Event";
 import { Never } from "./event/Never";
 import { Source } from "./event/Source";
 import type { Node } from "./Node";
+import { affine } from "./utils/affine";
 import { DedupQueue } from "./utils/DedupQueue";
 
 export class Timeline {
@@ -66,7 +67,7 @@ export class Timeline {
 				for (const state of event.dependenedStates) {
 					state.prepareUpdate();
 
-					for (const behavior of collectAllDependentActiveBehaviors(
+					for (const behavior of collectAllDependentBehaviors(
 						state.dependedBehaviors,
 					)) {
 						pushEventToQueue(behavior.updated);
@@ -103,14 +104,14 @@ export class Timeline {
 			eventQueue.add(event);
 		}
 
-		function* collectAllDependentActiveBehaviors(
+		function* collectAllDependentBehaviors(
 			behaviors: Iterable<DerivedBehavior<unknown>>,
 		): IterableIterator<DerivedBehavior<unknown>> {
 			for (const behavior of behaviors) {
-				if (!behavior.updated.isActive) continue;
+				assert(behavior.updated.isActive, "Behavior is not active");
 
 				yield behavior;
-				yield* collectAllDependentActiveBehaviors(behavior.dependedBehaviors);
+				yield* collectAllDependentBehaviors(behavior.dependedBehaviors);
 			}
 		}
 	}
@@ -133,21 +134,21 @@ export class Timeline {
 		this.isTracking = true;
 		this.reads.push(new Set());
 
-		return () => {
+		return affine(() => {
 			// biome-ignore lint/style/noNonNullAssertion: pop the set that was pushed above
 			const dependencies = this.reads.pop()!;
 			if (this.reads.length === 0) this.isTracking = false;
 
 			return dependencies;
-		};
+		});
 	}
 
 	startReadingNextValue() {
 		this.isReadingNextValue = true;
 
-		return () => {
+		return affine(() => {
 			this.isReadingNextValue = false;
-		};
+		});
 	}
 
 	get nextTimestamp() {

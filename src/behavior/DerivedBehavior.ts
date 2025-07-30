@@ -7,7 +7,7 @@ import { Behavior } from "./Behavior";
 export class DerivedBehavior<T> extends Behavior<T> {
 	updated: Event<T>;
 
-	lastRead?: { value: T; at: number; dependencies: Set<Behavior<any>> };
+	lastRead?: { value: T; at: number; dependencies?: Set<Behavior<any>> };
 	nextUpdate?: {
 		value: T;
 		isUpdated: boolean;
@@ -26,14 +26,21 @@ export class DerivedBehavior<T> extends Behavior<T> {
 		const { lastRead, timeline } = this;
 		if (lastRead?.at === timeline.timestamp) return lastRead.value;
 
-		const [value, dependencies] = this.withTrackingReads(this.fn);
-		this.lastRead = { value, at: timeline.timestamp, dependencies };
+		if (this.isActive) {
+			const [value, dependencies] = this.withTrackingReads(this.fn);
+			this.lastRead = { value, at: timeline.timestamp, dependencies };
 
-		for (const dependency of dependencies) {
-			dependency.dependedBehaviors.add(this);
+			for (const dependency of dependencies) {
+				dependency.dependedBehaviors.add(this);
+			}
+
+			return value;
+		} else {
+			const value = this.fn();
+			this.lastRead = { value, at: timeline.timestamp };
+
+			return value;
 		}
-
-		return value;
 	}
 
 	readNextValue() {
@@ -91,5 +98,26 @@ export class DerivedBehavior<T> extends Behavior<T> {
 			at: this.timeline.nextTimestamp,
 			dependencies,
 		};
+	}
+
+	activate() {
+		this.readCurrentValue();
+	}
+
+	deactivate() {
+		const { lastRead } = this;
+		if (!lastRead) return;
+
+		const { dependencies } = lastRead;
+		if (!dependencies) return;
+
+		for (const dependency of dependencies) {
+			dependency.dependedBehaviors.delete(this);
+		}
+		lastRead.dependencies = undefined;
+	}
+
+	get isActive() {
+		return this.updated.isActive;
 	}
 }
