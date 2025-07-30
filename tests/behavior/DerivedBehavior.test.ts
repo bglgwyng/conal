@@ -68,7 +68,7 @@ describe("DerivedBehavior", () => {
 		);
 
 		// Make it active by adding an effect
-		const unsubscribe = derived.updated.on(() => {});
+		const [unsubscribe] = derived.updated.on(() => {});
 		expect(derived.isActive).toBe(true);
 
 		// Read when active - should track dependencies

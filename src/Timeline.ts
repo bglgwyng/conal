@@ -74,8 +74,13 @@ export class Timeline {
 					}
 				}
 
-				for (const effect of event.effects) {
-					pendingEffects.push(() => effect(value));
+				for (const [runEffect, effectEvent] of event.effects) {
+					const result = runEffect(value);
+
+					if (!effectEvent.isActive) continue;
+					effectEvent.emit(result);
+
+					eventQueue.add(effectEvent);
 				}
 			}
 

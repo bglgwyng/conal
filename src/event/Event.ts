@@ -2,14 +2,14 @@ import assert from "assert";
 import type { State } from "../behavior/State";
 import { Node } from "../Node";
 import type { Timeline } from "../Timeline";
-import type { Maybe } from "../utils/Maybe";
+import { just, type Maybe } from "../utils/Maybe";
 
 export abstract class Event<T> extends Node {
 	debugLabel?: string;
 
 	childEvents: Set<Event<any>> = new Set();
 	dependenedStates: Set<State<T>> = new Set();
-	effects: ((value: any) => unknown)[] = [];
+	effects: (readonly [(value: any) => void, EffectEvent<any>])[] = [];
 
 	constructor(timeline: Timeline, _options?: { debugLabel?: string }) {
 		super(timeline);
@@ -41,17 +41,23 @@ export abstract class Event<T> extends Node {
 
 	abstract takeEmittedValue(): Maybe<T>;
 
-	on(fn: (value: T) => unknown): () => void {
+	on<U>(fn: (value: T) => U): readonly [() => void, EffectEvent<U>] {
 		const { isActive } = this;
 
-		this.effects.push(fn);
+		const effectEvent = new EffectEvent<U>(this.timeline);
+
+		const effect = [fn, effectEvent] as const;
+		this.effects.push(effect);
 		if (!isActive) this.activate();
 
-		return () => {
-			this.effects.splice(this.effects.indexOf(fn), 1);
+		return [
+			() => {
+				this.effects.splice(this.effects.indexOf(effect), 1);
 
-			if (!this.isActive) this.deactivate();
-		};
+				if (!this.isActive) this.deactivate();
+			},
+			effectEvent,
+		];
 	}
 
 	writeOn(state: State<T>) {
@@ -69,4 +75,22 @@ export abstract class Event<T> extends Node {
 
 	protected activate(): void {}
 	protected deactivate(): void {}
+}
+
+export class EffectEvent<T> extends Event<T> {
+	maybeLastEmitedValue: Maybe<T>;
+
+	emit(value: T) {
+		this.maybeLastEmitedValue = just(value);
+
+		this.timeline.needCommit(this);
+	}
+
+	takeEmittedValue() {
+		return this.maybeLastEmitedValue;
+	}
+
+	commit() {
+		this.maybeLastEmitedValue = undefined;
+	}
 }

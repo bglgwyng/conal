@@ -26,7 +26,7 @@ describe("Event isActive behavior", () => {
 		it("should become active when adding an effect", () => {
 			expect(source.isActive).toBe(false);
 
-			const dispose = source.on(() => {});
+			const [dispose] = source.on(() => {});
 
 			expect(source.isActive).toBe(true);
 
@@ -35,8 +35,8 @@ describe("Event isActive behavior", () => {
 		});
 
 		it("should remain active with multiple effects", () => {
-			const dispose1 = source.on(() => {});
-			const dispose2 = source.on(() => {});
+			const [dispose1] = source.on(() => {});
+			const [dispose2] = source.on(() => {});
 
 			expect(source.isActive).toBe(true);
 
@@ -53,7 +53,7 @@ describe("Event isActive behavior", () => {
 			const activateSpy = vi.spyOn(source as any, "activate");
 			const deactivateSpy = vi.spyOn(source as any, "deactivate");
 
-			const dispose = source.on(() => {});
+			const [dispose] = source.on(() => {});
 			expect(activateSpy).toHaveBeenCalledTimes(1);
 
 			dispose();
@@ -98,7 +98,7 @@ describe("Event isActive behavior", () => {
 			expect(source.isActive).toBe(false);
 
 			// Make childSource active first (required for listen)
-			const childDispose = childSource.on(() => {});
+			const [childDispose] = childSource.on(() => {});
 
 			// Now childSource can listen to source
 			const dispose = childSource.listen(source);
@@ -118,8 +118,8 @@ describe("Event isActive behavior", () => {
 			const child2 = new Source<string>(timeline);
 
 			// Make children active
-			const child1Effect = child1.on(() => {});
-			const child2Effect = child2.on(() => {});
+			const [child1Effect] = child1.on(() => {});
+			const [child2Effect] = child2.on(() => {});
 
 			// Children listen to source
 			const dispose1 = child1.listen(source);
@@ -157,7 +157,7 @@ describe("Event isActive behavior", () => {
 			expect(source.childEvents.size).toBe(0);
 
 			// Now make child active first
-			const childEffect = childSource.on(() => {});
+			const [childEffect] = childSource.on(() => {});
 			expect(childSource.isActive).toBe(true);
 
 			// Now child can listen to source
@@ -181,7 +181,7 @@ describe("Event isActive behavior", () => {
 			const childSource = new Source<string>(timeline);
 
 			// Add effect
-			const effectDispose = source.on(() => {});
+			const [effectDispose] = source.on(() => {});
 			expect(source.isActive).toBe(true);
 
 			// Add state dependency
@@ -189,7 +189,7 @@ describe("Event isActive behavior", () => {
 			expect(source.isActive).toBe(true);
 
 			// Add child event
-			const childEffect = childSource.on(() => {});
+			const [childEffect] = childSource.on(() => {});
 			const childDispose = childSource.listen(source);
 			expect(source.isActive).toBe(true);
 
@@ -214,7 +214,7 @@ describe("Event isActive behavior", () => {
 
 			// Multiple rapid activations
 			for (let i = 0; i < 5; i++) {
-				const dispose = source.on(() => {});
+				const [dispose] = source.on(() => {});
 				expect(source.isActive).toBe(true);
 				dispose();
 				expect(source.isActive).toBe(false);
@@ -228,7 +228,7 @@ describe("Event isActive behavior", () => {
 	describe("edge cases", () => {
 		it("should handle removing non-existent effects gracefully", () => {
 			const callback = () => {};
-			const dispose = source.on(callback);
+			const [dispose] = source.on(callback);
 
 			expect(source.isActive).toBe(true);
 
@@ -242,9 +242,9 @@ describe("Event isActive behavior", () => {
 		});
 
 		it("should maintain correct state when effects are added and removed in different orders", () => {
-			const dispose1 = source.on(() => {});
-			const dispose2 = source.on(() => {});
-			const dispose3 = source.on(() => {});
+			const [dispose1] = source.on(() => {});
+			const [dispose2] = source.on(() => {});
+			const [dispose3] = source.on(() => {});
 
 			expect(source.isActive).toBe(true);
 
