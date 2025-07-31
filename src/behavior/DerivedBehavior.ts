@@ -48,22 +48,20 @@ export class DerivedBehavior<T> extends Behavior<T> {
 
 		if (this.nextUpdate) return this.nextUpdate;
 
-		const stopReadingNextValue = this.timeline.startReadingNextValue();
-		try {
+		const nextValue = this.timeline.withReadingNextValue(() => {
 			const [value, dependencies] = this.withTrackingReads(this.fn);
 
-			this.nextUpdate = {
+			return {
 				value,
 				isUpdated: value !== this.readCurrentValue(),
 				dependencies,
 			};
+		});
 
-			this.timeline.needCommit(this);
-		} finally {
-			stopReadingNextValue();
-		}
+		this.nextUpdate = nextValue;
+		this.timeline.needCommit(this);
 
-		return this.nextUpdate;
+		return nextValue;
 	}
 
 	get dependencies(): Set<Behavior<any>> | undefined {

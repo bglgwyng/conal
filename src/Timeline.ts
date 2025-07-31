@@ -161,12 +161,14 @@ export class Timeline {
 		});
 	}
 
-	startReadingNextValue() {
+	withReadingNextValue<U>(fn: () => U): U {
 		this.isReadingNextValue = true;
 
-		return affine(() => {
+		try {
+			return fn();
+		} finally {
 			this.isReadingNextValue = false;
-		});
+		}
 	}
 
 	startAdjusting() {
