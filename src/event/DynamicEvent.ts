@@ -18,7 +18,7 @@ export class DynamicEvent<T> extends Event<T> {
 
 	activate(): void {
 		this.dispose = this.listen(this.behavior.read());
-		[this.disposeBehaviorUpdated] = this.behavior.updated.on((event) => {
+		[, this.disposeBehaviorUpdated] = this.behavior.updated.on((event) => {
 			// biome-ignore lint/style/noNonNullAssertion: `dispose` is set in activate
 			this.dispose!();
 			this.dispose = this.listen(event);

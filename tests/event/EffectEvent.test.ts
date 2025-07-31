@@ -14,13 +14,13 @@ describe("EffectEvent", () => {
 	beforeEach(() => {
 		timeline = new Timeline();
 		source = timeline.source<number>();
-		[dispose, effectEvent] = source.on((value) => value * 2);
+		[effectEvent, dispose] = source.on((value) => value * 2);
 	});
 
 	describe("effect event emission", () => {
 		it("should emit transformed value when source emits", () => {
 			const spy = vi.fn();
-			const [disposeEffect] = effectEvent.on(spy);
+			const [, disposeEffect] = effectEvent.on(spy);
 
 			timeline.start();
 
@@ -33,7 +33,7 @@ describe("EffectEvent", () => {
 
 		it("should emit updated values on subsequent source emits", () => {
 			const spy = vi.fn();
-			const [disposeEffect] = effectEvent.on(spy);
+			const [, disposeEffect] = effectEvent.on(spy);
 
 			timeline.start();
 
@@ -52,7 +52,7 @@ describe("EffectEvent", () => {
 		it("should call timeline.needCommit when effect emits", () => {
 			const needCommitSpy = vi.spyOn(timeline, "needCommit");
 			const spy = vi.fn();
-			const [disposeEffect] = effectEvent.on(spy);
+			const [, disposeEffect] = effectEvent.on(spy);
 
 			timeline.start();
 			source.emit(21);
@@ -67,7 +67,7 @@ describe("EffectEvent", () => {
 	describe("commit", () => {
 		it("should not emit after commit until new source emit", () => {
 			const spy = vi.fn();
-			const [disposeEffect] = effectEvent.on(spy);
+			const [, disposeEffect] = effectEvent.on(spy);
 
 			timeline.start();
 
@@ -91,7 +91,7 @@ describe("EffectEvent", () => {
 
 		it("should handle commit when no value was emitted", () => {
 			const spy = vi.fn();
-			const [disposeEffect] = effectEvent.on(spy);
+			const [, disposeEffect] = effectEvent.on(spy);
 
 			timeline.start();
 			// Should not throw
@@ -110,7 +110,7 @@ describe("EffectEvent", () => {
 		it("should emit, receive, and commit in sequence", () => {
 			const spy = vi.fn();
 
-			const [disposeEffect] = effectEvent.on(spy);
+			const [, disposeEffect] = effectEvent.on(spy);
 
 			timeline.start();
 			// Initial state - no emissions yet
@@ -139,7 +139,7 @@ describe("EffectEvent", () => {
 		it("should inherit Event functionality", () => {
 			expect(effectEvent.isActive).toBe(false);
 
-			const [disposeEffect] = effectEvent.on(() => {});
+			const [, disposeEffect] = effectEvent.on(() => {});
 			expect(effectEvent.isActive).toBe(true);
 
 			disposeEffect();
@@ -148,7 +148,7 @@ describe("EffectEvent", () => {
 
 		it("should work as a chained effect", () => {
 			const spy = vi.fn();
-			const [disposeChain] = effectEvent.on(spy);
+			const [, disposeChain] = effectEvent.on(spy);
 
 			timeline.start();
 
@@ -176,7 +176,7 @@ describe("EffectEvent", () => {
 			);
 
 			const spy = vi.fn();
-			const [disposeDerived] = derivedEvent.on(spy);
+			const [, disposeDerived] = derivedEvent.on(spy);
 
 			timeline.start();
 
@@ -204,7 +204,7 @@ describe("EffectEvent", () => {
 			}));
 
 			const spy = vi.fn();
-			const [disposeSecond] = secondDerived.on(spy);
+			const [, disposeSecond] = secondDerived.on(spy);
 
 			timeline.start();
 
@@ -226,7 +226,7 @@ describe("EffectEvent", () => {
 			});
 
 			const spy = vi.fn();
-			const [disposeDerived] = derivedEvent.on(spy);
+			const [, disposeDerived] = derivedEvent.on(spy);
 
 			timeline.start();
 
@@ -254,7 +254,7 @@ describe("EffectEvent", () => {
 			);
 
 			const spy = vi.fn();
-			const [disposeMerged] = mergedEvent.on(spy);
+			const [, disposeMerged] = mergedEvent.on(spy);
 
 			timeline.start();
 
@@ -274,7 +274,7 @@ describe("EffectEvent", () => {
 			const mergedEvent = new MergedEvent(timeline, effectEvent, rightSource);
 
 			const spy = vi.fn();
-			const [disposeMerged] = mergedEvent.on(spy);
+			const [, disposeMerged] = mergedEvent.on(spy);
 
 			timeline.start();
 
@@ -294,7 +294,7 @@ describe("EffectEvent", () => {
 			const mergedEvent = new MergedEvent(timeline, effectEvent, rightSource);
 
 			const spy = vi.fn();
-			const [disposeMerged] = mergedEvent.on(spy);
+			const [, disposeMerged] = mergedEvent.on(spy);
 
 			timeline.start();
 
@@ -316,7 +316,7 @@ describe("EffectEvent", () => {
 			const mergedEvent = new MergedEvent(timeline, effectEvent, rightSource);
 
 			const spy = vi.fn();
-			const [disposeMerged] = mergedEvent.on(spy);
+			const [, disposeMerged] = mergedEvent.on(spy);
 
 			timeline.start();
 
@@ -354,14 +354,14 @@ describe("EffectEvent", () => {
 			const mergedEvent = new MergedEvent(timeline, effectEvent, rightSource);
 
 			// Create another EffectEvent from MergedEvent
-			const [disposeChain, chainedEffect] = mergedEvent.on((merged) => {
+			const [chainedEffect, disposeChain] = mergedEvent.on((merged) => {
 				if (merged.type === "left") return `Left: ${merged.value}`;
 				if (merged.type === "right") return `Right: ${merged.value}`;
 				return `Both: ${merged.left} & ${merged.right}`;
 			});
 
 			const spy = vi.fn();
-			const [disposeChainedSpy] = chainedEffect.on(spy);
+			const [, disposeChainedSpy] = chainedEffect.on(spy);
 
 			timeline.start();
 

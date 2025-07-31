@@ -61,7 +61,7 @@ describe("DynamicEvent", () => {
 
 	it("should not receive events after unsubscribing", () => {
 		const callback = vi.fn();
-		const [unsubscribe] = dynamicEvent.on(callback);
+		const [, unsubscribe] = dynamicEvent.on(callback);
 
 		timeline.start();
 

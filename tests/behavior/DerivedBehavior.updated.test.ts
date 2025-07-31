@@ -23,7 +23,7 @@ describe("DerivedBehavior - updated event", () => {
 
 		// Set up a spy to track the updated event
 		const updateSpy = vi.fn();
-		const [unsubscribe] = derived.updated.on(updateSpy);
+		const [, unsubscribe] = derived.updated.on(updateSpy);
 
 		timeline.start();
 
@@ -74,7 +74,7 @@ describe("DerivedBehavior - updated event", () => {
 
 		// Add an effect to the updated event - this should trigger activate()
 		const updateSpy = vi.fn();
-		const [unsubscribe] = derived.updated.on(updateSpy);
+		const [, unsubscribe] = derived.updated.on(updateSpy);
 
 		// After adding the effect, dependencies should be tracked due to activate() call
 		expect(derived.dependencies).toBeDefined();
@@ -177,7 +177,7 @@ describe("DerivedBehavior - updated event", () => {
 
 		// Add both effect and writeOn
 		const updateSpy = vi.fn();
-		const [unsubscribeEffect] = derived.updated.on(updateSpy);
+		const [, unsubscribeEffect] = derived.updated.on(updateSpy);
 
 		timeline.start();
 
@@ -226,7 +226,7 @@ describe("DerivedBehavior - updated event", () => {
 
 		// Add an effect - this should trigger activate()
 		const updateSpy = vi.fn();
-		const [unsubscribe] = derived.updated.on(updateSpy);
+		const [, unsubscribe] = derived.updated.on(updateSpy);
 
 		// activate() should have been called
 		expect(activateSpy).toHaveBeenCalledTimes(1);
@@ -259,12 +259,12 @@ describe("DerivedBehavior - updated event", () => {
 		const deactivateSpy = vi.spyOn(derived, "deactivate");
 
 		// Add first effect
-		const [unsubscribe1] = derived.updated.on(() => {});
+		const [, unsubscribe1] = derived.updated.on(() => {});
 		expect(activateSpy).toHaveBeenCalledTimes(1);
 		expect(deactivateSpy).toHaveBeenCalledTimes(0);
 
 		// Add second effect - should not trigger activate again
-		const [unsubscribe2] = derived.updated.on(() => {});
+		const [, unsubscribe2] = derived.updated.on(() => {});
 		expect(activateSpy).toHaveBeenCalledTimes(1);
 		expect(deactivateSpy).toHaveBeenCalledTimes(0);
 
