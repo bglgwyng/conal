@@ -1,8 +1,8 @@
 {
-	"name": "tsdown-starter",
+	"name": "conal",
 	"version": "0.0.0",
 	"packageManager": "pnpm@10.11.0",
-	"description": "A starter for creating a tsdown package.",
+	"description": "Classic FRP library for TypeScript",
 	"type": "module",
 	"license": "MIT",
 	"homepage": "https://github.com/bglgwyng/conal#readme",
