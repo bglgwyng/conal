@@ -3,7 +3,7 @@ import { just, type Maybe } from "../utils/Maybe";
 import { Event } from "./Event";
 
 export class MergedEvent<L, R> extends Event<These<L, R>> {
-	private maybeEmittedValue: Maybe<These<L, R>>;
+	private maybeEmittedValue: Maybe<Maybe<These<L, R>>>;
 
 	constructor(
 		timeline: Timeline,
@@ -16,7 +16,7 @@ export class MergedEvent<L, R> extends Event<These<L, R>> {
 
 	getEmittedValue() {
 		const { maybeEmittedValue } = this;
-		if (maybeEmittedValue) return maybeEmittedValue;
+		if (maybeEmittedValue) return maybeEmittedValue();
 
 		const { left, right } = this;
 		const maybeLeft = left.getEmittedValue();
@@ -34,11 +34,9 @@ export class MergedEvent<L, R> extends Event<These<L, R>> {
 			result = just({ type: "left" as const, value: maybeLeft() });
 		} else if (maybeRight) {
 			result = just({ type: "right" as const, value: maybeRight() });
-		} else {
-			return;
 		}
 
-		this.maybeEmittedValue = result;
+		this.maybeEmittedValue = just(result);
 		this.timeline.needCommit(this);
 
 		return result;
