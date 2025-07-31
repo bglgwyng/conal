@@ -1,7 +1,6 @@
 {
 	"name": "conal",
 	"version": "0.0.0",
-	"packageManager": "pnpm@10.11.0",
 	"description": "Classic FRP library for TypeScript",
 	"type": "module",
 	"license": "MIT",
