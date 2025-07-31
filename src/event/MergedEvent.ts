@@ -1,8 +1,10 @@
 import type { Timeline } from "../Timeline";
-import { just } from "../utils/Maybe";
+import { just, type Maybe } from "../utils/Maybe";
 import { Event } from "./Event";
 
 export class MergedEvent<L, R> extends Event<These<L, R>> {
+	private maybeEmittedValue: Maybe<These<L, R>>;
+
 	constructor(
 		timeline: Timeline,
 		public readonly left: Event<L>,
@@ -12,24 +14,39 @@ export class MergedEvent<L, R> extends Event<These<L, R>> {
 		super(timeline, options);
 	}
 
-	// TODO: cache
-	public getEmittedValue = () => {
+	getEmittedValue() {
+		const { maybeEmittedValue } = this;
+		if (maybeEmittedValue) return maybeEmittedValue;
+
 		const { left, right } = this;
 		const maybeLeft = left.getEmittedValue();
 		const maybeRight = right.getEmittedValue();
 
-		if (maybeLeft && maybeRight)
-			return just({
+		let result: Maybe<These<L, R>>;
+
+		if (maybeLeft && maybeRight) {
+			result = just({
 				type: "both" as const,
 				left: maybeLeft(),
 				right: maybeRight(),
 			});
-		if (maybeLeft) return just({ type: "left" as const, value: maybeLeft() });
-		if (maybeRight)
-			return just({ type: "right" as const, value: maybeRight() });
+		} else if (maybeLeft) {
+			result = just({ type: "left" as const, value: maybeLeft() });
+		} else if (maybeRight) {
+			result = just({ type: "right" as const, value: maybeRight() });
+		} else {
+			return;
+		}
 
-		return;
-	};
+		this.maybeEmittedValue = result;
+		this.timeline.needCommit(this);
+
+		return result;
+	}
+
+	commit(): void {
+		this.maybeEmittedValue = undefined;
+	}
 
 	activate(): void {
 		this.disposeLeft = this.listen(this.left);
