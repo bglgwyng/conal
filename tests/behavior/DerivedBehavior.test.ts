@@ -89,4 +89,52 @@ describe("DerivedBehavior", () => {
 		// Clean up
 		unsubscribe();
 	});
+	it("should track dependencies correctly with nested reads", () => {
+		// Create source states
+		const source1 = timeline.source<number>();
+		const source2 = timeline.source<number>();
+		const state1 = timeline.state(0, source1);
+		const state2 = timeline.state(0, source2);
+
+		// Create a derived behavior that will be used inside another derived behavior
+		const innerDerived = new DerivedBehavior(
+			timeline,
+			() => state1.read() * 2, // Double the value of state1
+		);
+		innerDerived.updated.on(() => {});
+
+		// Create an outer derived behavior that uses the inner derived behavior
+		const outerDerived = new DerivedBehavior(
+			timeline,
+			() => innerDerived.read() + state2.read(), // Use innerDerived + state2
+		);
+		outerDerived.updated.on(() => {});
+
+		timeline.start();
+
+		// Initial read - should track all dependencies
+		expect(outerDerived.read()).toBe(0); // 0*2 + 0 = 0
+
+		// Verify dependencies
+		expect(outerDerived.dependencies?.has(innerDerived)).toBe(true);
+		expect(outerDerived.dependencies?.has(state2)).toBe(true);
+		expect(innerDerived.dependencies?.has(state1)).toBe(true);
+
+		// Verify dependedBehaviors
+		expect(innerDerived.dependedBehaviors.has(outerDerived)).toBe(true);
+		expect(state1.dependedBehaviors.has(innerDerived)).toBe(true);
+		expect(state2.dependedBehaviors.has(outerDerived)).toBe(true);
+
+		// Update state1 and verify the update propagates through the chain
+		source1.emit(5);
+		timeline.flush();
+
+		expect(outerDerived.read()).toBe(10); // 5*2 + 0 = 10
+
+		// Update state2 and verify
+		source2.emit(3);
+		timeline.flush();
+
+		expect(outerDerived.read()).toBe(13); // 5*2 + 3 = 13
+	});
 });

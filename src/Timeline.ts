@@ -15,7 +15,6 @@ export class Timeline {
 	emittingSources = new Set<Source<unknown>>();
 
 	isProceeding = false;
-	isTracking = false;
 	isReadingNextValue = false;
 
 	hasStarted = false;
@@ -142,23 +141,31 @@ export class Timeline {
 		assert.fail();
 	}
 
-	reads: Set<Behavior<any>>[] = [];
+	readTrackings: Set<Behavior<any>>[] = [];
 
 	reportRead(behavior: Behavior<any>) {
-		this.reads.at(-1)?.add(behavior);
+		this.readTrackings.at(-1)?.add(behavior);
 	}
 
-	startTrackingReads() {
-		this.isTracking = true;
-		this.reads.push(new Set());
+	withTrackingRead<T>(
+		fn: () => T,
+	): readonly [value: T, dependencies: Set<Behavior<any>>] {
+		this.readTrackings.push(new Set());
 
-		return affine(() => {
-			// biome-ignore lint/style/noNonNullAssertion: pop the set that was pushed above
-			const dependencies = this.reads.pop()!;
-			if (this.reads.length === 0) this.isTracking = false;
+		let value: T;
+		let dependencies: Set<Behavior<any>>;
+		try {
+			value = fn();
+		} finally {
+			// biome-ignore lint/style/noNonNullAssertion: pop the last read trackings that was pushed above
+			dependencies = this.readTrackings.pop()!;
+		}
 
-			return dependencies;
-		});
+		return [value, dependencies] as const;
+	}
+
+	get isTracking() {
+		return this.readTrackings.length > 0;
 	}
 
 	withReadingNextValue<U>(fn: () => U): U {

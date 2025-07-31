@@ -27,7 +27,7 @@ export class DerivedBehavior<T> extends Behavior<T> {
 		if (lastRead?.at === timeline.timestamp) return lastRead.value;
 
 		if (this.isActive) {
-			const [value, dependencies] = this.withTrackingReads(this.fn);
+			const [value, dependencies] = this.timeline.withTrackingRead(this.fn);
 			this.lastRead = { value, at: timeline.timestamp, dependencies };
 
 			for (const dependency of dependencies) {
@@ -44,12 +44,13 @@ export class DerivedBehavior<T> extends Behavior<T> {
 	}
 
 	readNextValue() {
-		assert(this.timeline.isProceeding);
+		assert(this.timeline.isProceeding, "Timeline is not proceeding");
+		assert(this.isActive, "DerivedBehavior is not active");
 
 		if (this.nextUpdate) return this.nextUpdate;
 
 		const nextValue = this.timeline.withReadingNextValue(() => {
-			const [value, dependencies] = this.withTrackingReads(this.fn);
+			const [value, dependencies] = this.timeline.withTrackingRead(this.fn);
 
 			return {
 				value,
@@ -66,21 +67,6 @@ export class DerivedBehavior<T> extends Behavior<T> {
 
 	get dependencies(): Set<Behavior<any>> | undefined {
 		return this.lastRead?.dependencies;
-	}
-
-	private withTrackingReads<U>(
-		fn: () => U,
-	): readonly [value: U, dependencies: Set<Behavior<any>>] {
-		const stopTrackingReads = this.timeline.startTrackingReads();
-		try {
-			const value = fn();
-			const dependencies = stopTrackingReads();
-			return [value, dependencies] as const;
-		} catch (error) {
-			// Clean up tracking on error
-			stopTrackingReads();
-			throw error;
-		}
 	}
 
 	commit() {
