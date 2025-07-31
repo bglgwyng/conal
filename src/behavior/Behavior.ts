@@ -1,6 +1,7 @@
 import type { Event } from "../event/Event";
 import { Node } from "../Node";
 import type { DerivedBehavior } from "./DerivedBehavior";
+import type { State } from "./State";
 
 export abstract class Behavior<T> extends Node {
 	dependedBehaviors: Set<DerivedBehavior<any>> = new Set();
@@ -14,6 +15,15 @@ export abstract class Behavior<T> extends Node {
 			: this.readCurrentValue();
 	}
 	abstract updated: Event<T>;
+
+	on<U>(fn: (value: T) => U): readonly [() => void, State<U>] {
+		const [dispose, effectfulUpdateEvent] = this.updated.on(fn);
+
+		return [
+			dispose,
+			this.timeline.state(fn(this.readCurrentValue()), effectfulUpdateEvent),
+		];
+	}
 
 	abstract readCurrentValue(): T;
 	abstract readNextValue(): { value: T; isUpdated: boolean };
