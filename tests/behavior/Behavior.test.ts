@@ -140,6 +140,31 @@ describe("Behavior.on", () => {
 		dispose3();
 	});
 
+	it("should handle transformation that throws error gracefully", () => {
+		const source = timeline.source<number>();
+		const state = timeline.state(1, source);
+
+		// Transformation that throws for certain values
+		const [dispose, transformedState] = state.on((value: number) => {
+			if (value === 0) throw new Error("Division by zero");
+			return 10 / value;
+		});
+
+		expect(transformedState.read()).toBe(10); // 10 / 1
+
+		timeline.start();
+
+		source.emit(2);
+		timeline.flush();
+		expect(transformedState.read()).toBe(5); // 10 / 2
+
+		source.emit(0);
+		timeline.flush();
+		expect(transformedState.read()).toBe(5);
+
+		dispose();
+	});
+
 	it("should maintain referential integrity of returned state", () => {
 		const source = timeline.source<number>();
 		const state = timeline.state(42, source);

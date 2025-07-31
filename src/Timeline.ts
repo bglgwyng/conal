@@ -6,8 +6,8 @@ import type { Event } from "./event/Event";
 import { Never } from "./event/Never";
 import { Source } from "./event/Source";
 import type { Node } from "./Node";
-import { affine } from "./utils/affine";
 import { DedupQueue } from "./utils/DedupQueue";
+import type { Maybe } from "./utils/Maybe";
 
 export class Timeline {
 	timestamp = 0;
@@ -68,7 +68,13 @@ export class Timeline {
 
 				processedEvents.add(event);
 
-				const maybeValue = event.takeEmittedValue();
+				let maybeValue: Maybe<unknown>;
+				try {
+					maybeValue = event.takeEmittedValue();
+				} catch (ex) {
+					console.error("Event failed", ex);
+					continue;
+				}
 				if (!maybeValue) continue;
 
 				const value = maybeValue();
