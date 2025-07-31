@@ -1,3 +1,4 @@
+import assert from "assert";
 import { just, type Maybe } from "../utils/Maybe";
 import { Event } from "./Event";
 
@@ -6,6 +7,9 @@ export class Source<T> extends Event<T> {
 
 	emit(value: T) {
 		const { timeline } = this;
+		assert(timeline.hasStarted, "Timeline has not started");
+		assert(!timeline.isProceeding, "Timeline is proceeding");
+
 		if (this.maybeLastEmitedValue) {
 			// TODO: warn
 			timeline.flush();
