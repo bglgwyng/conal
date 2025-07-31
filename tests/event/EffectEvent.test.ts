@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { State } from "../../src/behavior/State";
 import { DerivedEvent } from "../../src/event/DerivedEvent";
 import type { EffectEvent } from "../../src/event/Event";
 import { MergedEvent } from "../../src/event/MergedEvent";
@@ -158,6 +159,80 @@ describe("EffectEvent", () => {
 			expect(spy).toHaveBeenCalledWith(20);
 
 			disposeChain();
+		});
+
+		it("should allow creating new state and source within on callback", () => {
+			const createdSources: Array<{ value: number; source: Source<string> }> =
+				[];
+			const createdStates: Array<{
+				initialValue: string;
+				state: State<string>;
+			}> = [];
+			const allCallbacks: Array<() => void> = [];
+
+			// Create an effect that dynamically creates new sources and states
+			const [, disposeEffect] = effectEvent.on((transformedValue) => {
+				// Create a new source within the callback
+				const newSource = timeline.source<string>();
+				createdSources.push({ value: transformedValue, source: newSource });
+
+				// Create a new state within the callback
+				const initialStateValue = `State for ${transformedValue}`;
+				const newState = timeline.state(initialStateValue, newSource);
+				createdStates.push({
+					initialValue: initialStateValue,
+					state: newState,
+				});
+
+				// Set up a callback on the newly created source
+				const [, disposeNewCallback] = newSource.on((stringValue) => {
+					// This callback should be able to access the new state
+					expect(newState.read()).toBe(stringValue);
+				});
+				allCallbacks.push(disposeNewCallback);
+			});
+
+			timeline.start();
+
+			// Trigger the effect which will create new reactive elements
+			source.emit(5); // effect transforms to 10
+			timeline.flush();
+
+			// Verify that new source and state were created
+			expect(createdSources).toHaveLength(1);
+			expect(createdStates).toHaveLength(1);
+			expect(createdSources[0].value).toBe(10);
+			expect(createdStates[0].initialValue).toBe("State for 10");
+			expect(createdStates[0].state.read()).toBe("State for 10");
+
+			// Test that the newly created source works
+			createdSources[0].source.emit("Hello from dynamic source!");
+			timeline.flush();
+
+			// The state should now have the emitted value
+			expect(createdStates[0].state.read()).toBe("Hello from dynamic source!");
+
+			// Trigger another effect to create more dynamic elements
+			source.emit(15); // effect transforms to 30
+			timeline.flush();
+
+			// Should have created another set
+			expect(createdSources).toHaveLength(2);
+			expect(createdStates).toHaveLength(2);
+			expect(createdSources[1].value).toBe(30);
+			expect(createdStates[1].initialValue).toBe("State for 30");
+
+			// Test that both dynamic sources work independently
+			createdSources[0].source.emit("First dynamic");
+			createdSources[1].source.emit("Second dynamic");
+			timeline.flush();
+
+			expect(createdStates[0].state.read()).toBe("First dynamic");
+			expect(createdStates[1].state.read()).toBe("Second dynamic");
+
+			// Clean up all dynamic callbacks
+			allCallbacks.forEach((dispose) => dispose());
+			disposeEffect();
 		});
 
 		afterEach(() => {
