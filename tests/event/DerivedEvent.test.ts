@@ -134,6 +134,34 @@ describe("DerivedEvent", () => {
 			expect(secondResult?.()).toBe("Number: 100");
 		});
 
+		it("should clear maybeEmittedValue in commit method", () => {
+			const transformFn = vitest.fn((n: number) => `Number: ${n}`);
+			derivedEvent = new DerivedEvent(timeline, parentEvent, transformFn);
+
+			timeline.start();
+			parentEvent.emit(42);
+
+			// First call caches the value
+			const firstResult = derivedEvent.getEmittedValue();
+			expect(firstResult?.()).toBe("Number: 42");
+			expect(transformFn).toHaveBeenCalledTimes(1);
+
+			// Verify cache exists by calling again (should not recompute)
+			const cachedResult = derivedEvent.getEmittedValue();
+			expect(cachedResult).toBe(firstResult); // Same reference
+			expect(transformFn).toHaveBeenCalledTimes(1); // Still only 1 call
+
+			// Call commit - this should clear maybeEmittedValue
+			derivedEvent.commit();
+
+			// Now getEmittedValue should recompute even with same parent value
+			// because maybeEmittedValue was cleared
+			const afterCommitResult = derivedEvent.getEmittedValue();
+			expect(afterCommitResult?.()).toBe("Number: 42"); // Same value
+			expect(afterCommitResult).not.toBe(firstResult); // Different reference
+			expect(transformFn).toHaveBeenCalledTimes(2); // Recomputed
+		});
+
 		it("should not cache when parent has no emitted value", () => {
 			const transformFn = vitest.fn((n: number) => `Number: ${n}`);
 			derivedEvent = new DerivedEvent(timeline, parentEvent, transformFn);
