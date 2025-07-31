@@ -178,14 +178,6 @@ export class Timeline {
 		}
 	}
 
-	startAdjusting() {
-		this.isRunningEffect = true;
-
-		return affine(() => {
-			this.isRunningEffect = false;
-		});
-	}
-
 	get nextTimestamp() {
 		return this.timestamp + 1;
 	}
