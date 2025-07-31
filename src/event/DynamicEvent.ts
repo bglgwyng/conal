@@ -12,8 +12,8 @@ export class DynamicEvent<T> extends Event<T> {
 		super(timeline, options);
 	}
 
-	takeEmittedValue(): Maybe<T> {
-		return this.behavior.read().takeEmittedValue();
+	getEmittedValue(): Maybe<T> {
+		return this.behavior.read().getEmittedValue();
 	}
 
 	activate(): void {

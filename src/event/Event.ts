@@ -39,7 +39,7 @@ export abstract class Event<T> extends Node {
 		);
 	}
 
-	abstract takeEmittedValue(): Maybe<T>;
+	abstract getEmittedValue(): Maybe<T>;
 
 	on<U>(fn: (value: T) => U): readonly [EffectEvent<U>, () => void] {
 		assert(this.timeline.canUpdateNetwork, "Cannot update network");
@@ -88,7 +88,7 @@ export class EffectEvent<T> extends Event<T> {
 		this.timeline.needCommit(this);
 	}
 
-	takeEmittedValue() {
+	getEmittedValue() {
 		return this.maybeLastEmitedValue;
 	}
 

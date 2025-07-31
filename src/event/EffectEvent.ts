@@ -10,7 +10,7 @@ export class EffectEvent<T> extends Event<T> {
 		this.timeline.needCommit(this);
 	}
 
-	takeEmittedValue() {
+	getEmittedValue() {
 		return this.maybeLastEmitedValue;
 	}
 

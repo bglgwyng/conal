@@ -10,7 +10,7 @@ export class UpdateEvent<T> extends Event<T> {
 		super(derivedBehavior.timeline, options);
 	}
 
-	takeEmittedValue() {
+	getEmittedValue() {
 		const { value, isUpdated } = this.derivedBehavior.readNextValue();
 		if (!isUpdated) return;
 

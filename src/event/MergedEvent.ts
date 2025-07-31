@@ -13,10 +13,10 @@ export class MergedEvent<L, R> extends Event<These<L, R>> {
 	}
 
 	// TODO: cache
-	public takeEmittedValue = () => {
+	public getEmittedValue = () => {
 		const { left, right } = this;
-		const maybeLeft = left.takeEmittedValue();
-		const maybeRight = right.takeEmittedValue();
+		const maybeLeft = left.getEmittedValue();
+		const maybeRight = right.getEmittedValue();
 
 		if (maybeLeft && maybeRight)
 			return just({

@@ -12,8 +12,8 @@ export class DerivedEvent<T, U> extends Event<T> {
 		super(timeline, options);
 	}
 
-	takeEmittedValue() {
-		const maybeEmittedValue = this.parent.takeEmittedValue();
+	getEmittedValue() {
+		const maybeEmittedValue = this.parent.getEmittedValue();
 		if (!maybeEmittedValue) return;
 
 		try {
