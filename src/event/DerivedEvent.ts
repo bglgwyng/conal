@@ -1,8 +1,11 @@
 import assert from "assert";
 import type { Timeline } from "../Timeline";
+import { just, type Maybe } from "../utils/Maybe";
 import { Event } from "./Event";
 
 export class DerivedEvent<T, U> extends Event<T> {
+	private maybeEmittedValue: Maybe<T>;
+
 	constructor(
 		timeline: Timeline,
 		public readonly parent: Event<U>,
@@ -13,17 +16,28 @@ export class DerivedEvent<T, U> extends Event<T> {
 	}
 
 	getEmittedValue() {
-		const maybeEmittedValue = this.parent.getEmittedValue();
-		if (!maybeEmittedValue) return;
+		const { maybeEmittedValue } = this;
+		if (maybeEmittedValue) return maybeEmittedValue;
+
+		const maybeParentEmittedValue = this.parent.getEmittedValue();
+		if (!maybeParentEmittedValue) return;
 
 		try {
-			const value = this.fn(maybeEmittedValue());
-			return () => value;
+			const maybeValue = just(this.fn(maybeParentEmittedValue()));
+			this.maybeEmittedValue = maybeValue;
+
+			this.timeline.needCommit(this);
+
+			return maybeValue;
 		} catch (error) {
 			if (error === Discard) return;
 
 			throw error;
 		}
+	}
+
+	commit(): void {
+		this.maybeEmittedValue = undefined;
 	}
 
 	activate() {

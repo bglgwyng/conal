@@ -86,4 +86,170 @@ describe("DerivedEvent", () => {
 		timeline.flush();
 		expect(mockCallback).toHaveBeenCalledWith("Number: 7");
 	});
+
+	describe("caching behavior", () => {
+		it("should cache emitted value and not recompute on multiple getEmittedValue calls", () => {
+			const transformFn = vitest.fn((n: number) => `Number: ${n}`);
+			derivedEvent = new DerivedEvent(timeline, parentEvent, transformFn);
+
+			timeline.start();
+
+			parentEvent.emit(42);
+
+			// First call should compute the value
+			const firstResult = derivedEvent.getEmittedValue();
+			expect(transformFn).toHaveBeenCalledTimes(1);
+			expect(firstResult?.()).toBe("Number: 42");
+
+			// Second call should use cached value, not recompute
+			const secondResult = derivedEvent.getEmittedValue();
+			expect(transformFn).toHaveBeenCalledTimes(1); // Still only called once
+			expect(secondResult?.()).toBe("Number: 42");
+
+			// Both results should be the same function reference
+			expect(firstResult).toBe(secondResult);
+		});
+
+		it("should clear cache after commit and recompute on next getEmittedValue", () => {
+			const transformFn = vitest.fn((n: number) => `Number: ${n}`);
+			derivedEvent = new DerivedEvent(timeline, parentEvent, transformFn);
+
+			timeline.start();
+			parentEvent.emit(42);
+
+			// First computation
+			const firstResult = derivedEvent.getEmittedValue();
+			expect(transformFn).toHaveBeenCalledTimes(1);
+			expect(firstResult?.()).toBe("Number: 42");
+
+			// Commit clears the cache
+			derivedEvent.commit();
+
+			// Emit new value
+			parentEvent.emit(100);
+
+			// Should recompute since cache was cleared
+			const secondResult = derivedEvent.getEmittedValue();
+			expect(transformFn).toHaveBeenCalledTimes(2); // Called twice now
+			expect(secondResult?.()).toBe("Number: 100");
+		});
+
+		it("should not cache when parent has no emitted value", () => {
+			const transformFn = vitest.fn((n: number) => `Number: ${n}`);
+			derivedEvent = new DerivedEvent(timeline, parentEvent, transformFn);
+
+			timeline.start();
+			// Don't emit anything to parent
+
+			// Should return undefined and not call transform function
+			const result = derivedEvent.getEmittedValue();
+			expect(result).toBeUndefined();
+			expect(transformFn).not.toHaveBeenCalled();
+
+			// Multiple calls should still not cache anything
+			const result2 = derivedEvent.getEmittedValue();
+			expect(result2).toBeUndefined();
+			expect(transformFn).not.toHaveBeenCalled();
+		});
+
+		it("should not cache when transformation throws Discard", () => {
+			const transformFn = vitest.fn((n: number) => {
+				if (n % 2 === 0) throw Discard;
+				return `Number: ${n}`;
+			});
+			derivedEvent = new DerivedEvent(timeline, parentEvent, transformFn);
+
+			timeline.start();
+			parentEvent.emit(42); // Even number, should be discarded
+
+			// Should return undefined and not cache
+			const result = derivedEvent.getEmittedValue();
+			expect(result).toBeUndefined();
+			expect(transformFn).toHaveBeenCalledTimes(1);
+
+			// Second call should call transform function again (no caching)
+			const result2 = derivedEvent.getEmittedValue();
+			expect(result2).toBeUndefined();
+			expect(transformFn).toHaveBeenCalledTimes(2);
+		});
+
+		it("should cache successful computation after Discard", () => {
+			const transformFn = vitest.fn((n: number) => {
+				if (n % 2 === 0) throw Discard;
+				return `Number: ${n}`;
+			});
+			derivedEvent = new DerivedEvent(timeline, parentEvent, transformFn);
+
+			timeline.start();
+
+			// First emit even number (discarded)
+			parentEvent.emit(42);
+			const discardedResult = derivedEvent.getEmittedValue();
+			expect(discardedResult).toBeUndefined();
+			expect(transformFn).toHaveBeenCalledTimes(1);
+
+			// Then emit odd number (should be cached)
+			parentEvent.emit(7);
+			const successResult1 = derivedEvent.getEmittedValue();
+			expect(successResult1?.()).toBe("Number: 7");
+			expect(transformFn).toHaveBeenCalledTimes(2);
+
+			// Second call should use cache
+			const successResult2 = derivedEvent.getEmittedValue();
+			expect(successResult2?.()).toBe("Number: 7");
+			expect(transformFn).toHaveBeenCalledTimes(2); // Still only 2 calls
+			expect(successResult1).toBe(successResult2);
+		});
+
+		it("should handle errors in transformation without caching", () => {
+			const transformFn = vitest.fn((n: number) => {
+				if (n === 42) throw new Error("Test error");
+				return `Number: ${n}`;
+			});
+			derivedEvent = new DerivedEvent(timeline, parentEvent, transformFn);
+
+			timeline.start();
+			parentEvent.emit(42);
+
+			// Should throw error and not cache
+			expect(() => derivedEvent.getEmittedValue()).toThrow("Test error");
+			expect(transformFn).toHaveBeenCalledTimes(1);
+
+			// Second call should throw again (no caching of errors)
+			expect(() => derivedEvent.getEmittedValue()).toThrow("Test error");
+			expect(transformFn).toHaveBeenCalledTimes(2);
+		});
+
+		it("should cache independently for chained DerivedEvents", () => {
+			const transformFn1 = vitest.fn((n: number) => `Number: ${n}`);
+			const transformFn2 = vitest.fn((s: string) => `${s}!`);
+
+			const derived1 = new DerivedEvent(timeline, parentEvent, transformFn1);
+			const derived2 = new DerivedEvent(timeline, derived1, transformFn2);
+
+			timeline.start();
+
+			parentEvent.emit(42);
+
+			// First call computes both levels
+			const result1 = derived2.getEmittedValue();
+			expect(result1?.()).toBe("Number: 42!");
+			expect(transformFn1).toHaveBeenCalledTimes(1);
+			expect(transformFn2).toHaveBeenCalledTimes(1);
+
+			// Second call should use both caches
+			const result2 = derived2.getEmittedValue();
+			expect(result2?.()).toBe("Number: 42!");
+			expect(transformFn1).toHaveBeenCalledTimes(1); // Still cached
+			expect(transformFn2).toHaveBeenCalledTimes(1); // Still cached
+			expect(result1).toBe(result2);
+
+			// Accessing intermediate result should also be cached
+			const intermediate1 = derived1.getEmittedValue();
+			const intermediate2 = derived1.getEmittedValue();
+			expect(intermediate1?.()).toBe("Number: 42");
+			expect(intermediate1).toBe(intermediate2);
+			expect(transformFn1).toHaveBeenCalledTimes(1); // Still cached
+		});
+	});
 });
