@@ -10,25 +10,44 @@ import { DedupQueue } from "./utils/DedupQueue";
 import type { Maybe } from "./utils/Maybe";
 
 export class Timeline {
-	timestamp = 0;
+	#timestamp = 0;
+	get timestamp() {
+		return this.#timestamp;
+	}
 
-	emittingSources = new Set<Source<unknown>>();
+	get nextTimestamp() {
+		return this.#timestamp + 1;
+	}
 
-	isProceeding = false;
-	isReadingNextValue = false;
+	#isProceeding = false;
+	get isProceeding() {
+		return this.#isProceeding;
+	}
 
-	hasStarted = false;
-	isRunningEffect = true;
+	#isReadingNextValue = false;
+	get isReadingNextValue() {
+		return this.#isReadingNextValue;
+	}
+
+	#hasStarted = false;
+	get hasStarted() {
+		return this.#hasStarted;
+	}
+
+	#isRunningEffect = true;
+	get isRunningEffect() {
+		return this.#isRunningEffect;
+	}
 
 	start() {
-		assert(!this.hasStarted, "Timeline has already started");
+		assert(!this.#hasStarted, "Timeline has already started");
 
-		this.hasStarted = true;
-		this.isRunningEffect = false;
+		this.#hasStarted = true;
+		this.#isRunningEffect = false;
 	}
 
 	get canUpdateNetwork() {
-		return this.isRunningEffect || !this.hasStarted;
+		return this.#isRunningEffect || !this.#hasStarted;
 	}
 
 	state<T>(initialValue: T, updated: Event<T>): State<T> {
@@ -39,26 +58,24 @@ export class Timeline {
 		return new Source(this);
 	}
 
-	markEmitting(event: Source<unknown>) {
-		this.emittingSources.add(event);
-	}
+	never = new Never<any>(this);
 
 	flush() {
-		assert(this.hasStarted, "Timeline has not started");
-		assert(!this.isProceeding, "Timeline is already proceeding");
+		assert(this.#hasStarted, "Timeline has not started");
+		assert(!this.#isProceeding, "Timeline is already proceeding");
 
-		this.isProceeding = true;
+		this.#isProceeding = true;
 
 		const eventQueue = new DedupQueue<Event<unknown>>();
 		const processedEvents: Set<Event<unknown>> = new Set();
 
 		try {
-			for (const source of this.emittingSources) {
+			for (const source of this.#emittingSources) {
 				if (!source.isActive) continue;
 
 				eventQueue.add(source);
 			}
-			this.emittingSources.clear();
+			this.#emittingSources.clear();
 
 			while (eventQueue.size > 0) {
 				// biome-ignore lint/style/noNonNullAssertion: size checked
@@ -95,7 +112,7 @@ export class Timeline {
 
 				for (const [runEffect, effectEvent] of event.effects) {
 					try {
-						this.isRunningEffect = true;
+						this.#isRunningEffect = true;
 						const result = runEffect(value);
 
 						if (!effectEvent.isActive) continue;
@@ -105,20 +122,20 @@ export class Timeline {
 					} catch (ex) {
 						console.warn("Effect failed", ex);
 					} finally {
-						this.isRunningEffect = false;
+						this.#isRunningEffect = false;
 					}
 				}
 			}
 
-			for (const node of this.toCommitNodes) {
+			for (const node of this.#toCommitNodes) {
 				node.commit();
 			}
-			this.toCommitNodes.clear();
+			this.#toCommitNodes.clear();
 		} finally {
-			this.isProceeding = false;
+			this.#isProceeding = false;
 		}
 
-		this.timestamp = this.nextTimestamp;
+		this.#timestamp = this.nextTimestamp;
 
 		function pushEventToQueue(event: Event<unknown>) {
 			if (eventQueue.has(event)) return;
@@ -139,24 +156,25 @@ export class Timeline {
 		}
 	}
 
-	beforeFlush() {
-		assert.fail();
+	#emittingSources = new Set<Source<unknown>>();
+
+	// @internal
+	markEmitting(event: Source<unknown>) {
+		this.#emittingSources.add(event);
 	}
 
-	afterFlush() {
-		assert.fail();
-	}
+	#readTrackings: Set<Behavior<any>>[] = [];
 
-	readTrackings: Set<Behavior<any>>[] = [];
-
+	// @internal
 	reportRead(behavior: Behavior<any>) {
-		this.readTrackings.at(-1)?.add(behavior);
+		this.#readTrackings.at(-1)?.add(behavior);
 	}
 
+	// @internal
 	withTrackingRead<T>(
 		fn: () => T,
 	): readonly [value: T, dependencies: Set<Behavior<any>>] {
-		this.readTrackings.push(new Set());
+		this.#readTrackings.push(new Set());
 
 		let value: T;
 		let dependencies: Set<Behavior<any>>;
@@ -164,34 +182,31 @@ export class Timeline {
 			value = fn();
 		} finally {
 			// biome-ignore lint/style/noNonNullAssertion: pop the last read trackings that was pushed above
-			dependencies = this.readTrackings.pop()!;
+			dependencies = this.#readTrackings.pop()!;
 		}
 
 		return [value, dependencies] as const;
 	}
 
 	get isTracking() {
-		return this.readTrackings.length > 0;
+		return this.#readTrackings.length > 0;
 	}
 
+	// @internal
 	withReadingNextValue<U>(fn: () => U): U {
-		this.isReadingNextValue = true;
+		this.#isReadingNextValue = true;
 
 		try {
 			return fn();
 		} finally {
-			this.isReadingNextValue = false;
+			this.#isReadingNextValue = false;
 		}
 	}
 
-	get nextTimestamp() {
-		return this.timestamp + 1;
-	}
+	#toCommitNodes: Set<Node> = new Set();
 
-	toCommitNodes: Set<Node> = new Set();
+	// @internal
 	needCommit(node: Node) {
-		this.toCommitNodes.add(node);
+		this.#toCommitNodes.add(node);
 	}
-
-	never = new Never<any>(this);
 }
