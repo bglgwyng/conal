@@ -8,12 +8,12 @@ export class Source<T> extends Event<T> {
 		const { timeline } = this;
 		if (this.maybeLastEmitedValue) {
 			// TODO: warn
-			this.timeline.flush();
+			timeline.flush();
 		}
 		this.maybeLastEmitedValue = just(value);
 
 		timeline.markEmitting(this as Source<unknown>);
-		this.timeline.needCommit(this);
+		timeline.needCommit(this);
 	}
 
 	getEmittedValue() {
