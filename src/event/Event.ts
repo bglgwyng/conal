@@ -16,21 +16,6 @@ export abstract class Event<T> extends Node {
 		this.debugLabel = _options?.debugLabel;
 	}
 
-	listen(event: Event<any>): () => void {
-		assert(this.isActive, "Event is not active");
-
-		const { isActive } = event;
-		event.childEvents.add(this);
-
-		if (!isActive) event.activate();
-
-		return () => {
-			event.childEvents.delete(this);
-
-			if (event.isActive) event.deactivate();
-		};
-	}
-
 	get isActive() {
 		return (
 			this.effects.length > 0 ||
@@ -38,8 +23,6 @@ export abstract class Event<T> extends Node {
 			this.childEvents.size > 0
 		);
 	}
-
-	abstract getEmittedValue(): Maybe<T>;
 
 	on<U>(fn: (value: T) => U): readonly [EffectEvent<U>, () => void] {
 		assert(this.timeline.canUpdateNetwork, "Cannot update network");
@@ -62,6 +45,26 @@ export abstract class Event<T> extends Node {
 		];
 	}
 
+	// @internal
+	listen(event: Event<any>): () => void {
+		assert(this.isActive, "Event is not active");
+
+		const { isActive } = event;
+		event.childEvents.add(this);
+
+		if (!isActive) event.activate();
+
+		return () => {
+			event.childEvents.delete(this);
+
+			if (event.isActive) event.deactivate();
+		};
+	}
+
+	// @internal
+	abstract getEmittedValue(): Maybe<T>;
+
+	// @internal
 	writeOn(state: State<T>) {
 		const { isActive } = this;
 		this.dependenedStates.add(state);
