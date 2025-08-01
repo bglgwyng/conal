@@ -1,5 +1,5 @@
+import { just } from "../../utils/Maybe";
 import type { DerivedBehavior } from "../behavior/DerivedBehavior";
-import { just } from "../utils/Maybe";
 import { Event } from "./Event";
 
 export class UpdateEvent<T> extends Event<T> {

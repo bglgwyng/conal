@@ -1,8 +1,8 @@
 import assert from "assert";
+import type { Timeline } from "../../Timeline";
+import { just, type Maybe } from "../../utils/Maybe";
 import type { State } from "../behavior/State";
 import { Node } from "../Node";
-import type { Timeline } from "../Timeline";
-import { just, type Maybe } from "../utils/Maybe";
 
 export abstract class Event<T> extends Node {
 	debugLabel?: string;

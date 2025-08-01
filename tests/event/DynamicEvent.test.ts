@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { State } from "../../src/behavior/State";
-import { DynamicEvent } from "../../src/event/DynamicEvent";
-import type { Source } from "../../src/event/Source";
+import { DynamicEvent } from "../../src/core/event/DynamicEvent";
+import type { Source } from "../../src/core/event/Source";
 import { source, state } from "../../src/factory";
 import { Timeline } from "../../src/Timeline";
 

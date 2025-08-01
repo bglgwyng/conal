@@ -1,6 +1,6 @@
+import type { Timeline } from "../../Timeline";
+import { just, type Maybe } from "../../utils/Maybe";
 import type { Event } from "../event/Event";
-import type { Timeline } from "../Timeline";
-import { just, type Maybe } from "../utils/Maybe";
 import { Behavior } from "./Behavior";
 
 export class State<T> extends Behavior<T> {

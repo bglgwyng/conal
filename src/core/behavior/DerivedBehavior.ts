@@ -1,7 +1,7 @@
 import assert from "assert";
+import type { Timeline } from "../../Timeline";
 import type { Event } from "../event/Event";
 import { UpdateEvent } from "../event/UpdateEvent";
-import type { Timeline } from "../Timeline";
 import { Behavior } from "./Behavior";
 
 export class DerivedBehavior<T> extends Behavior<T> {

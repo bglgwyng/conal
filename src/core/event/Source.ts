@@ -1,5 +1,5 @@
 import assert from "assert";
-import { just, type Maybe } from "../utils/Maybe";
+import { just, type Maybe } from "../../utils/Maybe";
 import { Event } from "./Event";
 
 export class Source<T> extends Event<T> {

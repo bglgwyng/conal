@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { State } from "../../src/behavior/State";
-import { DerivedEvent } from "../../src/event/DerivedEvent";
-import type { EffectEvent } from "../../src/event/Event";
-import type { Source } from "../../src/event/Source";
+import { DerivedEvent } from "../../src/core/event/DerivedEvent";
+import type { EffectEvent } from "../../src/core/event/Event";
+import type { Source } from "../../src/core/event/Source";
 import { merge, source } from "../../src/factory";
 import { Timeline } from "../../src/Timeline";
 

@@ -1,6 +1,6 @@
 import assert from "assert";
-import type { Timeline } from "../Timeline";
-import { just, type Maybe } from "../utils/Maybe";
+import type { Timeline } from "../../Timeline";
+import { just, type Maybe } from "../../utils/Maybe";
 import { Event } from "./Event";
 
 export class DerivedEvent<T, U> extends Event<T> {

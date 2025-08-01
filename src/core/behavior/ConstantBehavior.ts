@@ -1,5 +1,5 @@
+import type { Timeline } from "../../Timeline";
 import type { Event } from "../event/Event";
-import type { Timeline } from "../Timeline";
 import { Behavior } from "./Behavior";
 
 export class ConstantBehavior<T> extends Behavior<T> {

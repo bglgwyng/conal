@@ -1,8 +1,8 @@
 import assert from "assert";
-import { State } from "./behavior/State";
-import type { Event } from "./event/Event";
-import { MergedEvent } from "./event/MergedEvent";
-import { Source } from "./event/Source";
+import { State } from "./core/behavior/State";
+import type { Event } from "./core/event/Event";
+import { MergedEvent } from "./core/event/MergedEvent";
+import { Source } from "./core/event/Source";
 import { Timeline } from "./Timeline";
 
 export function state<T>(initialValue: T, updated: Event<T>): State<T> {

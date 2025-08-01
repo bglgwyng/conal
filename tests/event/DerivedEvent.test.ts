@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vitest } from "vitest";
-import { DerivedEvent, Discard } from "../../src/event/DerivedEvent";
-import type { Source } from "../../src/event/Source";
+import { DerivedEvent, Discard } from "../../src/core/event/DerivedEvent";
+import type { Source } from "../../src/core/event/Source";
 import { source } from "../../src/factory";
 import { Timeline } from "../../src/Timeline";
 

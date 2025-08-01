@@ -1,5 +1,5 @@
 import { describe, expect, it, vitest } from "vitest";
-import { ConstantBehavior } from "../../src/behavior/ConstantBehavior";
+import { ConstantBehavior } from "../../src/core/behavior/ConstantBehavior";
 import { Timeline } from "../../src/Timeline";
 
 describe("ConstantBehavior", () => {

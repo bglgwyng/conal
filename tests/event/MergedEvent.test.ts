@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vitest } from "vitest";
-import type { MergedEvent } from "../../src/event/MergedEvent";
-import { Source } from "../../src/event/Source";
+import type { MergedEvent } from "../../src/core/event/MergedEvent";
+import { Source } from "../../src/core/event/Source";
 import { merge, source } from "../../src/factory";
 import { Timeline } from "../../src/Timeline";
 
