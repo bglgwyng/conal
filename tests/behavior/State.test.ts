@@ -15,7 +15,7 @@ describe("State", () => {
 		const state = timeline.state(0, source);
 		expect(state.read()).toBe(0);
 
-		timeline.start();
+		timeline.unsafeStart();
 
 		source.emit(1);
 		timeline.flush();
@@ -33,7 +33,7 @@ describe("State", () => {
 			return { current: state.read(), next: value };
 		}).on(updateSpy);
 
-		timeline.start();
+		timeline.unsafeStart();
 
 		source.emit(20);
 		timeline.flush();

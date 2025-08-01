@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vitest } from "vitest";
 import { DerivedEvent, Discard } from "../../src/event/DerivedEvent";
-import { Source } from "../../src/event/Source";
+import type { Source } from "../../src/event/Source";
+import { source } from "../../src/factory";
 import { Timeline } from "../../src/Timeline";
 
 describe("DerivedEvent", () => {
@@ -10,7 +11,9 @@ describe("DerivedEvent", () => {
 
 	beforeEach(() => {
 		timeline = new Timeline();
-		parentEvent = new Source<number>(timeline);
+		timeline.unsafeActivate();
+
+		parentEvent = source<number>();
 	});
 
 	it("should transform parent event values using the provided function", () => {
@@ -20,7 +23,7 @@ describe("DerivedEvent", () => {
 		const mockCallback = vitest.fn();
 		derivedEvent.on(mockCallback);
 
-		timeline.start();
+		timeline.unsafeStart();
 
 		parentEvent.emit(42);
 
@@ -36,7 +39,7 @@ describe("DerivedEvent", () => {
 		const mockCallback = vitest.fn();
 		derivedEvent.on(mockCallback);
 
-		timeline.start();
+		timeline.unsafeStart();
 
 		parentEvent.emit(42);
 
@@ -55,7 +58,7 @@ describe("DerivedEvent", () => {
 		const mockCallback = vitest.fn();
 		derived2.on(mockCallback);
 
-		timeline.start();
+		timeline.unsafeStart();
 
 		parentEvent.emit(42);
 		timeline.flush();
@@ -74,7 +77,7 @@ describe("DerivedEvent", () => {
 		const mockCallback = vitest.fn();
 		derivedEvent.on(mockCallback);
 
-		timeline.start();
+		timeline.unsafeStart();
 
 		// This should be discarded (even number)
 		parentEvent.emit(42);
@@ -92,7 +95,7 @@ describe("DerivedEvent", () => {
 			const transformFn = vitest.fn((n: number) => `Number: ${n}`);
 			derivedEvent = new DerivedEvent(timeline, parentEvent, transformFn);
 
-			timeline.start();
+			timeline.unsafeStart();
 
 			parentEvent.emit(42);
 
@@ -114,7 +117,7 @@ describe("DerivedEvent", () => {
 			const transformFn = vitest.fn((n: number) => `Number: ${n}`);
 			derivedEvent = new DerivedEvent(timeline, parentEvent, transformFn);
 
-			timeline.start();
+			timeline.unsafeStart();
 			parentEvent.emit(42);
 
 			// First computation
@@ -138,7 +141,7 @@ describe("DerivedEvent", () => {
 			const transformFn = vitest.fn((n: number) => `Number: ${n}`);
 			derivedEvent = new DerivedEvent(timeline, parentEvent, transformFn);
 
-			timeline.start();
+			timeline.unsafeStart();
 			parentEvent.emit(42);
 
 			// First call caches the value
@@ -166,7 +169,7 @@ describe("DerivedEvent", () => {
 			const transformFn = vitest.fn((n: number) => `Number: ${n}`);
 			derivedEvent = new DerivedEvent(timeline, parentEvent, transformFn);
 
-			timeline.start();
+			timeline.unsafeStart();
 			// Don't emit anything to parent
 
 			// Should return undefined and not call transform function
@@ -187,7 +190,7 @@ describe("DerivedEvent", () => {
 			});
 			derivedEvent = new DerivedEvent(timeline, parentEvent, transformFn);
 
-			timeline.start();
+			timeline.unsafeStart();
 			parentEvent.emit(42); // Even number, should be discarded
 
 			// Should return undefined and not cache
@@ -208,7 +211,7 @@ describe("DerivedEvent", () => {
 			});
 			derivedEvent = new DerivedEvent(timeline, parentEvent, transformFn);
 
-			timeline.start();
+			timeline.unsafeStart();
 
 			// First emit even number (discarded)
 			parentEvent.emit(42);
@@ -236,7 +239,7 @@ describe("DerivedEvent", () => {
 			});
 			derivedEvent = new DerivedEvent(timeline, parentEvent, transformFn);
 
-			timeline.start();
+			timeline.unsafeStart();
 			parentEvent.emit(42);
 
 			// Should throw error and not cache
@@ -255,7 +258,7 @@ describe("DerivedEvent", () => {
 			const derived1 = new DerivedEvent(timeline, parentEvent, transformFn1);
 			const derived2 = new DerivedEvent(timeline, derived1, transformFn2);
 
-			timeline.start();
+			timeline.unsafeStart();
 
 			parentEvent.emit(42);
 

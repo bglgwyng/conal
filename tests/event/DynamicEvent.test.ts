@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { State } from "../../src/behavior/State";
+import type { State } from "../../src/behavior/State";
 import { DynamicEvent } from "../../src/event/DynamicEvent";
-import { Source } from "../../src/event/Source";
+import type { Source } from "../../src/event/Source";
+import { source, state } from "../../src/factory";
 import { Timeline } from "../../src/Timeline";
 
 describe("DynamicEvent", () => {
@@ -14,16 +15,17 @@ describe("DynamicEvent", () => {
 
 	beforeEach(() => {
 		timeline = new Timeline();
+		timeline.unsafeActivate();
 
 		// Create two source events for testing
-		source1 = new Source<number>(timeline);
-		source2 = new Source<number>(timeline);
+		source1 = source();
+		source2 = source();
 
 		// Create a switch event to change between sources
-		switchEvent = new Source<Source<number>>(timeline);
+		switchEvent = source<Source<number>>();
 
 		// Create a State behavior that holds the current source
-		behavior = new State<Source<number>>(timeline, source1, switchEvent);
+		behavior = state<Source<number>>(source1, switchEvent);
 
 		// Create the DynamicEvent that will switch between sources
 		dynamicEvent = new DynamicEvent(timeline, behavior);
@@ -33,7 +35,7 @@ describe("DynamicEvent", () => {
 		const callback = vi.fn();
 		dynamicEvent.on(callback);
 
-		timeline.start();
+		timeline.unsafeStart();
 
 		// Emit from the first source
 		source1.emit(42);
@@ -46,7 +48,7 @@ describe("DynamicEvent", () => {
 		const callback = vi.fn();
 		dynamicEvent.on(callback);
 
-		timeline.start();
+		timeline.unsafeStart();
 
 		// Switch to the second source
 		switchEvent.emit(source2);
@@ -63,7 +65,7 @@ describe("DynamicEvent", () => {
 		const callback = vi.fn();
 		const [, unsubscribe] = dynamicEvent.on(callback);
 
-		timeline.start();
+		timeline.unsafeStart();
 
 		// Emit and verify
 		source1.emit(1);
@@ -83,7 +85,7 @@ describe("DynamicEvent", () => {
 		const callback = vi.fn();
 		dynamicEvent.on(callback);
 
-		timeline.start();
+		timeline.unsafeStart();
 
 		// Switch to second source
 		source1.emit(1);
@@ -98,7 +100,7 @@ describe("DynamicEvent", () => {
 		const callback = vi.fn();
 		dynamicEvent.on(callback);
 
-		timeline.start();
+		timeline.unsafeStart();
 
 		// Switch to second source
 		switchEvent.emit(source2);
