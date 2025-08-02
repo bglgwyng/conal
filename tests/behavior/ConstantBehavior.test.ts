@@ -34,7 +34,7 @@ describe("ConstantBehavior", () => {
 		timeline.start();
 
 		// Advance timeline to see if any updates occur
-		timeline.flush();
+		timeline.proceed();
 
 		// The callback should never be called
 		expect(mockCallback).not.toHaveBeenCalled();

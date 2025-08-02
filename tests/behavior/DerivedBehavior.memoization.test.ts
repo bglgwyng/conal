@@ -29,13 +29,13 @@ describe("DerivedBehavior - Memoization", () => {
 		expect(computeFn).toHaveBeenCalledTimes(1);
 
 		// Change timestamp and read again - should recompute
-		timeline.flush();
+		timeline.proceed();
 		expect(derived.read()).toBe(0);
 		expect(computeFn).toHaveBeenCalledTimes(2);
 
 		// // Update state and verify recomputation
 		source.emit(5);
-		timeline.flush();
+		timeline.proceed();
 
 		expect(derived.read()).toBe(10);
 		expect(computeFn).toHaveBeenCalledTimes(3);

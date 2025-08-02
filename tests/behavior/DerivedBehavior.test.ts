@@ -27,7 +27,7 @@ describe("DerivedBehavior", () => {
 		// Set initial state value
 		source1.emit(5); // This will update both state1 and state2
 		source2.emit(10);
-		timeline.flush();
+		timeline.proceed();
 
 		// Check if derived value is computed correctly
 		expect(derived.read()).toBe(15);
@@ -127,13 +127,13 @@ describe("DerivedBehavior", () => {
 
 		// Update state1 and verify the update propagates through the chain
 		source1.emit(5);
-		timeline.flush();
+		timeline.proceed();
 
 		expect(outerDerived.read()).toBe(10); // 5*2 + 0 = 10
 
 		// Update state2 and verify
 		source2.emit(3);
-		timeline.flush();
+		timeline.proceed();
 
 		expect(outerDerived.read()).toBe(13); // 5*2 + 3 = 13
 	});

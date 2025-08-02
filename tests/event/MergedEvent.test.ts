@@ -26,7 +26,7 @@ describe("MergedEvent", () => {
 		// Emit left value first
 		leftSource.emit("hello");
 		rightSource.emit(42);
-		timeline.flush();
+		timeline.proceed();
 
 		expect(mockCallback).toHaveBeenCalledWith({
 			type: "both",
@@ -45,7 +45,7 @@ describe("MergedEvent", () => {
 
 		// Emit only left value
 		leftSource.emit("left only");
-		timeline.flush();
+		timeline.proceed();
 
 		expect(mockCallback).toHaveBeenCalledWith({
 			type: "left",
@@ -63,7 +63,7 @@ describe("MergedEvent", () => {
 
 		// Emit only right value
 		rightSource.emit(100);
-		timeline.flush();
+		timeline.proceed();
 
 		expect(mockCallback).toHaveBeenCalledWith({
 			type: "right",
@@ -81,7 +81,7 @@ describe("MergedEvent", () => {
 
 		leftSource.emit("first");
 		rightSource.emit(1);
-		timeline.flush();
+		timeline.proceed();
 
 		expect(mockCallback).toHaveBeenLastCalledWith({
 			type: "both",
@@ -100,17 +100,17 @@ describe("MergedEvent", () => {
 
 		// Emit in interleaved order
 		leftSource.emit("a");
-		timeline.flush();
+		timeline.proceed();
 
 		rightSource.emit(1);
-		timeline.flush();
+		timeline.proceed();
 
 		leftSource.emit("b");
-		timeline.flush();
+		timeline.proceed();
 
 		leftSource.emit("c");
 		rightSource.emit(2);
-		timeline.flush();
+		timeline.proceed();
 
 		expect(results).toEqual([
 			{ type: "left", value: "a" },

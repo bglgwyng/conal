@@ -18,7 +18,7 @@ describe("State", () => {
 		timeline.start();
 
 		source.emit(1);
-		timeline.flush();
+		timeline.proceed();
 
 		expect(state.read()).toBe(1);
 	});
@@ -36,7 +36,7 @@ describe("State", () => {
 		timeline.start();
 
 		source.emit(20);
-		timeline.flush();
+		timeline.proceed();
 
 		expect(updateSpy).toHaveBeenCalledExactlyOnceWith({
 			current: 10,

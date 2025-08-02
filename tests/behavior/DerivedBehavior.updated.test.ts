@@ -33,7 +33,7 @@ describe("DerivedBehavior - updated event", () => {
 
 		// Update first state and flush
 		source1.emit(5);
-		timeline.flush();
+		timeline.proceed();
 
 		// Should trigger update with new value (5 + 0)
 		expect(updateSpy).toHaveBeenCalledTimes(1);
@@ -41,7 +41,7 @@ describe("DerivedBehavior - updated event", () => {
 
 		// Update second state and flush
 		source2.emit(3);
-		timeline.flush();
+		timeline.proceed();
 
 		// Should trigger update with new value (5 + 3)
 		expect(updateSpy).toHaveBeenCalledTimes(2);
@@ -52,7 +52,7 @@ describe("DerivedBehavior - updated event", () => {
 
 		// Update again after unsubscribing
 		source1.emit(10);
-		timeline.flush();
+		timeline.proceed();
 
 		// Should not trigger update after unsubscribe
 		expect(updateSpy).toHaveBeenCalledTimes(2);
@@ -90,7 +90,7 @@ describe("DerivedBehavior - updated event", () => {
 
 		// Update one of the sources
 		source1.emit(15);
-		timeline.flush();
+		timeline.proceed();
 
 		// Should trigger update because dependencies were properly tracked
 		expect(updateSpy).toHaveBeenCalledTimes(1);
@@ -114,7 +114,7 @@ describe("DerivedBehavior - updated event", () => {
 
 		// Update the source
 		source1.emit(20);
-		timeline.flush();
+		timeline.proceed();
 
 		// Still no dependencies tracked since no effect was added
 		expect(derived.dependencies).toBeUndefined();
@@ -153,14 +153,14 @@ describe("DerivedBehavior - updated event", () => {
 
 		// Update one of the sources
 		source1.emit(25);
-		timeline.flush();
+		timeline.proceed();
 
 		// Target state should be updated with the new derived value
 		expect(targetState.read()).toBe(45); // 25 + 20
 
 		// Update the other source
 		source2.emit(30);
-		timeline.flush();
+		timeline.proceed();
 
 		// Target state should be updated again
 		expect(targetState.read()).toBe(55); // 25 + 30
@@ -193,7 +193,7 @@ describe("DerivedBehavior - updated event", () => {
 
 		// Update source
 		source.emit(10);
-		timeline.flush();
+		timeline.proceed();
 
 		// Both effect and writeOn should work
 		expect(updateSpy).toHaveBeenCalledTimes(1);
@@ -305,7 +305,7 @@ describe("DerivedBehavior - updated event", () => {
 
 		// Update source to verify the connection works
 		source.emit(20);
-		timeline.flush();
+		timeline.proceed();
 		expect(targetState.read()).toBe(25); // 20 + 5
 	});
 
@@ -324,7 +324,7 @@ describe("DerivedBehavior - updated event", () => {
 		timeline.start();
 
 		source.emit(20);
-		timeline.flush();
+		timeline.proceed();
 
 		expect(updateSpy).toHaveBeenCalledExactlyOnceWith({
 			current: 15,

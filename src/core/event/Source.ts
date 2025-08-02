@@ -12,7 +12,7 @@ export class Source<T> extends Event<T> {
 
 		if (this.maybeLastEmitedValue) {
 			// TODO: warn
-			timeline.flush();
+			timeline.proceed();
 		}
 		this.maybeLastEmitedValue = just(value);
 

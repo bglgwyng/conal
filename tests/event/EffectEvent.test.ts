@@ -26,7 +26,7 @@ describe("EffectEvent", () => {
 			timeline.start();
 
 			source.emit(21); // effect will transform to 42
-			timeline.flush();
+			timeline.proceed();
 
 			expect(spy).toHaveBeenCalledWith(42);
 			disposeEffect();
@@ -39,11 +39,11 @@ describe("EffectEvent", () => {
 			timeline.start();
 
 			source.emit(5); // effect will transform to 10
-			timeline.flush();
+			timeline.proceed();
 			expect(spy).toHaveBeenCalledWith(10);
 
 			source.emit(10); // effect will transform to 20
-			timeline.flush();
+			timeline.proceed();
 			expect(spy).toHaveBeenCalledWith(20);
 
 			expect(spy).toHaveBeenCalledTimes(2);
@@ -57,7 +57,7 @@ describe("EffectEvent", () => {
 
 			timeline.start();
 			source.emit(21);
-			timeline.flush();
+			timeline.proceed();
 
 			expect(needCommitSpy).toHaveBeenCalledWith(effectEvent);
 			expect(spy).toHaveBeenCalledWith(42);
@@ -74,16 +74,16 @@ describe("EffectEvent", () => {
 
 			// First emit
 			source.emit(21);
-			timeline.flush();
+			timeline.proceed();
 			expect(spy).toHaveBeenCalledWith(42);
 
 			// Flush again - should not trigger spy again
-			timeline.flush();
+			timeline.proceed();
 			expect(spy).toHaveBeenCalledTimes(1);
 
 			// New source emit should work
 			source.emit(25);
-			timeline.flush();
+			timeline.proceed();
 			expect(spy).toHaveBeenCalledWith(50);
 			expect(spy).toHaveBeenCalledTimes(2);
 
@@ -96,11 +96,11 @@ describe("EffectEvent", () => {
 
 			timeline.start();
 			// Should not throw
-			timeline.flush();
+			timeline.proceed();
 
 			// Should still work normally after commit
 			source.emit(10);
-			timeline.flush();
+			timeline.proceed();
 			expect(spy).toHaveBeenCalledWith(20);
 
 			disposeEffect();
@@ -119,7 +119,7 @@ describe("EffectEvent", () => {
 
 			// Source emit triggers effect
 			source.emit(50); // effect will transform to 100
-			timeline.flush();
+			timeline.proceed();
 			expect(spy).toHaveBeenCalledWith(100);
 			expect(spy).toHaveBeenCalledTimes(1);
 
@@ -128,7 +128,7 @@ describe("EffectEvent", () => {
 
 			// Can emit again after commit
 			source.emit(100); // effect will transform to 200
-			timeline.flush();
+			timeline.proceed();
 			expect(spy).toHaveBeenCalledWith(200);
 			expect(spy).toHaveBeenCalledTimes(2);
 
@@ -154,7 +154,7 @@ describe("EffectEvent", () => {
 			timeline.start();
 
 			source.emit(10); // source -> effect (20) -> spy
-			timeline.flush();
+			timeline.proceed();
 
 			expect(spy).toHaveBeenCalledWith(20);
 
@@ -196,7 +196,7 @@ describe("EffectEvent", () => {
 
 			// Trigger the effect which will create new reactive elements
 			source.emit(5); // effect transforms to 10
-			timeline.flush();
+			timeline.proceed();
 
 			// Verify that new source and state were created
 			expect(createdSources).toHaveLength(1);
@@ -207,14 +207,14 @@ describe("EffectEvent", () => {
 
 			// Test that the newly created source works
 			createdSources[0].source.emit("Hello from dynamic source!");
-			timeline.flush();
+			timeline.proceed();
 
 			// The state should now have the emitted value
 			expect(createdStates[0].state.read()).toBe("Hello from dynamic source!");
 
 			// Trigger another effect to create more dynamic elements
 			source.emit(15); // effect transforms to 30
-			timeline.flush();
+			timeline.proceed();
 
 			// Should have created another set
 			expect(createdSources).toHaveLength(2);
@@ -225,7 +225,7 @@ describe("EffectEvent", () => {
 			// Test that both dynamic sources work independently
 			createdSources[0].source.emit("First dynamic");
 			createdSources[1].source.emit("Second dynamic");
-			timeline.flush();
+			timeline.proceed();
 
 			expect(createdStates[0].state.read()).toBe("First dynamic");
 			expect(createdStates[1].state.read()).toBe("Second dynamic");
@@ -257,7 +257,7 @@ describe("EffectEvent", () => {
 
 			// Source emits -> Effect transforms -> DerivedEvent transforms
 			source.emit(15); // source(15) -> effect(30) -> derived("Result: 30")
-			timeline.flush();
+			timeline.proceed();
 
 			expect(spy).toHaveBeenCalledWith("Result: 30");
 
@@ -285,7 +285,7 @@ describe("EffectEvent", () => {
 
 			// Test the full chain
 			source.emit(12); // source(12) -> effect(24) -> first("Value: 24") -> second({message: "Value: 24", length: 9})
-			timeline.flush();
+			timeline.proceed();
 
 			expect(spy).toHaveBeenCalledWith({
 				message: "Value: 24",
@@ -306,7 +306,7 @@ describe("EffectEvent", () => {
 			timeline.start();
 
 			source.emit(25);
-			timeline.flush();
+			timeline.proceed();
 			expect(spy).not.toHaveBeenCalled();
 
 			disposeDerived();
@@ -335,7 +335,7 @@ describe("EffectEvent", () => {
 
 			// Only left (EffectEvent) emits
 			source.emit(10); // source(10) -> effect(20) -> merged({type: "left", value: 20})
-			timeline.flush();
+			timeline.proceed();
 
 			expect(spy).toHaveBeenCalledWith({
 				type: "left",
@@ -355,7 +355,7 @@ describe("EffectEvent", () => {
 
 			// Only right source emits
 			rightSource.emit("hello");
-			timeline.flush();
+			timeline.proceed();
 
 			expect(spy).toHaveBeenCalledWith({
 				type: "right",
@@ -376,7 +376,7 @@ describe("EffectEvent", () => {
 			// Both events emit in same timeline flush
 			source.emit(15); // Will trigger effectEvent with value 30
 			rightSource.emit("world");
-			timeline.flush();
+			timeline.proceed();
 
 			expect(spy).toHaveBeenCalledWith({
 				type: "both",
@@ -397,7 +397,7 @@ describe("EffectEvent", () => {
 
 			// First: left only
 			source.emit(5); // effect will emit 10
-			timeline.flush();
+			timeline.proceed();
 			expect(spy).toHaveBeenNthCalledWith(1, {
 				type: "left",
 				value: 10,
@@ -405,7 +405,7 @@ describe("EffectEvent", () => {
 
 			// Second: right only
 			rightSource.emit("test");
-			timeline.flush();
+			timeline.proceed();
 			expect(spy).toHaveBeenNthCalledWith(2, {
 				type: "right",
 				value: "test",
@@ -414,7 +414,7 @@ describe("EffectEvent", () => {
 			// Third: both together
 			source.emit(20); // effect will emit 40
 			rightSource.emit("both");
-			timeline.flush();
+			timeline.proceed();
 			expect(spy).toHaveBeenNthCalledWith(3, {
 				type: "both",
 				left: 40,
@@ -442,14 +442,14 @@ describe("EffectEvent", () => {
 
 			// Test the full chain
 			source.emit(8); // source(8) -> effect(16) -> merged({type: "left", value: 16}) -> chained("Left: 16")
-			timeline.flush();
+			timeline.proceed();
 
 			expect(spy).toHaveBeenCalledWith("Left: 16");
 
 			// Test with both
 			source.emit(12); // effect(24)
 			rightSource.emit("test");
-			timeline.flush();
+			timeline.proceed();
 
 			expect(spy).toHaveBeenCalledWith("Both: 24 & test");
 

@@ -37,7 +37,7 @@ describe("DynamicEvent", () => {
 
 		// Emit from the first source
 		source1.emit(42);
-		timeline.flush();
+		timeline.proceed();
 
 		expect(callback).toHaveBeenCalledWith(42);
 	});
@@ -50,11 +50,11 @@ describe("DynamicEvent", () => {
 
 		// Switch to the second source
 		switchEvent.emit(source2);
-		timeline.flush();
+		timeline.proceed();
 
 		// Emit from the second source
 		source2.emit(100);
-		timeline.flush();
+		timeline.proceed();
 
 		expect(callback).toHaveBeenCalledWith(100);
 	});
@@ -67,13 +67,13 @@ describe("DynamicEvent", () => {
 
 		// Emit and verify
 		source1.emit(1);
-		timeline.flush();
+		timeline.proceed();
 		expect(callback).toHaveBeenCalledTimes(1);
 
 		// Unsubscribe and emit again
 		unsubscribe();
 		source1.emit(2);
-		timeline.flush();
+		timeline.proceed();
 
 		// Should still only have been called once
 		expect(callback).toHaveBeenCalledTimes(1);
@@ -88,7 +88,7 @@ describe("DynamicEvent", () => {
 		// Switch to second source
 		source1.emit(1);
 		switchEvent.emit(source2);
-		timeline.flush();
+		timeline.proceed();
 
 		expect(callback).toHaveBeenCalledTimes(1);
 		expect(callback).toHaveBeenLastCalledWith(1);
@@ -102,13 +102,13 @@ describe("DynamicEvent", () => {
 
 		// Switch to second source
 		switchEvent.emit(source2);
-		timeline.flush();
+		timeline.proceed();
 
 		// Emit from first source (should be ignored)
 		source1.emit(1);
 		// Emit from second source (should be received)
 		source2.emit(2);
-		timeline.flush();
+		timeline.proceed();
 
 		expect(callback).toHaveBeenCalledTimes(1);
 		expect(callback).toHaveBeenCalledWith(2);

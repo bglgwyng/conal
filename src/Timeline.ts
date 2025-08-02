@@ -60,7 +60,7 @@ export class Timeline {
 
 	never = new Never<any>(this);
 
-	flush() {
+	proceed() {
 		assert(this.#hasStarted, "Timeline has not started");
 		assert(!this.#isProceeding, "Timeline is already proceeding");
 

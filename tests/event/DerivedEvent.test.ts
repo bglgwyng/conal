@@ -24,7 +24,7 @@ describe("DerivedEvent", () => {
 
 		parentEvent.emit(42);
 
-		timeline.flush();
+		timeline.proceed();
 
 		expect(mockCallback).toHaveBeenCalledWith("Number: 42");
 	});
@@ -40,7 +40,7 @@ describe("DerivedEvent", () => {
 
 		parentEvent.emit(42);
 
-		timeline.flush();
+		timeline.proceed();
 
 		expect(mockCallback).toHaveBeenCalledWith("Number: 42");
 	});
@@ -58,7 +58,7 @@ describe("DerivedEvent", () => {
 		timeline.start();
 
 		parentEvent.emit(42);
-		timeline.flush();
+		timeline.proceed();
 
 		expect(mockCallback).toHaveBeenCalledWith("Number: 42!");
 	});
@@ -78,12 +78,12 @@ describe("DerivedEvent", () => {
 
 		// This should be discarded (even number)
 		parentEvent.emit(42);
-		timeline.flush();
+		timeline.proceed();
 		expect(mockCallback).not.toHaveBeenCalled();
 
 		// This should propagate (odd number)
 		parentEvent.emit(7);
-		timeline.flush();
+		timeline.proceed();
 		expect(mockCallback).toHaveBeenCalledWith("Number: 7");
 	});
 

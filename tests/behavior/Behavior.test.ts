@@ -34,7 +34,7 @@ describe("Behavior.on", () => {
 
 		// Update source and check if transformed state updates
 		source.emit(7);
-		timeline.flush();
+		timeline.proceed();
 
 		expect(doubledState.read()).toBe(14); // 7 * 2
 
@@ -55,7 +55,7 @@ describe("Behavior.on", () => {
 		timeline.start();
 
 		source.emit("world");
-		timeline.flush();
+		timeline.proceed();
 
 		expect(upperState.read()).toBe("WORLD");
 
@@ -76,7 +76,7 @@ describe("Behavior.on", () => {
 
 		// Update before disposing
 		source.emit(2);
-		timeline.flush();
+		timeline.proceed();
 		expect(transformedState.read()).toBe(102);
 
 		// Dispose the subscription
@@ -84,7 +84,7 @@ describe("Behavior.on", () => {
 
 		// Update after disposing - the transformed state should not update
 		source.emit(3);
-		timeline.flush();
+		timeline.proceed();
 
 		// The transformed state should still have the last value before disposal
 		expect(transformedState.read()).toBe(102);
@@ -104,7 +104,7 @@ describe("Behavior.on", () => {
 		timeline.start();
 
 		source.emit({ x: 3, y: 4 });
-		timeline.flush();
+		timeline.proceed();
 
 		expect(distanceState.read()).toBe(5); // sqrt(3^2 + 4^2) = 5
 
@@ -128,7 +128,7 @@ describe("Behavior.on", () => {
 		timeline.start();
 
 		source.emit(5);
-		timeline.flush();
+		timeline.proceed();
 
 		expect(doubledState.read()).toBe(10);
 		expect(stringState.read()).toBe("Number: 5");
@@ -155,11 +155,11 @@ describe("Behavior.on", () => {
 		timeline.start();
 
 		source.emit(2);
-		timeline.flush();
+		timeline.proceed();
 		expect(transformedState.read()).toBe(5); // 10 / 2
 
 		source.emit(0);
-		timeline.flush();
+		timeline.proceed();
 		expect(transformedState.read()).toBe(5);
 
 		dispose();

@@ -9,7 +9,7 @@ describe("Timeline", () => {
 
 		expect(timeline.timestamp).toBe(0);
 
-		timeline.flush();
+		timeline.proceed();
 
 		expect(timeline.timestamp).toBe(1);
 	});
