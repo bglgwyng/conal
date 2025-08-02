@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { Timeline } from "../../src/Timeline";
+import { Timeline } from "../../../src/Timeline";
 
 describe("Behavior.on", () => {
 	let timeline: Timeline;

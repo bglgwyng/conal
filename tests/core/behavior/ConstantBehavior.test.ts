@@ -1,6 +1,6 @@
 import { describe, expect, it, vitest } from "vitest";
-import { ConstantBehavior } from "../../src/core/behavior/ConstantBehavior";
-import { Timeline } from "../../src/Timeline";
+import { ConstantBehavior } from "../../../src/core/behavior/ConstantBehavior";
+import { Timeline } from "../../../src/Timeline";
 
 describe("ConstantBehavior", () => {
 	it("should always return the initial value", () => {

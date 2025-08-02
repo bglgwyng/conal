@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { DerivedBehavior } from "../../src/core/behavior/DerivedBehavior";
-import { Timeline } from "../../src/Timeline";
+import { DerivedBehavior } from "../../../src/core/behavior/DerivedBehavior";
+import { Timeline } from "../../../src/Timeline";
 
 describe("DerivedBehavior - Memoization", () => {
 	let timeline: Timeline;

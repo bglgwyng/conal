@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { DerivedEvent } from "../../src/core/event/DerivedEvent";
-import { Timeline } from "../../src/Timeline";
+import { DerivedEvent } from "../../../src/core/event/DerivedEvent";
+import { Timeline } from "../../../src/Timeline";
 
 describe("State", () => {
 	let timeline: Timeline;

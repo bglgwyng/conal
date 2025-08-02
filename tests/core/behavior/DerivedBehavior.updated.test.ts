@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { DerivedBehavior } from "../../src/core/behavior/DerivedBehavior";
-import { DerivedEvent } from "../../src/core/event/DerivedEvent";
-import { Timeline } from "../../src/Timeline";
+import { DerivedBehavior } from "../../../src/core/behavior/DerivedBehavior";
+import { DerivedEvent } from "../../../src/core/event/DerivedEvent";
+import { Timeline } from "../../../src/Timeline";
 
 describe("DerivedBehavior - updated event", () => {
 	let timeline: Timeline;

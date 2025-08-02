@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { State } from "../../src/core/behavior/State";
-import { DerivedEvent } from "../../src/core/event/DerivedEvent";
-import type { EffectEvent } from "../../src/core/event/Event";
-import { MergedEvent } from "../../src/core/event/MergedEvent";
-import type { Source } from "../../src/core/event/Source";
-import { Timeline } from "../../src/Timeline";
+import type { State } from "../../../src/core/behavior/State";
+import { DerivedEvent } from "../../../src/core/event/DerivedEvent";
+import type { EffectEvent } from "../../../src/core/event/Event";
+import { MergedEvent } from "../../../src/core/event/MergedEvent";
+import type { Source } from "../../../src/core/event/Source";
+import { Timeline } from "../../../src/Timeline";
 
 describe("EffectEvent", () => {
 	let timeline: Timeline;
