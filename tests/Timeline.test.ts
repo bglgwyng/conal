@@ -5,7 +5,7 @@ describe("Timeline", () => {
 	test("increment timestamp", () => {
 		const timeline = new Timeline();
 
-		timeline.unsafeStart();
+		timeline.start();
 
 		expect(timeline.timestamp).toBe(0);
 

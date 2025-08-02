@@ -1,23 +1,21 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { State } from "../../src/behavior/State";
+import type { State } from "../../src/core/behavior/State";
 import { DerivedEvent } from "../../src/core/event/DerivedEvent";
 import type { EffectEvent } from "../../src/core/event/Event";
+import { MergedEvent } from "../../src/core/event/MergedEvent";
 import type { Source } from "../../src/core/event/Source";
-import { merge, source } from "../../src/factory";
 import { Timeline } from "../../src/Timeline";
 
 describe("EffectEvent", () => {
 	let timeline: Timeline;
-	let source1: Source<number>;
+	let source: Source<number>;
 	let effectEvent: EffectEvent<number>;
 	let dispose: () => void;
 
 	beforeEach(() => {
 		timeline = new Timeline();
-		timeline.unsafeActivate();
-
-		source1 = source<number>();
-		[effectEvent, dispose] = source1.on((value) => value * 2);
+		source = timeline.source<number>();
+		[effectEvent, dispose] = source.on((value) => value * 2);
 	});
 
 	describe("effect event emission", () => {
@@ -25,9 +23,9 @@ describe("EffectEvent", () => {
 			const spy = vi.fn();
 			const [, disposeEffect] = effectEvent.on(spy);
 
-			timeline.unsafeStart();
+			timeline.start();
 
-			source1.emit(21); // effect will transform to 42
+			source.emit(21); // effect will transform to 42
 			timeline.flush();
 
 			expect(spy).toHaveBeenCalledWith(42);
@@ -38,13 +36,13 @@ describe("EffectEvent", () => {
 			const spy = vi.fn();
 			const [, disposeEffect] = effectEvent.on(spy);
 
-			timeline.unsafeStart();
+			timeline.start();
 
-			source1.emit(5); // effect will transform to 10
+			source.emit(5); // effect will transform to 10
 			timeline.flush();
 			expect(spy).toHaveBeenCalledWith(10);
 
-			source1.emit(10); // effect will transform to 20
+			source.emit(10); // effect will transform to 20
 			timeline.flush();
 			expect(spy).toHaveBeenCalledWith(20);
 
@@ -57,8 +55,8 @@ describe("EffectEvent", () => {
 			const spy = vi.fn();
 			const [, disposeEffect] = effectEvent.on(spy);
 
-			timeline.unsafeStart();
-			source1.emit(21);
+			timeline.start();
+			source.emit(21);
 			timeline.flush();
 
 			expect(needCommitSpy).toHaveBeenCalledWith(effectEvent);
@@ -72,10 +70,10 @@ describe("EffectEvent", () => {
 			const spy = vi.fn();
 			const [, disposeEffect] = effectEvent.on(spy);
 
-			timeline.unsafeStart();
+			timeline.start();
 
 			// First emit
-			source1.emit(21);
+			source.emit(21);
 			timeline.flush();
 			expect(spy).toHaveBeenCalledWith(42);
 
@@ -84,7 +82,7 @@ describe("EffectEvent", () => {
 			expect(spy).toHaveBeenCalledTimes(1);
 
 			// New source emit should work
-			source1.emit(25);
+			source.emit(25);
 			timeline.flush();
 			expect(spy).toHaveBeenCalledWith(50);
 			expect(spy).toHaveBeenCalledTimes(2);
@@ -96,12 +94,12 @@ describe("EffectEvent", () => {
 			const spy = vi.fn();
 			const [, disposeEffect] = effectEvent.on(spy);
 
-			timeline.unsafeStart();
+			timeline.start();
 			// Should not throw
 			timeline.flush();
 
 			// Should still work normally after commit
-			source1.emit(10);
+			source.emit(10);
 			timeline.flush();
 			expect(spy).toHaveBeenCalledWith(20);
 
@@ -115,12 +113,12 @@ describe("EffectEvent", () => {
 
 			const [, disposeEffect] = effectEvent.on(spy);
 
-			timeline.unsafeStart();
+			timeline.start();
 			// Initial state - no emissions yet
 			expect(spy).not.toHaveBeenCalled();
 
 			// Source emit triggers effect
-			source1.emit(50); // effect will transform to 100
+			source.emit(50); // effect will transform to 100
 			timeline.flush();
 			expect(spy).toHaveBeenCalledWith(100);
 			expect(spy).toHaveBeenCalledTimes(1);
@@ -129,7 +127,7 @@ describe("EffectEvent", () => {
 			effectEvent.commit();
 
 			// Can emit again after commit
-			source1.emit(100); // effect will transform to 200
+			source.emit(100); // effect will transform to 200
 			timeline.flush();
 			expect(spy).toHaveBeenCalledWith(200);
 			expect(spy).toHaveBeenCalledTimes(2);
@@ -153,9 +151,9 @@ describe("EffectEvent", () => {
 			const spy = vi.fn();
 			const [, disposeChain] = effectEvent.on(spy);
 
-			timeline.unsafeStart();
+			timeline.start();
 
-			source1.emit(10); // source -> effect (20) -> spy
+			source.emit(10); // source -> effect (20) -> spy
 			timeline.flush();
 
 			expect(spy).toHaveBeenCalledWith(20);
@@ -194,10 +192,10 @@ describe("EffectEvent", () => {
 				allCallbacks.push(disposeNewCallback);
 			});
 
-			timeline.unsafeStart();
+			timeline.start();
 
 			// Trigger the effect which will create new reactive elements
-			source1.emit(5); // effect transforms to 10
+			source.emit(5); // effect transforms to 10
 			timeline.flush();
 
 			// Verify that new source and state were created
@@ -215,7 +213,7 @@ describe("EffectEvent", () => {
 			expect(createdStates[0].state.read()).toBe("Hello from dynamic source!");
 
 			// Trigger another effect to create more dynamic elements
-			source1.emit(15); // effect transforms to 30
+			source.emit(15); // effect transforms to 30
 			timeline.flush();
 
 			// Should have created another set
@@ -255,10 +253,10 @@ describe("EffectEvent", () => {
 			const spy = vi.fn();
 			const [, disposeDerived] = derivedEvent.on(spy);
 
-			timeline.unsafeStart();
+			timeline.start();
 
 			// Source emits -> Effect transforms -> DerivedEvent transforms
-			source1.emit(15); // source(15) -> effect(30) -> derived("Result: 30")
+			source.emit(15); // source(15) -> effect(30) -> derived("Result: 30")
 			timeline.flush();
 
 			expect(spy).toHaveBeenCalledWith("Result: 30");
@@ -283,10 +281,10 @@ describe("EffectEvent", () => {
 			const spy = vi.fn();
 			const [, disposeSecond] = secondDerived.on(spy);
 
-			timeline.unsafeStart();
+			timeline.start();
 
 			// Test the full chain
-			source1.emit(12); // source(12) -> effect(24) -> first("Value: 24") -> second({message: "Value: 24", length: 9})
+			source.emit(12); // source(12) -> effect(24) -> first("Value: 24") -> second({message: "Value: 24", length: 9})
 			timeline.flush();
 
 			expect(spy).toHaveBeenCalledWith({
@@ -298,16 +296,16 @@ describe("EffectEvent", () => {
 		});
 
 		it("should handle error in DerivedEvent transformation", () => {
-			const derivedEvent = new DerivedEvent(timeline, effectEvent, (_value) => {
+			const derivedEvent = new DerivedEvent(timeline, effectEvent, (value) => {
 				throw new Error("DerivedEvent transformation failed");
 			});
 
 			const spy = vi.fn();
 			const [, disposeDerived] = derivedEvent.on(spy);
 
-			timeline.unsafeStart();
+			timeline.start();
 
-			source1.emit(25);
+			source.emit(25);
 			timeline.flush();
 			expect(spy).not.toHaveBeenCalled();
 
@@ -323,18 +321,20 @@ describe("EffectEvent", () => {
 		});
 
 		it("should emit left when EffectEvent emits", () => {
-			const mergedEvent = merge(
+			const mergedEvent = new MergedEvent(
+				timeline,
 				effectEvent, // left: EffectEvent<number>
 				rightSource, // right: Source<string>
+				{ debugLabel: "EffectEvent-Source Merge" },
 			);
 
 			const spy = vi.fn();
 			const [, disposeMerged] = mergedEvent.on(spy);
 
-			timeline.unsafeStart();
+			timeline.start();
 
 			// Only left (EffectEvent) emits
-			source1.emit(10); // source(10) -> effect(20) -> merged({type: "left", value: 20})
+			source.emit(10); // source(10) -> effect(20) -> merged({type: "left", value: 20})
 			timeline.flush();
 
 			expect(spy).toHaveBeenCalledWith({
@@ -346,12 +346,12 @@ describe("EffectEvent", () => {
 		});
 
 		it("should emit right when right source emits", () => {
-			const mergedEvent = merge(effectEvent, rightSource);
+			const mergedEvent = new MergedEvent(timeline, effectEvent, rightSource);
 
 			const spy = vi.fn();
 			const [, disposeMerged] = mergedEvent.on(spy);
 
-			timeline.unsafeStart();
+			timeline.start();
 
 			// Only right source emits
 			rightSource.emit("hello");
@@ -366,15 +366,15 @@ describe("EffectEvent", () => {
 		});
 
 		it("should emit both when both events emit simultaneously", () => {
-			const mergedEvent = merge(effectEvent, rightSource);
+			const mergedEvent = new MergedEvent(timeline, effectEvent, rightSource);
 
 			const spy = vi.fn();
 			const [, disposeMerged] = mergedEvent.on(spy);
 
-			timeline.unsafeStart();
+			timeline.start();
 
 			// Both events emit in same timeline flush
-			source1.emit(15); // Will trigger effectEvent with value 30
+			source.emit(15); // Will trigger effectEvent with value 30
 			rightSource.emit("world");
 			timeline.flush();
 
@@ -388,15 +388,15 @@ describe("EffectEvent", () => {
 		});
 
 		it("should handle multiple emissions from different events", () => {
-			const mergedEvent = merge(effectEvent, rightSource);
+			const mergedEvent = new MergedEvent(timeline, effectEvent, rightSource);
 
 			const spy = vi.fn();
 			const [, disposeMerged] = mergedEvent.on(spy);
 
-			timeline.unsafeStart();
+			timeline.start();
 
 			// First: left only
-			source1.emit(5); // effect will emit 10
+			source.emit(5); // effect will emit 10
 			timeline.flush();
 			expect(spy).toHaveBeenNthCalledWith(1, {
 				type: "left",
@@ -412,7 +412,7 @@ describe("EffectEvent", () => {
 			});
 
 			// Third: both together
-			source1.emit(20); // effect will emit 40
+			source.emit(20); // effect will emit 40
 			rightSource.emit("both");
 			timeline.flush();
 			expect(spy).toHaveBeenNthCalledWith(3, {
@@ -426,7 +426,7 @@ describe("EffectEvent", () => {
 		});
 
 		it("should work with chained EffectEvent from MergedEvent", () => {
-			const mergedEvent = merge(effectEvent, rightSource);
+			const mergedEvent = new MergedEvent(timeline, effectEvent, rightSource);
 
 			// Create another EffectEvent from MergedEvent
 			const [chainedEffect, disposeChain] = mergedEvent.on((merged) => {
@@ -438,16 +438,16 @@ describe("EffectEvent", () => {
 			const spy = vi.fn();
 			const [, disposeChainedSpy] = chainedEffect.on(spy);
 
-			timeline.unsafeStart();
+			timeline.start();
 
 			// Test the full chain
-			source1.emit(8); // source(8) -> effect(16) -> merged({type: "left", value: 16}) -> chained("Left: 16")
+			source.emit(8); // source(8) -> effect(16) -> merged({type: "left", value: 16}) -> chained("Left: 16")
 			timeline.flush();
 
 			expect(spy).toHaveBeenCalledWith("Left: 16");
 
 			// Test with both
-			source1.emit(12); // effect(24)
+			source.emit(12); // effect(24)
 			rightSource.emit("test");
 			timeline.flush();
 

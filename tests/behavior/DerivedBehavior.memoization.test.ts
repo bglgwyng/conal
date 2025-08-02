@@ -7,7 +7,6 @@ describe("DerivedBehavior - Memoization", () => {
 
 	beforeEach(() => {
 		timeline = new Timeline();
-		timeline.unsafeActivate();
 	});
 
 	it("should memoize computed values within the same timestamp", () => {
@@ -19,7 +18,7 @@ describe("DerivedBehavior - Memoization", () => {
 
 		const derived = new DerivedBehavior(timeline, computeFn);
 
-		timeline.unsafeStart();
+		timeline.start();
 
 		// First read - should compute the value
 		expect(derived.read()).toBe(0);

@@ -22,7 +22,7 @@ describe("DerivedBehavior", () => {
 
 		expect(derived.read()).toBe(0);
 
-		timeline.unsafeStart();
+		timeline.start();
 
 		// Set initial state value
 		source1.emit(5); // This will update both state1 and state2
@@ -73,7 +73,7 @@ describe("DerivedBehavior", () => {
 		const [, unsubscribe] = derived.updated.on(() => {});
 		expect(derived.isActive).toBe(true);
 
-		timeline.unsafeStart();
+		timeline.start();
 
 		// Read when active - should track dependencies
 		const result = derived.read();
@@ -110,7 +110,7 @@ describe("DerivedBehavior", () => {
 		);
 		outerDerived.updated.on(() => {});
 
-		timeline.unsafeStart();
+		timeline.start();
 
 		// Initial read - should track all dependencies
 		expect(outerDerived.read()).toBe(0); // 0*2 + 0 = 0

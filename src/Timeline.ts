@@ -39,14 +39,11 @@ export class Timeline {
 		return this.#isRunningEffect;
 	}
 
-	start(fn: () => void) {
+	start() {
 		assert(!this.#hasStarted, "Timeline has already started");
 
-		this.withActiveTimeline(() => {
-			fn();
-
-			this.#hasStarted = true;
-		});
+		this.#hasStarted = true;
+		this.#isRunningEffect = false;
 	}
 
 	get canUpdateNetwork() {
@@ -211,33 +208,5 @@ export class Timeline {
 	// @internal
 	needCommit(node: Node) {
 		this.#toCommitNodes.add(node);
-	}
-
-	static #activeTimeline?: Timeline;
-	static get activeTimeline() {
-		return Timeline.#activeTimeline;
-	}
-
-	// for tests
-
-	unsafeActivate() {
-		Timeline.#activeTimeline = this;
-	}
-
-	unsafeStart() {
-		assert(!this.#hasStarted, "Timeline has already started");
-		this.#hasStarted = true;
-	}
-
-	withActiveTimeline<T>(fn: () => T): T {
-		const previousTimeline = Timeline.activeTimeline;
-
-		Timeline.#activeTimeline = this;
-
-		try {
-			return fn();
-		} finally {
-			Timeline.#activeTimeline = previousTimeline;
-		}
 	}
 }
