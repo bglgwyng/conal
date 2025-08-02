@@ -20,8 +20,6 @@ describe("DerivedEvent", () => {
 		const mockCallback = vitest.fn();
 		derivedEvent.on(mockCallback);
 
-		timeline.start();
-
 		parentEvent.emit(42);
 
 		timeline.proceed();
@@ -35,8 +33,6 @@ describe("DerivedEvent", () => {
 
 		const mockCallback = vitest.fn();
 		derivedEvent.on(mockCallback);
-
-		timeline.start();
 
 		parentEvent.emit(42);
 
@@ -55,8 +51,6 @@ describe("DerivedEvent", () => {
 		const mockCallback = vitest.fn();
 		derived2.on(mockCallback);
 
-		timeline.start();
-
 		parentEvent.emit(42);
 		timeline.proceed();
 
@@ -74,8 +68,6 @@ describe("DerivedEvent", () => {
 		const mockCallback = vitest.fn();
 		derivedEvent.on(mockCallback);
 
-		timeline.start();
-
 		// This should be discarded (even number)
 		parentEvent.emit(42);
 		timeline.proceed();
@@ -91,8 +83,6 @@ describe("DerivedEvent", () => {
 		it("should cache emitted value and not recompute on multiple getEmittedValue calls", () => {
 			const transformFn = vitest.fn((n: number) => `Number: ${n}`);
 			derivedEvent = new DerivedEvent(timeline, parentEvent, transformFn);
-
-			timeline.start();
 
 			parentEvent.emit(42);
 
@@ -114,7 +104,6 @@ describe("DerivedEvent", () => {
 			const transformFn = vitest.fn((n: number) => `Number: ${n}`);
 			derivedEvent = new DerivedEvent(timeline, parentEvent, transformFn);
 
-			timeline.start();
 			parentEvent.emit(42);
 
 			// First computation
@@ -138,7 +127,6 @@ describe("DerivedEvent", () => {
 			const transformFn = vitest.fn((n: number) => `Number: ${n}`);
 			derivedEvent = new DerivedEvent(timeline, parentEvent, transformFn);
 
-			timeline.start();
 			parentEvent.emit(42);
 
 			// First call caches the value
@@ -166,7 +154,6 @@ describe("DerivedEvent", () => {
 			const transformFn = vitest.fn((n: number) => `Number: ${n}`);
 			derivedEvent = new DerivedEvent(timeline, parentEvent, transformFn);
 
-			timeline.start();
 			// Don't emit anything to parent
 
 			// Should return undefined and not call transform function
@@ -187,7 +174,6 @@ describe("DerivedEvent", () => {
 			});
 			derivedEvent = new DerivedEvent(timeline, parentEvent, transformFn);
 
-			timeline.start();
 			parentEvent.emit(42); // Even number, should be discarded
 
 			// Should return undefined and not cache
@@ -207,8 +193,6 @@ describe("DerivedEvent", () => {
 				return `Number: ${n}`;
 			});
 			derivedEvent = new DerivedEvent(timeline, parentEvent, transformFn);
-
-			timeline.start();
 
 			// First emit even number (discarded)
 			parentEvent.emit(42);
@@ -236,7 +220,6 @@ describe("DerivedEvent", () => {
 			});
 			derivedEvent = new DerivedEvent(timeline, parentEvent, transformFn);
 
-			timeline.start();
 			parentEvent.emit(42);
 
 			// Should throw error and not cache
@@ -254,8 +237,6 @@ describe("DerivedEvent", () => {
 
 			const derived1 = new DerivedEvent(timeline, parentEvent, transformFn1);
 			const derived2 = new DerivedEvent(timeline, derived1, transformFn2);
-
-			timeline.start();
 
 			parentEvent.emit(42);
 

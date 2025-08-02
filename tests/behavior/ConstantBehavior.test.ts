@@ -8,8 +8,6 @@ describe("ConstantBehavior", () => {
 		const value = { test: "value" };
 		const behavior = new ConstantBehavior(timeline, value);
 
-		timeline.start();
-
 		// Test readCurrentValue
 		expect(behavior.readCurrentValue()).toBe(value);
 
@@ -31,8 +29,6 @@ describe("ConstantBehavior", () => {
 		const mockCallback = vitest.fn();
 		behavior.updated.on(mockCallback);
 
-		timeline.start();
-
 		// Advance timeline to see if any updates occur
 		timeline.proceed();
 
@@ -53,8 +49,6 @@ describe("ConstantBehavior", () => {
 		const obj = { key: "value" };
 		const objBehavior = new ConstantBehavior(timeline, obj);
 
-		timeline.start();
-
 		expect(numBehavior.read()).toBe(42);
 		expect(strBehavior.read()).toBe("test");
 		expect(objBehavior.read()).toBe(obj);
@@ -65,8 +59,6 @@ describe("ConstantBehavior", () => {
 
 		const obj = { data: 1 };
 		const behavior = new ConstantBehavior(timeline, obj);
-
-		timeline.start();
 
 		// Multiple reads should return the same object reference
 		const firstRead = behavior.read();

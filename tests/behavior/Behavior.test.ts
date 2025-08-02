@@ -30,8 +30,6 @@ describe("Behavior.on", () => {
 
 		expect(doubledState.read()).toBe(10); // 5 * 2
 
-		timeline.start();
-
 		// Update source and check if transformed state updates
 		source.emit(7);
 		timeline.proceed();
@@ -52,8 +50,6 @@ describe("Behavior.on", () => {
 
 		expect(upperState.read()).toBe("HELLO");
 
-		timeline.start();
-
 		source.emit("world");
 		timeline.proceed();
 
@@ -71,8 +67,6 @@ describe("Behavior.on", () => {
 		);
 
 		expect(transformedState.read()).toBe(101);
-
-		timeline.start();
 
 		// Update before disposing
 		source.emit(2);
@@ -101,8 +95,6 @@ describe("Behavior.on", () => {
 
 		expect(distanceState.read()).toBeCloseTo(Math.sqrt(5), 5); // sqrt(1^2 + 2^2)
 
-		timeline.start();
-
 		source.emit({ x: 3, y: 4 });
 		timeline.proceed();
 
@@ -124,8 +116,6 @@ describe("Behavior.on", () => {
 		expect(doubledState.read()).toBe(20);
 		expect(stringState.read()).toBe("Number: 10");
 		expect(negatedState.read()).toBe(-10);
-
-		timeline.start();
 
 		source.emit(5);
 		timeline.proceed();
@@ -151,8 +141,6 @@ describe("Behavior.on", () => {
 		});
 
 		expect(transformedState.read()).toBe(10); // 10 / 1
-
-		timeline.start();
 
 		source.emit(2);
 		timeline.proceed();

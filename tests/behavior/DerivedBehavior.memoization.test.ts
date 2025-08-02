@@ -18,8 +18,6 @@ describe("DerivedBehavior - Memoization", () => {
 
 		const derived = new DerivedBehavior(timeline, computeFn);
 
-		timeline.start();
-
 		// First read - should compute the value
 		expect(derived.read()).toBe(0);
 		expect(computeFn).toHaveBeenCalledTimes(1);

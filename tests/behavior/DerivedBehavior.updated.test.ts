@@ -25,8 +25,6 @@ describe("DerivedBehavior - updated event", () => {
 		const updateSpy = vi.fn();
 		const [, unsubscribe] = derived.updated.on(updateSpy);
 
-		timeline.start();
-
 		// Initial read to set up dependencies
 		expect(derived.read()).toBe(0);
 		expect(updateSpy).not.toHaveBeenCalled();
@@ -86,8 +84,6 @@ describe("DerivedBehavior - updated event", () => {
 		expect(state1.dependedBehaviors.has(derived)).toBe(true);
 		expect(state2.dependedBehaviors.has(derived)).toBe(true);
 
-		timeline.start();
-
 		// Update one of the sources
 		source1.emit(15);
 		timeline.proceed();
@@ -109,8 +105,6 @@ describe("DerivedBehavior - updated event", () => {
 		// No effect added, so no dependencies should be tracked
 		expect(derived.dependencies).toBeUndefined();
 		expect(state1.dependedBehaviors.has(derived)).toBe(false);
-
-		timeline.start();
 
 		// Update the source
 		source1.emit(20);
@@ -149,8 +143,6 @@ describe("DerivedBehavior - updated event", () => {
 		// Verify that the updated event has the targetState in its dependenedStates
 		expect(derived.updated.dependenedStates.has(targetState)).toBe(true);
 
-		timeline.start();
-
 		// Update one of the sources
 		source1.emit(25);
 		timeline.proceed();
@@ -178,8 +170,6 @@ describe("DerivedBehavior - updated event", () => {
 		// Add both effect and writeOn
 		const updateSpy = vi.fn();
 		const [, unsubscribeEffect] = derived.updated.on(updateSpy);
-
-		timeline.start();
 
 		// Dependencies should be tracked
 		expect(derived.dependencies).toBeDefined();
@@ -301,8 +291,6 @@ describe("DerivedBehavior - updated event", () => {
 		expect(derived.dependencies).toBeDefined();
 		expect(state.dependedBehaviors.has(derived)).toBe(true);
 
-		timeline.start();
-
 		// Update source to verify the connection works
 		source.emit(20);
 		timeline.proceed();
@@ -320,8 +308,6 @@ describe("DerivedBehavior - updated event", () => {
 		new DerivedEvent(timeline, derived.updated, (value) => {
 			return { current: derived.read(), next: value };
 		}).on(updateSpy);
-
-		timeline.start();
 
 		source.emit(20);
 		timeline.proceed();

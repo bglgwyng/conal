@@ -7,7 +7,6 @@ export class Source<T> extends Event<T> {
 
 	emit(value: T) {
 		const { timeline } = this;
-		assert(timeline.hasStarted, "Timeline has not started");
 		assert(!timeline.isProceeding, "Timeline is proceeding");
 
 		if (this.maybeLastEmitedValue) {

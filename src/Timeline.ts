@@ -39,17 +39,6 @@ export class Timeline {
 		return this.#isRunningEffect;
 	}
 
-	start() {
-		assert(!this.#hasStarted, "Timeline has already started");
-
-		this.#hasStarted = true;
-		this.#isRunningEffect = false;
-	}
-
-	get canUpdateNetwork() {
-		return this.#isRunningEffect || !this.#hasStarted;
-	}
-
 	state<T>(initialValue: T, updated: Event<T>): State<T> {
 		return new State(this, initialValue, updated);
 	}
@@ -61,7 +50,6 @@ export class Timeline {
 	never = new Never<any>(this);
 
 	proceed() {
-		assert(this.#hasStarted, "Timeline has not started");
 		assert(!this.#isProceeding, "Timeline is already proceeding");
 
 		this.#isProceeding = true;

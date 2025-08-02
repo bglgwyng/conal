@@ -21,8 +21,6 @@ describe("MergedEvent", () => {
 		const mockCallback = vitest.fn();
 		mergedEvent.on(mockCallback);
 
-		timeline.start();
-
 		// Emit left value first
 		leftSource.emit("hello");
 		rightSource.emit(42);
@@ -41,8 +39,6 @@ describe("MergedEvent", () => {
 		const mockCallback = vitest.fn();
 		mergedEvent.on(mockCallback);
 
-		timeline.start();
-
 		// Emit only left value
 		leftSource.emit("left only");
 		timeline.proceed();
@@ -58,8 +54,6 @@ describe("MergedEvent", () => {
 
 		const mockCallback = vitest.fn();
 		mergedEvent.on(mockCallback);
-
-		timeline.start();
 
 		// Emit only right value
 		rightSource.emit(100);
@@ -77,8 +71,6 @@ describe("MergedEvent", () => {
 		const mockCallback = vitest.fn();
 		mergedEvent.on(mockCallback);
 
-		timeline.start();
-
 		leftSource.emit("first");
 		rightSource.emit(1);
 		timeline.proceed();
@@ -95,8 +87,6 @@ describe("MergedEvent", () => {
 
 		const results: any[] = [];
 		mergedEvent.on((value) => results.push(value));
-
-		timeline.start();
 
 		// Emit in interleaved order
 		leftSource.emit("a");
@@ -128,7 +118,6 @@ describe("MergedEvent", () => {
 
 			mergedEvent = new MergedEvent(timeline, leftSource, rightSource);
 
-			timeline.start();
 			leftSource.emit("test");
 			rightSource.emit(42);
 
@@ -169,7 +158,6 @@ describe("MergedEvent", () => {
 
 			mergedEvent = new MergedEvent(timeline, leftSource, rightSource);
 
-			timeline.start();
 			leftSource.emit("first");
 			rightSource.emit(1);
 
@@ -212,7 +200,6 @@ describe("MergedEvent", () => {
 		it("should clear maybeEmittedValue in commit method", () => {
 			mergedEvent = new MergedEvent(timeline, leftSource, rightSource);
 
-			timeline.start();
 			leftSource.emit("cached");
 			rightSource.emit(100);
 
@@ -248,7 +235,6 @@ describe("MergedEvent", () => {
 
 			mergedEvent = new MergedEvent(timeline, leftSource, rightSource);
 
-			timeline.start();
 			// Don't emit anything to either source
 
 			// Should return undefined and not cache
@@ -269,7 +255,6 @@ describe("MergedEvent", () => {
 
 			mergedEvent = new MergedEvent(timeline, leftSource, rightSource);
 
-			timeline.start();
 			leftSource.emit("left-only");
 			// Don't emit to right source
 
@@ -301,7 +286,6 @@ describe("MergedEvent", () => {
 
 			mergedEvent = new MergedEvent(timeline, leftSource, rightSource);
 
-			timeline.start();
 			// Don't emit to left source
 			rightSource.emit(999);
 
@@ -337,7 +321,6 @@ describe("MergedEvent", () => {
 			const thirdGetEmittedValue = vitest.spyOn(thirdSource, "getEmittedValue");
 			const innerGetEmittedValue = vitest.spyOn(innerMerged, "getEmittedValue");
 
-			timeline.start();
 			leftSource.emit("nested");
 			rightSource.emit(42);
 			thirdSource.emit(true);
