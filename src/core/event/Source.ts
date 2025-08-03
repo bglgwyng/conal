@@ -1,10 +1,7 @@
 import assert from "assert";
-import { just, type Maybe } from "../../utils/Maybe";
-import { Event } from "./Event";
+import { Emmittable } from "./Event";
 
-export class Source<T> extends Event<T> {
-	maybeLastEmitedValue: Maybe<T>;
-
+export class Source<T> extends Emmittable<T> {
 	emit = (value: T) => {
 		const { timeline } = this;
 		assert(!timeline.isProceeding, "Timeline is proceeding");
@@ -13,17 +10,10 @@ export class Source<T> extends Event<T> {
 			// TODO: warn
 			timeline.proceed();
 		}
-		this.maybeLastEmitedValue = just(value);
 
-		timeline.markEmitting(this as Source<unknown>);
-		timeline.needCommit(this);
+		// Call parent emit method
+		super.emit(value);
+
+		timeline.reportEmission(this as Source<unknown>);
 	};
-
-	getEmittedValue() {
-		return this.maybeLastEmitedValue;
-	}
-
-	commit() {
-		this.maybeLastEmitedValue = undefined;
-	}
 }

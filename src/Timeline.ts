@@ -147,7 +147,7 @@ export class Timeline {
 	#emittingSources = new Set<Source<unknown>>();
 
 	// @internal
-	markEmitting(event: Source<unknown>) {
+	reportEmission(event: Source<unknown>) {
 		this.#emittingSources.add(event);
 	}
 
