@@ -1,0 +1,27 @@
+import { Behavior } from "./Behavior";
+import { State } from "./core/behavior/State";
+import { Source } from "./core/event/Source";
+import { Event } from "./Event";
+import { getActiveTimeline, withTimeline } from "./GlobalContext";
+import type { Timeline } from "./Timeline";
+
+export function build<T>(timeline: Timeline, fn: () => T): T {
+	return withTimeline(timeline, fn);
+}
+
+export function state<T>(initialValue: T, updated: Event<T>): Behavior<T> {
+	const timeline = getActiveTimeline();
+
+	return new Behavior(new State(timeline, initialValue, updated.internalEvent));
+}
+
+export function source<T>(): readonly [
+	event: Event<T>,
+	emit: (value: T) => void,
+] {
+	const timeline = getActiveTimeline();
+
+	const source = new Source<T>(timeline);
+
+	return [new Event(source), source.emit];
+}

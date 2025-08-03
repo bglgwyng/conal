@@ -6,14 +6,15 @@ import type { State } from "./State";
 export abstract class Behavior<T> extends Node {
 	dependedBehaviors: Set<DerivedBehavior<any>> = new Set();
 
-	read(): T {
+	read = (): T => {
 		const { timeline } = this;
 		if (timeline.isTracking) timeline.reportRead(this);
 
 		return timeline.isReadingNextValue
 			? this.readNextValue().value
 			: this.readCurrentValue();
-	}
+	};
+
 	abstract updated: Event<T>;
 
 	on<U>(fn: (value: T) => U): readonly [state: State<U>, dispose: () => void] {

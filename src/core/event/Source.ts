@@ -5,7 +5,7 @@ import { Event } from "./Event";
 export class Source<T> extends Event<T> {
 	maybeLastEmitedValue: Maybe<T>;
 
-	emit(value: T) {
+	emit = (value: T) => {
 		const { timeline } = this;
 		assert(!timeline.isProceeding, "Timeline is proceeding");
 
@@ -17,7 +17,7 @@ export class Source<T> extends Event<T> {
 
 		timeline.markEmitting(this as Source<unknown>);
 		timeline.needCommit(this);
-	}
+	};
 
 	getEmittedValue() {
 		return this.maybeLastEmitedValue;
