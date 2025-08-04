@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Behavior } from "../src/Behavior";
 import { Event } from "../src/Event";
-import { build, computed, source, state } from "../src/factory";
+import { build, computed, source, state, transform } from "../src/factory";
 import { getActiveTimeline } from "../src/GlobalContext";
 import { Timeline } from "../src/Timeline";
 
@@ -153,6 +153,104 @@ describe("Factory Functions", () => {
 
 		it("should throw when no active timeline", () => {
 			expect(() => computed(() => 42)).toThrow();
+		});
+	});
+
+	describe("transform()", () => {
+		it("should transform event values using the provided function", () => {
+			const result = build(timeline, () => {
+				const [sourceEvent, emit] = source<number>();
+				const transformedEvent = transform(sourceEvent, (n) => `Number: ${n}`);
+				return { transformedEvent, emit };
+			});
+
+			expect(result.transformedEvent).toBeInstanceOf(Event);
+
+			const callback = vi.fn();
+			result.transformedEvent.on(callback);
+
+			result.emit(42);
+			timeline.proceed();
+
+			expect(callback).toHaveBeenCalledWith("Number: 42");
+		});
+
+		it("should transform different types correctly", () => {
+			const result = build(timeline, () => {
+				const [stringEvent, emitString] = source<string>();
+				const [numberEvent, emitNumber] = source<number>();
+
+				const stringToLength = transform(stringEvent, (s) => s.length);
+				const numberToBoolean = transform(numberEvent, (n) => n > 0);
+
+				return { stringToLength, numberToBoolean, emitString, emitNumber };
+			});
+
+			const lengthCallback = vi.fn();
+			const booleanCallback = vi.fn();
+			result.stringToLength.on(lengthCallback);
+			result.numberToBoolean.on(booleanCallback);
+
+			// Test string to length transformation
+			result.emitString("hello");
+			timeline.proceed();
+			expect(lengthCallback).toHaveBeenCalledWith(5);
+
+			// Test number to boolean transformation
+			result.emitNumber(10);
+			timeline.proceed();
+			expect(booleanCallback).toHaveBeenCalledWith(true);
+
+			result.emitNumber(-5);
+			timeline.proceed();
+			expect(booleanCallback).toHaveBeenCalledWith(false);
+		});
+
+		it("should chain transformations correctly", () => {
+			const result = build(timeline, () => {
+				const [sourceEvent, emit] = source<number>();
+				const doubled = transform(sourceEvent, (n) => n * 2);
+				const toStringEvent = transform(doubled, (n) => `Result: ${n}`);
+				return { toStringEvent, emit };
+			});
+
+			const callback = vi.fn();
+			result.toStringEvent.on(callback);
+
+			result.emit(5);
+			timeline.proceed();
+
+			expect(callback).toHaveBeenCalledWith("Result: 10"); // 5 * 2 = 10
+		});
+
+		it("should work with complex objects", () => {
+			interface Person {
+				name: string;
+				age: number;
+			}
+
+			const result = build(timeline, () => {
+				const [personEvent, emit] = source<Person>();
+				const nameEvent = transform(personEvent, (person) => person.name);
+				const ageEvent = transform(personEvent, (person) => person.age);
+				return { nameEvent, ageEvent, emit };
+			});
+
+			const nameCallback = vi.fn();
+			const ageCallback = vi.fn();
+			result.nameEvent.on(nameCallback);
+			result.ageEvent.on(ageCallback);
+
+			result.emit({ name: "Alice", age: 30 });
+			timeline.proceed();
+
+			expect(nameCallback).toHaveBeenCalledWith("Alice");
+			expect(ageCallback).toHaveBeenCalledWith(30);
+		});
+
+		it("should throw when no active timeline", () => {
+			const [event] = build(timeline, () => source<number>());
+			expect(() => transform(event, (n) => n * 2)).toThrow();
 		});
 	});
 
