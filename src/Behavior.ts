@@ -1,4 +1,5 @@
 import type { Behavior as InternalBehavior } from "./core/behavior/Behavior";
+import { Event } from "./Event";
 import { withTimeline } from "./globalContext";
 
 export class Behavior<T> {
@@ -8,6 +9,8 @@ export class Behavior<T> {
 	constructor(internalBehavior: InternalBehavior<T>) {
 		this.internal = internalBehavior;
 	}
+
+	updated = (): Event<T> => new Event(this.internal.updated);
 
 	read = (): T => withTimeline(this.internal.timeline, this.internal.read);
 
