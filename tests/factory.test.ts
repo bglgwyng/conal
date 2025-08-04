@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Behavior } from "../src/Behavior";
 import { Event } from "../src/Event";
-import { build, source, state } from "../src/factory";
+import { build, computed, source, state } from "../src/factory";
 import { getActiveTimeline } from "../src/GlobalContext";
 import { Timeline } from "../src/Timeline";
 
@@ -93,6 +93,66 @@ describe("Factory Functions", () => {
 		it("should throw when no active timeline", () => {
 			const [event] = build(timeline, () => source<number>());
 			expect(() => state(42, event)).toThrow();
+		});
+	});
+
+	describe("computed()", () => {
+		it("should create a Behavior that computes from other behaviors", () => {
+			const result = build(timeline, () => {
+				const [updateEvent1, emit1] = source<number>();
+				const [updateEvent2, emit2] = source<number>();
+				const state1 = state(5, updateEvent1);
+				const state2 = state(10, updateEvent2);
+				const computedBehavior = computed(() => state1.read() + state2.read());
+
+				return { state1, state2, computedBehavior, emit1, emit2 };
+			});
+
+			expect(result.computedBehavior).toBeInstanceOf(Behavior);
+			expect(result.computedBehavior.read()).toBe(15); // 5 + 10
+
+			// Update state1 and verify computed value updates
+			result.emit1(20);
+			timeline.proceed();
+			expect(result.computedBehavior.read()).toBe(30); // 20 + 10
+
+			// Update state2 and verify computed value updates
+			result.emit2(5);
+			timeline.proceed();
+			expect(result.computedBehavior.read()).toBe(25); // 20 + 5
+		});
+
+		it("should work with constant values", () => {
+			const result = build(timeline, () => {
+				return computed(() => 42);
+			});
+
+			expect(result).toBeInstanceOf(Behavior);
+			expect(result.read()).toBe(42);
+		});
+
+		it("should work with complex computations", () => {
+			const result = build(timeline, () => {
+				const [updateEvent, emit] = source<number>();
+				const numberState = state(3, updateEvent);
+				const computedBehavior = computed(() => {
+					const value = numberState.read();
+					return value * value + 1; // x^2 + 1
+				});
+
+				return { computedBehavior, emit };
+			});
+
+			expect(result.computedBehavior.read()).toBe(10); // 3^2 + 1 = 10
+
+			// Update and verify computation
+			result.emit(4);
+			timeline.proceed();
+			expect(result.computedBehavior.read()).toBe(17); // 4^2 + 1 = 17
+		});
+
+		it("should throw when no active timeline", () => {
+			expect(() => computed(() => 42)).toThrow();
 		});
 	});
 
