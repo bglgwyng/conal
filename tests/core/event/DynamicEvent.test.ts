@@ -1,16 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { State } from "../../../src/core/behavior/State";
 import { DynamicEvent } from "../../../src/core/event/DynamicEvent";
+import type { Event } from "../../../src/core/event/Event";
 import { Source } from "../../../src/core/event/Source";
 import { Timeline } from "../../../src/Timeline";
 
 describe("DynamicEvent", () => {
 	let timeline: Timeline;
-	let behavior: State<Source<number>>;
+	let behavior: State<Event<number>>;
 	let source1: Source<number>;
 	let source2: Source<number>;
-	let switchEvent: Source<Source<number>>;
-	let dynamicEvent: DynamicEvent<number>;
+	let switchEvent: Source<Event<number>>;
+	let dynamicEvent: DynamicEvent<Event<number>, number>;
 
 	beforeEach(() => {
 		timeline = new Timeline();
@@ -20,13 +21,13 @@ describe("DynamicEvent", () => {
 		source2 = new Source<number>(timeline);
 
 		// Create a switch event to change between sources
-		switchEvent = new Source<Source<number>>(timeline);
+		switchEvent = new Source<Event<number>>(timeline);
 
 		// Create a State behavior that holds the current source
-		behavior = new State<Source<number>>(timeline, source1, switchEvent);
+		behavior = new State<Event<number>>(timeline, source1, switchEvent);
 
 		// Create the DynamicEvent that will switch between sources
-		dynamicEvent = new DynamicEvent(timeline, behavior);
+		dynamicEvent = new DynamicEvent(timeline, behavior, (x) => x);
 	});
 
 	it("should forward events from the current source", () => {

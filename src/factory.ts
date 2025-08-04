@@ -1,6 +1,7 @@
 import { Behavior } from "./Behavior";
 import { ComputedBehavior } from "./core/behavior/ComputedBehavior";
 import { State } from "./core/behavior/State";
+import { DynamicEvent } from "./core/event/DynamicEvent";
 import { Source } from "./core/event/Source";
 import { TransformedEvent } from "./core/event/TransformedEvent";
 import { Event } from "./Event";
@@ -44,4 +45,16 @@ export function transform<T, U>(
 	const timeline = getActiveTimeline();
 
 	return new Event(new TransformedEvent(timeline, event.internalEvent, fn));
+}
+
+export function switchable<T>(behavior: Behavior<Event<T>>): Event<T> {
+	const timeline = getActiveTimeline();
+
+	return new Event(
+		new DynamicEvent(
+			timeline,
+			behavior.internal,
+			(event) => event.internalEvent,
+		),
+	);
 }
