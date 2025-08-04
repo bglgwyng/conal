@@ -1,6 +1,6 @@
 import assert from "assert";
 import type { Behavior } from "./core/behavior/Behavior";
-import type { DerivedBehavior } from "./core/behavior/DerivedBehavior";
+import type { ComputedBehavior } from "./core/behavior/ComputedBehavior";
 import { State } from "./core/behavior/State";
 import type { Event } from "./core/event/Event";
 import { Never } from "./core/event/Never";
@@ -133,8 +133,8 @@ export class Timeline {
 		}
 
 		function* collectAllDependentBehaviors(
-			behaviors: Iterable<DerivedBehavior<unknown>>,
-		): IterableIterator<DerivedBehavior<unknown>> {
+			behaviors: Iterable<ComputedBehavior<unknown>>,
+		): IterableIterator<ComputedBehavior<unknown>> {
 			for (const behavior of behaviors) {
 				assert(behavior.updated.isActive, "Behavior is not active");
 

@@ -1,27 +1,27 @@
 import { just } from "../../utils/Maybe";
-import type { DerivedBehavior } from "../behavior/DerivedBehavior";
+import type { ComputedBehavior } from "../behavior/ComputedBehavior";
 import { Event } from "./Event";
 
 export class UpdateEvent<T> extends Event<T> {
 	constructor(
-		public derivedBehavior: DerivedBehavior<T>,
+		public computed: ComputedBehavior<T>,
 		options?: { debugLabel?: string },
 	) {
-		super(derivedBehavior.timeline, options);
+		super(computed.timeline, options);
 	}
 
 	getEmittedValue() {
-		const { value, isUpdated } = this.derivedBehavior.readNextValue();
+		const { value, isUpdated } = this.computed.readNextValue();
 		if (!isUpdated) return;
 
 		return just(value);
 	}
 
 	activate(): void {
-		this.derivedBehavior.activate();
+		this.computed.activate();
 	}
 
 	deactivate(): void {
-		this.derivedBehavior.deactivate();
+		this.computed.deactivate();
 	}
 }

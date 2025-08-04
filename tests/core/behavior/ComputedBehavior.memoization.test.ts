@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { DerivedBehavior } from "../../../src/core/behavior/DerivedBehavior";
+import { ComputedBehavior } from "../../../src/core/behavior/ComputedBehavior";
 import { Timeline } from "../../../src/Timeline";
 
-describe("DerivedBehavior - Memoization", () => {
+describe("ComputedBehavior - Memoization", () => {
 	let timeline: Timeline;
 
 	beforeEach(() => {
@@ -16,26 +16,26 @@ describe("DerivedBehavior - Memoization", () => {
 			return state.read() * 2;
 		});
 
-		const derived = new DerivedBehavior(timeline, computeFn);
+		const computed = new ComputedBehavior(timeline, computeFn);
 
 		// First read - should compute the value
-		expect(derived.read()).toBe(0);
+		expect(computed.read()).toBe(0);
 		expect(computeFn).toHaveBeenCalledTimes(1);
 
 		// Second read within same timestamp - should use cached value
-		expect(derived.read()).toBe(0);
+		expect(computed.read()).toBe(0);
 		expect(computeFn).toHaveBeenCalledTimes(1);
 
 		// Change timestamp and read again - should recompute
 		timeline.proceed();
-		expect(derived.read()).toBe(0);
+		expect(computed.read()).toBe(0);
 		expect(computeFn).toHaveBeenCalledTimes(2);
 
 		// // Update state and verify recomputation
 		source.emit(5);
 		timeline.proceed();
 
-		expect(derived.read()).toBe(10);
+		expect(computed.read()).toBe(10);
 		expect(computeFn).toHaveBeenCalledTimes(3);
 	});
 });

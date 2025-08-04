@@ -4,7 +4,7 @@ import type { Event } from "../event/Event";
 import { UpdateEvent } from "../event/UpdateEvent";
 import { Behavior } from "./Behavior";
 
-export class DerivedBehavior<T> extends Behavior<T> {
+export class ComputedBehavior<T> extends Behavior<T> {
 	updated: Event<T>;
 
 	lastRead?: { value: T; at: number; dependencies?: Set<Behavior<any>> };
@@ -45,7 +45,7 @@ export class DerivedBehavior<T> extends Behavior<T> {
 
 	readNextValue() {
 		assert(this.timeline.isProceeding, "Timeline is not proceeding");
-		assert(this.isActive, "DerivedBehavior is not active");
+		assert(this.isActive, "ComputedBehavior is not active");
 
 		if (this.nextUpdate) return this.nextUpdate;
 
