@@ -12,6 +12,17 @@ export function getActiveTimeline() {
 	return activeTimeline;
 }
 
+export function useTimeline<T>(timeline: Timeline): Disposable {
+	const previousTimeline = globalContext.activeTimeline;
+
+	globalContext.activeTimeline = timeline;
+	return {
+		[Symbol.dispose]: () => {
+			globalContext.activeTimeline = previousTimeline;
+		},
+	};
+}
+
 export function withTimeline<T>(timeline: Timeline, fn: () => T): T {
 	const previousTimeline = globalContext.activeTimeline;
 

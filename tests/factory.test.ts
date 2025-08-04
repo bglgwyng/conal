@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Behavior } from "../src/Behavior";
 import { Event } from "../src/Event";
 import { build, source, state } from "../src/factory";
+import { getActiveTimeline } from "../src/GlobalContext";
 import { Timeline } from "../src/Timeline";
 
 describe("Factory Functions", () => {
@@ -130,6 +131,19 @@ describe("Factory Functions", () => {
 
 			expect(result.outer).toBeInstanceOf(Event);
 			expect(result.inner).toBeInstanceOf(Event);
+		});
+
+		it("should return disposable when called with only timeline", () => {
+			expect(getActiveTimeline).toThrow("Timeline is not active");
+			{
+				using disposable = build(timeline);
+				expect(getActiveTimeline()).toBe(timeline);
+
+				expect(disposable).toBeDefined();
+				expect(typeof disposable).toBe("object");
+				expect(typeof disposable[Symbol.dispose]).toBe("function");
+			}
+			expect(getActiveTimeline).toThrow("Timeline is not active");
 		});
 	});
 });

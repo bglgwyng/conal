@@ -2,11 +2,14 @@ import { Behavior } from "./Behavior";
 import { State } from "./core/behavior/State";
 import { Source } from "./core/event/Source";
 import { Event } from "./Event";
-import { getActiveTimeline, withTimeline } from "./GlobalContext";
+import { getActiveTimeline, useTimeline, withTimeline } from "./GlobalContext";
 import type { Timeline } from "./Timeline";
 
-export function build<T>(timeline: Timeline, fn: () => T): T {
-	return withTimeline(timeline, fn);
+export function build<T>(timeline: Timeline): Disposable;
+export function build<T>(timeline: Timeline, fn: () => T): T;
+export function build<T>(timeline: Timeline, fn?: () => T): T | Disposable {
+	if (fn) return withTimeline(timeline, fn);
+	return useTimeline(timeline);
 }
 
 export function state<T>(initialValue: T, updated: Event<T>): Behavior<T> {
