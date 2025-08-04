@@ -38,8 +38,8 @@ export function source<T>(): readonly [
 }
 
 export function transform<T, U>(
-	event: Event<T>,
 	fn: (value: T) => U,
+	event: Event<T>,
 ): Event<U> {
 	const timeline = getActiveTimeline();
 

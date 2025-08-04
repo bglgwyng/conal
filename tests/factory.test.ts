@@ -160,7 +160,7 @@ describe("Factory Functions", () => {
 		it("should transform event values using the provided function", () => {
 			const result = build(timeline, () => {
 				const [sourceEvent, emit] = source<number>();
-				const transformedEvent = transform(sourceEvent, (n) => `Number: ${n}`);
+				const transformedEvent = transform((n) => `Number: ${n}`, sourceEvent);
 				return { transformedEvent, emit };
 			});
 
@@ -180,8 +180,8 @@ describe("Factory Functions", () => {
 				const [stringEvent, emitString] = source<string>();
 				const [numberEvent, emitNumber] = source<number>();
 
-				const stringToLength = transform(stringEvent, (s) => s.length);
-				const numberToBoolean = transform(numberEvent, (n) => n > 0);
+				const stringToLength = transform((s) => s.length, stringEvent);
+				const numberToBoolean = transform((n) => n > 0, numberEvent);
 
 				return { stringToLength, numberToBoolean, emitString, emitNumber };
 			});
@@ -209,8 +209,8 @@ describe("Factory Functions", () => {
 		it("should chain transformations correctly", () => {
 			const result = build(timeline, () => {
 				const [sourceEvent, emit] = source<number>();
-				const doubled = transform(sourceEvent, (n) => n * 2);
-				const toStringEvent = transform(doubled, (n) => `Result: ${n}`);
+				const doubled = transform((n) => n * 2, sourceEvent);
+				const toStringEvent = transform((n) => `Result: ${n}`, doubled);
 				return { toStringEvent, emit };
 			});
 
@@ -231,8 +231,8 @@ describe("Factory Functions", () => {
 
 			const result = build(timeline, () => {
 				const [personEvent, emit] = source<Person>();
-				const nameEvent = transform(personEvent, (person) => person.name);
-				const ageEvent = transform(personEvent, (person) => person.age);
+				const nameEvent = transform((person) => person.name, personEvent);
+				const ageEvent = transform((person) => person.age, personEvent);
 				return { nameEvent, ageEvent, emit };
 			});
 
@@ -250,7 +250,7 @@ describe("Factory Functions", () => {
 
 		it("should throw when no active timeline", () => {
 			const [event] = build(timeline, () => source<number>());
-			expect(() => transform(event, (n) => n * 2)).toThrow();
+			expect(() => transform((n) => n * 2, event)).toThrow();
 		});
 	});
 
