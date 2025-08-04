@@ -1,5 +1,5 @@
 import type { Behavior as InternalBehavior } from "./core/behavior/Behavior";
-import { withTimeline } from "./GlobalContext";
+import { withTimeline } from "./globalContext";
 
 export class Behavior<T> {
 	// @internal

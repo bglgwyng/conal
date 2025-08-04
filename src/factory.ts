@@ -4,7 +4,7 @@ import { State } from "./core/behavior/State";
 import { Source } from "./core/event/Source";
 import { TransformedEvent } from "./core/event/TransformedEvent";
 import { Event } from "./Event";
-import { getActiveTimeline, useTimeline, withTimeline } from "./GlobalContext";
+import { getActiveTimeline, useTimeline, withTimeline } from "./globalContext";
 import type { Timeline } from "./Timeline";
 
 export function build<T>(timeline: Timeline): Disposable;

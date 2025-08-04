@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Behavior } from "../src/Behavior";
 import { Event } from "../src/Event";
 import { build, computed, source, state, transform } from "../src/factory";
-import { getActiveTimeline } from "../src/GlobalContext";
+import { getActiveTimeline } from "../src/globalContext";
 import { Timeline } from "../src/Timeline";
 
 describe("Factory Functions", () => {
