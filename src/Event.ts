@@ -1,6 +1,6 @@
-import { DerivedEvent } from "./core/event/DerivedEvent";
 import type { Event as InternalEvent } from "./core/event/Event";
 import { MergedEvent, type These } from "./core/event/MergedEvent";
+import { TransformedEvent } from "./core/event/TransformedEvent";
 
 export class Event<T> {
 	// @internal
@@ -36,7 +36,7 @@ export class Event<T> {
 
 	derived<U>(fn: (value: T) => U): Event<U> {
 		return new Event(
-			new DerivedEvent(this.internalEvent.timeline, this.internalEvent, fn),
+			new TransformedEvent(this.internalEvent.timeline, this.internalEvent, fn),
 		);
 	}
 }

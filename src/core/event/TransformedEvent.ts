@@ -3,7 +3,7 @@ import type { Timeline } from "../../Timeline";
 import { just, type Maybe } from "../../utils/Maybe";
 import { Event } from "./Event";
 
-export class DerivedEvent<T, U> extends Event<T> {
+export class TransformedEvent<T, U> extends Event<T> {
 	private maybeEmittedValue: Maybe<Maybe<T>>;
 
 	constructor(

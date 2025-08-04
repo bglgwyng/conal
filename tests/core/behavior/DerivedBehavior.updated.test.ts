@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DerivedBehavior } from "../../../src/core/behavior/DerivedBehavior";
-import { DerivedEvent } from "../../../src/core/event/DerivedEvent";
+import { TransformedEvent } from "../../../src/core/event/TransformedEvent";
 import { Timeline } from "../../../src/Timeline";
 
 describe("DerivedBehavior - updated event", () => {
@@ -305,7 +305,7 @@ describe("DerivedBehavior - updated event", () => {
 
 		const updateSpy = vi.fn();
 
-		new DerivedEvent(timeline, derived.updated, (value) => {
+		new TransformedEvent(timeline, derived.updated, (value) => {
 			return { current: derived.read(), next: value };
 		}).on(updateSpy);
 

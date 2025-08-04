@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { State } from "../../../src/core/behavior/State";
-import { DerivedEvent } from "../../../src/core/event/DerivedEvent";
 import type { EffectEvent } from "../../../src/core/event/Event";
 import { MergedEvent } from "../../../src/core/event/MergedEvent";
 import type { Source } from "../../../src/core/event/Source";
+import { TransformedEvent } from "../../../src/core/event/TransformedEvent";
 import { Timeline } from "../../../src/Timeline";
 
 describe("EffectEvent", () => {
@@ -227,10 +227,10 @@ describe("EffectEvent", () => {
 		});
 	});
 
-	describe("DerivedEvent from EffectEvent", () => {
-		it("should create DerivedEvent from EffectEvent and transform values", () => {
-			// Create DerivedEvent that transforms EffectEvent values
-			const derivedEvent = new DerivedEvent(
+	describe("TransformedEvent from EffectEvent", () => {
+		it("should create TransformedEvent from EffectEvent and transform values", () => {
+			// Create TransformedEvent that transforms EffectEvent values
+			const derivedEvent = new TransformedEvent(
 				timeline,
 				effectEvent,
 				(value) => `Result: ${value}`, // Transform number to string
@@ -240,7 +240,7 @@ describe("EffectEvent", () => {
 			const spy = vi.fn();
 			const [, disposeDerived] = derivedEvent.on(spy);
 
-			// Source emits -> Effect transforms -> DerivedEvent transforms
+			// Source emits -> Effect transforms -> TransformedEvent transforms
 			source.emit(15); // source(15) -> effect(30) -> derived("Result: 30")
 			timeline.proceed();
 
@@ -251,17 +251,21 @@ describe("EffectEvent", () => {
 
 		it("should handle multiple transformations in chain", () => {
 			// First derived event: number -> string
-			const firstDerived = new DerivedEvent(
+			const firstDerived = new TransformedEvent(
 				timeline,
 				effectEvent,
 				(value) => `Value: ${value}`,
 			);
 
 			// Second derived event: string -> object
-			const secondDerived = new DerivedEvent(timeline, firstDerived, (str) => ({
-				message: str,
-				length: str.length,
-			}));
+			const secondDerived = new TransformedEvent(
+				timeline,
+				firstDerived,
+				(str) => ({
+					message: str,
+					length: str.length,
+				}),
+			);
 
 			const spy = vi.fn();
 			const [, disposeSecond] = secondDerived.on(spy);
@@ -278,10 +282,14 @@ describe("EffectEvent", () => {
 			disposeSecond();
 		});
 
-		it("should handle error in DerivedEvent transformation", () => {
-			const derivedEvent = new DerivedEvent(timeline, effectEvent, (value) => {
-				throw new Error("DerivedEvent transformation failed");
-			});
+		it("should handle error in TransformedEvent transformation", () => {
+			const derivedEvent = new TransformedEvent(
+				timeline,
+				effectEvent,
+				(value) => {
+					throw new Error("TransformedEvent transformation failed");
+				},
+			);
 
 			const spy = vi.fn();
 			const [, disposeDerived] = derivedEvent.on(spy);
