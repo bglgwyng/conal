@@ -34,7 +34,7 @@ export class Event<T> {
 		);
 	}
 
-	derived<U>(fn: (value: T) => U): Event<U> {
+	transform<U>(fn: (value: T) => U): Event<U> {
 		return new Event(
 			new TransformedEvent(this.internalEvent.timeline, this.internalEvent, fn),
 		);
