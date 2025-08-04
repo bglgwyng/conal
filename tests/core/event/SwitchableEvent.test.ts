@@ -1,17 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { State } from "../../../src/core/behavior/State";
-import { DynamicEvent } from "../../../src/core/event/DynamicEvent";
 import type { Event } from "../../../src/core/event/Event";
 import { Source } from "../../../src/core/event/Source";
+import { SwitchableEvent } from "../../../src/core/event/SwitchableEvent";
 import { Timeline } from "../../../src/Timeline";
 
-describe("DynamicEvent", () => {
+describe("SwitchableEvent", () => {
 	let timeline: Timeline;
 	let behavior: State<Event<number>>;
 	let source1: Source<number>;
 	let source2: Source<number>;
 	let switchEvent: Source<Event<number>>;
-	let dynamicEvent: DynamicEvent<Event<number>, number>;
+	let switchableEvent: SwitchableEvent<Event<number>, number>;
 
 	beforeEach(() => {
 		timeline = new Timeline();
@@ -26,13 +26,13 @@ describe("DynamicEvent", () => {
 		// Create a State behavior that holds the current source
 		behavior = new State<Event<number>>(timeline, source1, switchEvent);
 
-		// Create the DynamicEvent that will switch between sources
-		dynamicEvent = new DynamicEvent(timeline, behavior, (x) => x);
+		// Create the SwitchableEvent that will switch between sources
+		switchableEvent = new SwitchableEvent(timeline, behavior, (x) => x);
 	});
 
 	it("should forward events from the current source", () => {
 		const callback = vi.fn();
-		dynamicEvent.on(callback);
+		switchableEvent.on(callback);
 
 		// Emit from the first source
 		source1.emit(42);
@@ -43,7 +43,7 @@ describe("DynamicEvent", () => {
 
 	it("should switch to a new source when behavior updates", () => {
 		const callback = vi.fn();
-		dynamicEvent.on(callback);
+		switchableEvent.on(callback);
 
 		// Switch to the second source
 		switchEvent.emit(source2);
@@ -58,7 +58,7 @@ describe("DynamicEvent", () => {
 
 	it("should not receive events after unsubscribing", () => {
 		const callback = vi.fn();
-		const [, unsubscribe] = dynamicEvent.on(callback);
+		const [, unsubscribe] = switchableEvent.on(callback);
 
 		// Emit and verify
 		source1.emit(1);
@@ -76,7 +76,7 @@ describe("DynamicEvent", () => {
 
 	it("should emit the last value from the current source when switching", () => {
 		const callback = vi.fn();
-		dynamicEvent.on(callback);
+		switchableEvent.on(callback);
 
 		// Switch to second source
 		source1.emit(1);
@@ -89,7 +89,7 @@ describe("DynamicEvent", () => {
 
 	it("should clean up old source when switching", () => {
 		const callback = vi.fn();
-		dynamicEvent.on(callback);
+		switchableEvent.on(callback);
 
 		// Switch to second source
 		switchEvent.emit(source2);

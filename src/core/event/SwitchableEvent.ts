@@ -3,7 +3,7 @@ import type { Maybe } from "../../utils/Maybe";
 import type { Behavior } from "../behavior/Behavior";
 import { Event } from "./Event";
 
-export class DynamicEvent<U, T> extends Event<T> {
+export class SwitchableEvent<U, T> extends Event<T> {
 	constructor(
 		timeline: Timeline,
 		public readonly behavior: Behavior<U>,
