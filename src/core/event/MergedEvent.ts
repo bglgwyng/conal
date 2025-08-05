@@ -1,5 +1,6 @@
 import type { Timeline } from "../../Timeline";
 import { just, type Maybe } from "../../utils/Maybe";
+import type { Metadata } from "../Node";
 import { Event } from "./Event";
 
 export class MergedEvent<L, R> extends Event<These<L, R>> {
@@ -9,9 +10,9 @@ export class MergedEvent<L, R> extends Event<These<L, R>> {
 		timeline: Timeline,
 		public readonly left: Event<L>,
 		public readonly right: Event<R>,
-		options?: { debugLabel?: string },
+		metadata?: Metadata,
 	) {
-		super(timeline, options);
+		super(timeline, metadata);
 	}
 
 	getEmittedValue() {

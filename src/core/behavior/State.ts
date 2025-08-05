@@ -1,6 +1,7 @@
 import type { Timeline } from "../../Timeline";
 import { just, type Maybe } from "../../utils/Maybe";
 import type { Event } from "../event/Event";
+import type { Metadata } from "../Node";
 import { Behavior } from "./Behavior";
 
 export class State<T> extends Behavior<T> {
@@ -8,11 +9,12 @@ export class State<T> extends Behavior<T> {
 	public maybeNextValue: Maybe<T>;
 
 	constructor(
-		public timeline: Timeline,
+		timeline: Timeline,
 		initialValue: T,
 		public updated: Event<T>,
+		metadata?: Metadata,
 	) {
-		super(timeline);
+		super(timeline, metadata);
 
 		this.value = initialValue;
 		this.updated.writeOn(this);

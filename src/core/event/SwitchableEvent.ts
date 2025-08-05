@@ -1,6 +1,7 @@
 import type { Timeline } from "../../Timeline";
 import type { Maybe } from "../../utils/Maybe";
 import type { Behavior } from "../behavior/Behavior";
+import type { Metadata } from "../Node";
 import { Event } from "./Event";
 
 export class SwitchableEvent<U, T> extends Event<T> {
@@ -8,9 +9,9 @@ export class SwitchableEvent<U, T> extends Event<T> {
 		timeline: Timeline,
 		public readonly behavior: Behavior<U>,
 		public readonly extractEvent: (behavior: U) => Event<T>,
-		options?: { debugLabel?: string },
+		metadata?: Metadata,
 	) {
-		super(timeline, options);
+		super(timeline, metadata);
 	}
 
 	getEmittedValue(): Maybe<T> {

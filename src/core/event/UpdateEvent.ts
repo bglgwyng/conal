@@ -1,13 +1,14 @@
 import { just } from "../../utils/Maybe";
 import type { ComputedBehavior } from "../behavior/ComputedBehavior";
+import type { Metadata } from "../Node";
 import { Event } from "./Event";
 
 export class UpdateEvent<T> extends Event<T> {
 	constructor(
 		public computed: ComputedBehavior<T>,
-		options?: { debugLabel?: string },
+		metadata?: Metadata,
 	) {
-		super(computed.timeline, options);
+		super(computed.timeline, metadata);
 	}
 
 	getEmittedValue() {

@@ -1,20 +1,12 @@
 import assert from "assert";
-import type { Timeline } from "../../Timeline";
 import { just, type Maybe } from "../../utils/Maybe";
 import type { State } from "../behavior/State";
 import { Node } from "../Node";
 
 export abstract class Event<T> extends Node {
-	debugLabel?: string;
-
 	childEvents: Set<Event<any>> = new Set();
 	dependenedStates: Set<State<T>> = new Set();
 	effects: (readonly [(value: any) => void, EffectEvent<any>])[] = [];
-
-	constructor(timeline: Timeline, _options?: { debugLabel?: string }) {
-		super(timeline);
-		this.debugLabel = _options?.debugLabel;
-	}
 
 	get isActive() {
 		return (
