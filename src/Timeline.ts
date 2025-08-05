@@ -91,7 +91,7 @@ export class Timeline {
 				for (const state of event.dependenedStates) {
 					state.prepareUpdate();
 
-					for (const behavior of collectAllDependentBehaviors(
+					for (const behavior of collectDependendedBehaviors(
 						state.dependedBehaviors,
 					)) {
 						pushEventToQueue(behavior.updated);
@@ -132,14 +132,14 @@ export class Timeline {
 			eventQueue.add(event);
 		}
 
-		function* collectAllDependentBehaviors(
+		function* collectDependendedBehaviors(
 			behaviors: Iterable<ComputedBehavior<unknown>>,
 		): IterableIterator<ComputedBehavior<unknown>> {
 			for (const behavior of behaviors) {
 				assert(behavior.updated.isActive, "Behavior is not active");
 
 				yield behavior;
-				yield* collectAllDependentBehaviors(behavior.dependedBehaviors);
+				yield* collectDependendedBehaviors(behavior.dependedBehaviors);
 			}
 		}
 	}
