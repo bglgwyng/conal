@@ -8,7 +8,7 @@ export abstract class Behavior<T> extends Node {
 
 	read = (): T => {
 		const { timeline } = this;
-		if (timeline.isTracking) timeline.reportRead(this);
+		timeline.reportRead(this);
 
 		return timeline.isReadingNextValue
 			? this.readNextValue().value
