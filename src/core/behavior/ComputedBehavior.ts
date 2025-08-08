@@ -6,7 +6,7 @@ import type { Metadata } from "../Node";
 import { Behavior } from "./Behavior";
 
 export class ComputedBehavior<T> extends Behavior<T> {
-	updated: Event<T>;
+	updated: Event<T> = new UpdateEvent(this);
 
 	lastRead?: { value: T; at: number; dependencies?: Set<Behavior<any>> };
 	nextUpdate?: {
@@ -21,20 +21,32 @@ export class ComputedBehavior<T> extends Behavior<T> {
 		public metadata?: Metadata,
 	) {
 		super(timeline, metadata);
-		this.updated = new UpdateEvent(this);
+		this.updated = new UpdateEvent(this, {
+			debugLabel: `UpdateEvent(${this.metadata?.debugLabel})`,
+		});
 	}
 
 	readCurrentValue(): T {
-		const { lastRead, timeline } = this;
-		if (lastRead?.at === timeline.timestamp) return lastRead.value;
+		const { lastRead: _lastRead, timeline, isActive } = this;
 
-		if (this.isActive) {
-			const [value, dependencies] = this.timeline.withTrackingRead(this.fn);
-			this.lastRead = { value, at: timeline.timestamp, dependencies };
+		if (_lastRead?.at === timeline.timestamp) {
+			if (isActive && !_lastRead.dependencies) {
+				const [value, dependencies] = this.timeline.withTrackingRead(this.fn);
+				assert(
+					value === _lastRead.value,
+					new Error("Value should be the same"),
+				);
 
-			for (const dependency of dependencies) {
-				dependency.dependedBehaviors.add(this);
+				this.updateDependencies(dependencies);
 			}
+			return _lastRead.value;
+		}
+
+		if (isActive) {
+			const [value, dependencies] = this.timeline.withTrackingRead(this.fn);
+
+			this.lastRead = { value, at: timeline.timestamp };
+			this.updateDependencies(dependencies);
 
 			return value;
 		} else {
@@ -65,6 +77,15 @@ export class ComputedBehavior<T> extends Behavior<T> {
 		this.timeline.needCommit(this);
 
 		return nextValue;
+	}
+
+	updateDependencies(newDependencies: Set<Behavior<any>>) {
+		assert(this.lastRead, "lastRead is not set");
+
+		for (const dependency of newDependencies) {
+			dependency.dependedBehaviors.add(this);
+		}
+		this.lastRead.dependencies = newDependencies;
 	}
 
 	get dependencies(): Set<Behavior<any>> | undefined {
