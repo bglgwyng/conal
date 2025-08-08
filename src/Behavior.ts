@@ -5,12 +5,12 @@ import { withTimeline } from "./globalContext";
 export class Behavior<T> {
 	// @internal
 	internal: InternalBehavior<T>;
+	updated: Event<T>;
 
 	constructor(internalBehavior: InternalBehavior<T>) {
 		this.internal = internalBehavior;
+		this.updated = new Event(internalBehavior.updated);
 	}
-
-	updated = (): Event<T> => new Event(this.internal.updated);
 
 	read = (): T => withTimeline(this.internal.timeline, this.internal.read);
 

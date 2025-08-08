@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Behavior } from "../src/Behavior";
 import { Event } from "../src/Event";
-import { Timeline } from "../src/Timeline";
 import { build, computed, source, state } from "../src/factory";
+import { Timeline } from "../src/Timeline";
 
 describe("Behavior", () => {
 	let timeline: Timeline;
@@ -29,9 +29,7 @@ describe("Behavior", () => {
 				const [event, emit] = source<number>();
 				const behavior = state(10, event);
 
-				const updatedEvent = behavior.updated();
-
-				expect(updatedEvent).toBeInstanceOf(Event);
+				expect(behavior.updated).toBeInstanceOf(Event);
 			});
 		});
 
@@ -39,10 +37,9 @@ describe("Behavior", () => {
 			build(timeline, () => {
 				const [event, emit] = source<number>();
 				const behavior = state(10, event);
-				const updatedEvent = behavior.updated();
 
 				const callback = vi.fn();
-				updatedEvent.on(callback);
+				behavior.updated.on(callback);
 
 				emit(20);
 				timeline.proceed();
@@ -55,10 +52,9 @@ describe("Behavior", () => {
 			build(timeline, () => {
 				const [event, emit] = source<string>();
 				const behavior = state("initial", event);
-				const updatedEvent = behavior.updated();
 
 				const callback = vi.fn();
-				updatedEvent.on(callback);
+				behavior.updated.on(callback);
 
 				emit("first");
 				timeline.proceed();
@@ -168,7 +164,9 @@ describe("Behavior", () => {
 				const [event, emit] = source<number>();
 				const behavior = state(3, event);
 
-				const [squaredBehavior, dispose] = behavior.on((value) => value * value);
+				const [squaredBehavior, dispose] = behavior.on(
+					(value) => value * value,
+				);
 
 				expect(squaredBehavior.read()).toBe(9);
 
@@ -206,7 +204,9 @@ describe("Behavior", () => {
 				const [event, emit] = source<number>();
 				const behavior = state(42, event);
 
-				const [stringBehavior, dispose1] = behavior.on((value) => `Number: ${value}`);
+				const [stringBehavior, dispose1] = behavior.on(
+					(value) => `Number: ${value}`,
+				);
 				const [booleanBehavior, dispose2] = behavior.on((value) => value > 50);
 
 				expect(stringBehavior.read()).toBe("Number: 42");
@@ -231,7 +231,9 @@ describe("Behavior", () => {
 				const behavior = state({ name: "Alice", age: 30 }, event);
 
 				const [nameBehavior, dispose1] = behavior.on((person) => person.name);
-				const [isAdultBehavior, dispose2] = behavior.on((person) => person.age >= 18);
+				const [isAdultBehavior, dispose2] = behavior.on(
+					(person) => person.age >= 18,
+				);
 
 				expect(nameBehavior.read()).toBe("Alice");
 				expect(isAdultBehavior.read()).toBe(true);
@@ -249,7 +251,9 @@ describe("Behavior", () => {
 				const [event, emit] = source<number>();
 				const behavior = state(1, event);
 
-				const [transformedBehavior, dispose] = behavior.on((value) => value * 10);
+				const [transformedBehavior, dispose] = behavior.on(
+					(value) => value * 10,
+				);
 
 				expect(transformedBehavior.read()).toBe(10);
 
@@ -296,7 +300,9 @@ describe("Behavior", () => {
 				const baseBehavior = state(3, event);
 				const computedBehavior = computed(() => baseBehavior.read() + 1);
 
-				const [doubledComputed, dispose] = computedBehavior.on((value) => value * 2);
+				const [doubledComputed, dispose] = computedBehavior.on(
+					(value) => value * 2,
+				);
 
 				expect(doubledComputed.read()).toBe(8); // (3 + 1) * 2
 
@@ -341,7 +347,7 @@ describe("Behavior", () => {
 
 				// The behavior should work within the timeline context
 				expect(() => behavior.read()).not.toThrow();
-				expect(() => behavior.updated()).not.toThrow();
+				expect(() => behavior.updated).not.toThrow();
 				expect(() => behavior.on((x) => x)).not.toThrow();
 			});
 		});
