@@ -27,6 +27,7 @@ export class ComputedBehavior<T> extends Behavior<T> {
 	}
 
 	readCurrentValue(): T {
+		assert(!this.timeline.isReadingNextValue, "Timeline is reading next value");
 		const { lastRead: _lastRead, timeline, isActive } = this;
 
 		if (_lastRead?.at === timeline.timestamp) {
@@ -63,20 +64,21 @@ export class ComputedBehavior<T> extends Behavior<T> {
 
 		if (this.nextUpdate) return this.nextUpdate;
 
-		const nextValue = this.timeline.withReadingNextValue(() => {
+		const currentValue = this.readCurrentValue();
+		const nextUpdate = this.timeline.withReadingNextValue(() => {
 			const [value, dependencies] = this.timeline.withTrackingRead(this.fn);
 
 			return {
 				value,
-				isUpdated: value !== this.readCurrentValue(),
+				isUpdated: value !== currentValue,
 				dependencies,
 			};
 		});
 
-		this.nextUpdate = nextValue;
+		this.nextUpdate = nextUpdate;
 		this.timeline.needCommit(this);
 
-		return nextValue;
+		return nextUpdate;
 	}
 
 	updateDependencies(newDependencies: Set<Behavior<any>>) {
