@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { State } from "../../../src/core/behavior/State";
-import type { EffectEvent } from "../../../src/core/event/Event";
+import type { Event } from "../../../src/core/event/Event";
 import { MergedEvent } from "../../../src/core/event/MergedEvent";
 import type { Source } from "../../../src/core/event/Source";
 import { TransformedEvent } from "../../../src/core/event/TransformedEvent";
@@ -9,7 +9,7 @@ import { Timeline } from "../../../src/Timeline";
 describe("EffectEvent", () => {
 	let timeline: Timeline;
 	let source: Source<number>;
-	let effectEvent: EffectEvent<number>;
+	let effectEvent: Event<number>;
 	let dispose: () => void;
 
 	beforeEach(() => {
