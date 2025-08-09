@@ -110,7 +110,7 @@ describe("MergedEvent", () => {
 		]);
 	});
 
-	describe("caching behavior", () => {
+	describe("caching dynamic", () => {
 		it("should cache emitted value and not recompute on multiple getEmission calls", () => {
 			// Mock the child events' getEmission to track calls
 			const leftgetEmission = vitest.spyOn(leftSource, "getEmission");

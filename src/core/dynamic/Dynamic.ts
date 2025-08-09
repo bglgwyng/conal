@@ -1,10 +1,10 @@
 import type { Event } from "../event/Event";
 import { Node } from "../Node";
-import type { ComputedBehavior } from "./ComputedBehavior";
+import type { ComputedDynamic } from "./ComputedDynamic";
 import type { State } from "./State";
 
-export abstract class Behavior<T> extends Node {
-	dependedBehaviors: Set<ComputedBehavior<any>> = new Set();
+export abstract class Dynamic<T> extends Node {
+	dependedDynamics: Set<ComputedDynamic<any>> = new Set();
 
 	read = (): T => {
 		const { timeline } = this;

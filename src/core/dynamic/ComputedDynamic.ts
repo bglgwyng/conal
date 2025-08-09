@@ -2,16 +2,16 @@ import type { Timeline } from "../../Timeline";
 import { assert } from "../../utils/assert";
 import type { Event } from "../event/Event";
 import { UpdateEvent } from "../event/UpdateEvent";
-import { Behavior } from "./Behavior";
+import { Dynamic } from "./Dynamic";
 
-export class ComputedBehavior<T> extends Behavior<T> {
+export class ComputedDynamic<T> extends Dynamic<T> {
 	updated: Event<T> = new UpdateEvent(this);
 
-	lastRead?: { value: T; at: number; dependencies?: Set<Behavior<any>> };
+	lastRead?: { value: T; at: number; dependencies?: Set<Dynamic<any>> };
 	nextUpdate?: {
 		value: T;
 		isUpdated: boolean;
-		dependencies: Set<Behavior<any>>;
+		dependencies: Set<Dynamic<any>>;
 	};
 
 	constructor(
@@ -53,7 +53,7 @@ export class ComputedBehavior<T> extends Behavior<T> {
 
 	readNextValue() {
 		assert(this.timeline.isProceeding, "Timeline is not proceeding");
-		assert(this.isActive, "ComputedBehavior is not active");
+		assert(this.isActive, "ComputedDynamic is not active");
 
 		if (this.nextUpdate) return this.nextUpdate;
 
@@ -74,16 +74,16 @@ export class ComputedBehavior<T> extends Behavior<T> {
 		return nextUpdate;
 	}
 
-	updateDependencies(newDependencies: Set<Behavior<any>>) {
+	updateDependencies(newDependencies: Set<Dynamic<any>>) {
 		assert(this.lastRead, "lastRead is not set");
 
 		for (const dependency of newDependencies) {
-			dependency.dependedBehaviors.add(this);
+			dependency.dependedDynamics.add(this);
 		}
 		this.lastRead.dependencies = newDependencies;
 	}
 
-	get dependencies(): Set<Behavior<any>> | undefined {
+	get dependencies(): Set<Dynamic<any>> | undefined {
 		return this.lastRead?.dependencies;
 	}
 
@@ -114,7 +114,7 @@ export class ComputedBehavior<T> extends Behavior<T> {
 		if (!dependencies) return;
 
 		for (const dependency of dependencies) {
-			dependency.dependedBehaviors.delete(this);
+			dependency.dependedDynamics.delete(this);
 		}
 		lastRead.dependencies = undefined;
 	}

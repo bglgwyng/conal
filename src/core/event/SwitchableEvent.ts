@@ -1,30 +1,28 @@
 import type { Timeline } from "../../Timeline";
 import type { Maybe } from "../../utils/Maybe";
-import type { Behavior } from "../behavior/Behavior";
+import type { Dynamic } from "../dynamic/Dynamic";
 import { Event } from "./Event";
 
 export class SwitchableEvent<U, T> extends Event<T> {
 	constructor(
 		timeline: Timeline,
-		public readonly behavior: Behavior<U>,
-		public readonly extractEvent: (behavior: U) => Event<T>,
+		public readonly dynamic: Dynamic<U>,
+		public readonly extractEvent: (dynamic: U) => Event<T>,
 	) {
 		super(timeline);
 	}
 
 	getEmission(): Maybe<T> {
-		return this.extractEvent(this.behavior.read()).getEmission();
+		return this.extractEvent(this.dynamic.read()).getEmission();
 	}
 
 	activate(): void {
-		this.dispose = this.listen(this.extractEvent(this.behavior.read()));
-		[, this.disposeBehaviorUpdated] = this.behavior.updated.adjustOn(
-			(event) => {
-				// biome-ignore lint/style/noNonNullAssertion: `dispose` is set in activate
-				this.dispose!();
-				this.dispose = this.listen(this.extractEvent(event));
-			},
-		);
+		this.dispose = this.listen(this.extractEvent(this.dynamic.read()));
+		[, this.disposeDynamicUpdated] = this.dynamic.updated.adjustOn((event) => {
+			// biome-ignore lint/style/noNonNullAssertion: `dispose` is set in activate
+			this.dispose!();
+			this.dispose = this.listen(this.extractEvent(event));
+		});
 	}
 
 	deactivate(): void {
@@ -32,11 +30,11 @@ export class SwitchableEvent<U, T> extends Event<T> {
 		this.dispose!();
 		this.dispose = undefined;
 
-		// biome-ignore lint/style/noNonNullAssertion: `disposeBehaviorUpdated` is set in activate
-		this.disposeBehaviorUpdated!();
-		this.disposeBehaviorUpdated = undefined;
+		// biome-ignore lint/style/noNonNullAssertion: `disposeDynamicUpdated` is set in activate
+		this.disposeDynamicUpdated!();
+		this.disposeDynamicUpdated = undefined;
 	}
 
 	dispose?: () => void;
-	disposeBehaviorUpdated?: () => void;
+	disposeDynamicUpdated?: () => void;
 }

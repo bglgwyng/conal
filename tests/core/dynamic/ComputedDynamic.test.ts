@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { ComputedBehavior } from "../../../src/core/behavior/ComputedBehavior";
+import { ComputedDynamic } from "../../../src/core/dynamic/ComputedDynamic";
 import { Timeline } from "../../../src/Timeline";
 
-describe("ComputedBehavior", () => {
+describe("ComputedDynamic", () => {
 	let timeline: Timeline;
 
 	beforeEach(() => {
@@ -14,8 +14,8 @@ describe("ComputedBehavior", () => {
 		const source2 = timeline.source<number>();
 		const state1 = timeline.state(0, source1);
 		const state2 = timeline.state(0, source2);
-		// Create a computed behavior that doubles the state value
-		const computed = new ComputedBehavior(
+		// Create a computed dynamic that doubles the state value
+		const computed = new ComputedDynamic(
 			timeline,
 			() => state1.read() + state2.read(),
 		);
@@ -36,8 +36,8 @@ describe("ComputedBehavior", () => {
 		const source2 = timeline.source<number>();
 		const state1 = timeline.state(0, source1);
 		const state2 = timeline.state(0, source2);
-		// Create a computed behavior that depends on two states
-		const computed = new ComputedBehavior(
+		// Create a computed dynamic that depends on two states
+		const computed = new ComputedDynamic(
 			timeline,
 			() => state1.read() + state2.read(),
 		);
@@ -52,8 +52,8 @@ describe("ComputedBehavior", () => {
 
 		// Should still not track dependencies when inactive
 		expect(computed.dependencies).toBeUndefined();
-		expect(state1.dependedBehaviors.has(computed)).toBe(false);
-		expect(state2.dependedBehaviors.has(computed)).toBe(false);
+		expect(state1.dependedDynamics.has(computed)).toBe(false);
+		expect(state2.dependedDynamics.has(computed)).toBe(false);
 	});
 
 	it("should track dependencies when active", () => {
@@ -61,8 +61,8 @@ describe("ComputedBehavior", () => {
 		const source2 = timeline.source<number>();
 		const state1 = timeline.state(0, source1);
 		const state2 = timeline.state(0, source2);
-		// Create a computed behavior that depends on two states
-		const computed = new ComputedBehavior(
+		// Create a computed dynamic that depends on two states
+		const computed = new ComputedDynamic(
 			timeline,
 			() => state1.read() + state2.read(),
 		);
@@ -79,8 +79,8 @@ describe("ComputedBehavior", () => {
 		expect(computed.dependencies?.size).toBe(2);
 		expect(computed.dependencies?.has(state1)).toBe(true);
 		expect(computed.dependencies?.has(state2)).toBe(true);
-		expect(state1.dependedBehaviors.has(computed)).toBe(true);
-		expect(state2.dependedBehaviors.has(computed)).toBe(true);
+		expect(state1.dependedDynamics.has(computed)).toBe(true);
+		expect(state2.dependedDynamics.has(computed)).toBe(true);
 
 		// Clean up
 		unsubscribe();
@@ -92,15 +92,15 @@ describe("ComputedBehavior", () => {
 		const state1 = timeline.state(0, source1);
 		const state2 = timeline.state(0, source2);
 
-		// Create a computed behavior that will be used inside another computed behavior
-		const innerComputed = new ComputedBehavior(
+		// Create a computed dynamic that will be used inside another computed dynamic
+		const innerComputed = new ComputedDynamic(
 			timeline,
 			() => state1.read() * 2, // Double the value of state1
 		);
 		innerComputed.updated.on(() => {});
 
-		// Create an outer computed behavior that uses the inner computed behavior
-		const outerComputed = new ComputedBehavior(
+		// Create an outer computed dynamic that uses the inner computed dynamic
+		const outerComputed = new ComputedDynamic(
 			timeline,
 			() => innerComputed.read() + state2.read(), // Use innerComputed + state2
 		);
@@ -114,10 +114,10 @@ describe("ComputedBehavior", () => {
 		expect(outerComputed.dependencies?.has(state2)).toBe(true);
 		expect(innerComputed.dependencies?.has(state1)).toBe(true);
 
-		// Verify dependedBehaviors
-		expect(innerComputed.dependedBehaviors.has(outerComputed)).toBe(true);
-		expect(state1.dependedBehaviors.has(innerComputed)).toBe(true);
-		expect(state2.dependedBehaviors.has(outerComputed)).toBe(true);
+		// Verify dependedDynamics
+		expect(innerComputed.dependedDynamics.has(outerComputed)).toBe(true);
+		expect(state1.dependedDynamics.has(innerComputed)).toBe(true);
+		expect(state2.dependedDynamics.has(outerComputed)).toBe(true);
 
 		// Update state1 and verify the update propagates through the chain
 		source1.emit(5);

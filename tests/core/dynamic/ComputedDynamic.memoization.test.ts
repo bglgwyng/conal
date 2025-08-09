@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ComputedBehavior } from "../../../src/core/behavior/ComputedBehavior";
+import { ComputedDynamic } from "../../../src/core/dynamic/ComputedDynamic";
 import { Timeline } from "../../../src/Timeline";
 
-describe("ComputedBehavior - Memoization", () => {
+describe("ComputedDynamic - Memoization", () => {
 	let timeline: Timeline;
 
 	beforeEach(() => {
@@ -16,7 +16,7 @@ describe("ComputedBehavior - Memoization", () => {
 			return state.read() * 2;
 		});
 
-		const computed = new ComputedBehavior(timeline, computeFn);
+		const computed = new ComputedDynamic(timeline, computeFn);
 
 		// First read - should compute the value
 		expect(computed.read()).toBe(0);
@@ -44,12 +44,12 @@ describe("ComputedBehavior - Memoization", () => {
 		const state = timeline.state(1, source);
 		const mockFn = vi.fn(() => 42);
 
-		const computed = new ComputedBehavior(timeline, () => {
+		const computed = new ComputedDynamic(timeline, () => {
 			const stateValue = state.read();
 			return mockFn() + stateValue; // Mock function + state value
 		});
 
-		// Activate the computed behavior to enable dependency tracking
+		// Activate the computed dynamic to enable dependency tracking
 		computed.updated.on(() => {});
 
 		// Initial read - fn should be called once

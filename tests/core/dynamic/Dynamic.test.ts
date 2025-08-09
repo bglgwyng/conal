@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { Timeline } from "../../../src/Timeline";
 
-describe("Behavior.on", () => {
+describe("Dynamic.on", () => {
 	let timeline: Timeline;
 
 	beforeEach(() => {
@@ -21,7 +21,7 @@ describe("Behavior.on", () => {
 		expect(transformedState.read()).toBe("value: 0");
 	});
 
-	it("should create state that updates when source behavior updates", () => {
+	it("should create state that updates when source dynamic updates", () => {
 		const source = timeline.source<number>();
 		const state = timeline.state(5, source);
 
@@ -105,7 +105,7 @@ describe("Behavior.on", () => {
 		dispose();
 	});
 
-	it("should work with multiple transformations on same behavior", () => {
+	it("should work with multiple transformations on same dynamic", () => {
 		const source = timeline.source<number>();
 		const state = timeline.state(10, source);
 

@@ -1,9 +1,9 @@
 import type { Timeline } from "../../Timeline";
 import { just, type Maybe } from "../../utils/Maybe";
 import type { Event } from "../event/Event";
-import { Behavior } from "./Behavior";
+import { Dynamic } from "./Dynamic";
 
-export class State<T> extends Behavior<T> {
+export class State<T> extends Dynamic<T> {
 	public value: T;
 	public maybeNextValue: Maybe<T>;
 

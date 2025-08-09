@@ -1,8 +1,8 @@
 import type { Timeline } from "../../Timeline";
 import type { Event } from "../event/Event";
-import { Behavior } from "./Behavior";
+import { Dynamic } from "./Dynamic";
 
-export class ConstantBehavior<T> extends Behavior<T> {
+export class ConstantDynamic<T> extends Dynamic<T> {
 	public updated: Event<T>;
 	constructor(
 		public timeline: Timeline,

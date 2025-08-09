@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { State } from "../../../src/core/behavior/State";
+import type { State } from "../../../src/core/dynamic/State";
 import type { Event } from "../../../src/core/event/Event";
 import { MergedEvent } from "../../../src/core/event/MergedEvent";
 import type { Source } from "../../../src/core/event/Source";

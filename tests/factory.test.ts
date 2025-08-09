@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Behavior } from "../src/Behavior";
+import { Dynamic } from "../src/Dynamic";
 import { Event } from "../src/Event";
 import {
 	build,
@@ -59,13 +59,13 @@ describe("Factory Functions", () => {
 	});
 
 	describe("state()", () => {
-		it("should create a Behavior with initial value", () => {
+		it("should create a Dynamic with initial value", () => {
 			const result = build(timeline, () => {
 				const [updateEvent] = source<number>();
 				return state(42, updateEvent);
 			});
 
-			expect(result).toBeInstanceOf(Behavior);
+			expect(result).toBeInstanceOf(Dynamic);
 			expect(result.read()).toBe(42);
 		});
 
@@ -103,29 +103,29 @@ describe("Factory Functions", () => {
 	});
 
 	describe("computed()", () => {
-		it("should create a Behavior that computes from other behaviors", () => {
+		it("should create a Dynamic that computes from other dynamics", () => {
 			const result = build(timeline, () => {
 				const [updateEvent1, emit1] = source<number>();
 				const [updateEvent2, emit2] = source<number>();
 				const state1 = state(5, updateEvent1);
 				const state2 = state(10, updateEvent2);
-				const computedBehavior = computed(() => state1.read() + state2.read());
+				const computedDynamic = computed(() => state1.read() + state2.read());
 
-				return { state1, state2, computedBehavior, emit1, emit2 };
+				return { state1, state2, computedDynamic, emit1, emit2 };
 			});
 
-			expect(result.computedBehavior).toBeInstanceOf(Behavior);
-			expect(result.computedBehavior.read()).toBe(15); // 5 + 10
+			expect(result.computedDynamic).toBeInstanceOf(Dynamic);
+			expect(result.computedDynamic.read()).toBe(15); // 5 + 10
 
 			// Update state1 and verify computed value updates
 			result.emit1(20);
 			timeline.proceed();
-			expect(result.computedBehavior.read()).toBe(30); // 20 + 10
+			expect(result.computedDynamic.read()).toBe(30); // 20 + 10
 
 			// Update state2 and verify computed value updates
 			result.emit2(5);
 			timeline.proceed();
-			expect(result.computedBehavior.read()).toBe(25); // 20 + 5
+			expect(result.computedDynamic.read()).toBe(25); // 20 + 5
 		});
 
 		it("should work with constant values", () => {
@@ -133,7 +133,7 @@ describe("Factory Functions", () => {
 				return computed(() => 42);
 			});
 
-			expect(result).toBeInstanceOf(Behavior);
+			expect(result).toBeInstanceOf(Dynamic);
 			expect(result.read()).toBe(42);
 		});
 
@@ -141,20 +141,20 @@ describe("Factory Functions", () => {
 			const result = build(timeline, () => {
 				const [updateEvent, emit] = source<number>();
 				const numberState = state(3, updateEvent);
-				const computedBehavior = computed(() => {
+				const computedDynamic = computed(() => {
 					const value = numberState.read();
 					return value * value + 1; // x^2 + 1
 				});
 
-				return { computedBehavior, emit };
+				return { computedDynamic, emit };
 			});
 
-			expect(result.computedBehavior.read()).toBe(10); // 3^2 + 1 = 10
+			expect(result.computedDynamic.read()).toBe(10); // 3^2 + 1 = 10
 
 			// Update and verify computation
 			result.emit(4);
 			timeline.proceed();
-			expect(result.computedBehavior.read()).toBe(17); // 4^2 + 1 = 17
+			expect(result.computedDynamic.read()).toBe(17); // 4^2 + 1 = 17
 		});
 
 		it("should throw when no active timeline", () => {
@@ -261,14 +261,14 @@ describe("Factory Functions", () => {
 	});
 
 	describe("switchable()", () => {
-		it("should create an Event that switches between events based on behavior", () => {
+		it("should create an Event that switches between events based on dynamic", () => {
 			const result = build(timeline, () => {
 				const [event1, emit1] = source<string>();
 				const [event2, emit2] = source<string>();
 				const [switchEvent, emitSwitch] = source<Event<string>>();
 
-				const switchBehavior = state(event1, switchEvent);
-				const switchableEvent = switchable(switchBehavior);
+				const switchDynamic = state(event1, switchEvent);
+				const switchableEvent = switchable(switchDynamic);
 
 				return { switchableEvent, emit1, emit2, emitSwitch, event1, event2 };
 			});
@@ -305,8 +305,8 @@ describe("Factory Functions", () => {
 				const [stringEvent, emitString] = source<string>();
 				const [switchEvent, emitSwitch] = source<Event<any>>();
 
-				const switchBehavior = state<Event<any>>(numberEvent, switchEvent);
-				const switchableEvent = switchable(switchBehavior);
+				const switchDynamic = state<Event<any>>(numberEvent, switchEvent);
+				const switchableEvent = switchable(switchDynamic);
 
 				return {
 					switchableEvent,
@@ -342,8 +342,8 @@ describe("Factory Functions", () => {
 				const [event3, emit3] = source<string>();
 				const [switchEvent, emitSwitch] = source<Event<string>>();
 
-				const switchBehavior = state(event1, switchEvent);
-				const switchableEvent = switchable(switchBehavior);
+				const switchDynamic = state(event1, switchEvent);
+				const switchableEvent = switchable(switchDynamic);
 
 				return {
 					switchableEvent,
@@ -385,17 +385,17 @@ describe("Factory Functions", () => {
 			expect(callback).toHaveBeenLastCalledWith("back to first");
 		});
 
-		it("should work with computed behaviors 2", () => {
+		it("should work with computed dynamics 2", () => {
 			build(timeline);
 			const [event1, emit1] = source<number>();
 			const [event2, emit2] = source<number>();
 			const [toggleEvent, emitToggle] = source<boolean>();
 
-			const toggleBehavior = state(true, toggleEvent);
-			const eventBehavior = computed(() =>
-				toggleBehavior.read() ? event1 : event2,
+			const toggleDynamic = state(true, toggleEvent);
+			const eventDynamic = computed(() =>
+				toggleDynamic.read() ? event1 : event2,
 			);
-			const switchableEvent = switchable(eventBehavior);
+			const switchableEvent = switchable(eventDynamic);
 
 			const callback = vi.fn();
 			switchableEvent.on(callback);
@@ -431,8 +431,8 @@ describe("Factory Functions", () => {
 			// Emit to event1 before creating switchable
 			emit1("initial value");
 
-			const switchBehavior = state(event1, switchEvent);
-			const switchableEvent = switchable(switchBehavior);
+			const switchDynamic = state(event1, switchEvent);
+			const switchableEvent = switchable(switchDynamic);
 
 			const callback = vi.fn();
 			switchableEvent.on(callback);
@@ -452,14 +452,14 @@ describe("Factory Functions", () => {
 		it("should allow factory functions inside build", () => {
 			const result = build(timeline, () => {
 				const [event, emit] = source<string>();
-				const behavior = state("initial", event);
-				return { event, emit, behavior };
+				const dynamic = state("initial", event);
+				return { event, emit, dynamic };
 			});
 
 			expect(result.event).toBeInstanceOf(Event);
 			expect(typeof result.emit).toBe("function");
-			expect(result.behavior).toBeInstanceOf(Behavior);
-			expect(result.behavior.read()).toBe("initial");
+			expect(result.dynamic).toBeInstanceOf(Dynamic);
+			expect(result.dynamic.read()).toBe("initial");
 		});
 
 		it("should handle nested builds", () => {

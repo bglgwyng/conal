@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { State } from "../../../src/core/behavior/State";
+import { State } from "../../../src/core/dynamic/State";
 import type { Event } from "../../../src/core/event/Event";
 import { Source } from "../../../src/core/event/Source";
 import { SwitchableEvent } from "../../../src/core/event/SwitchableEvent";
@@ -7,7 +7,7 @@ import { Timeline } from "../../../src/Timeline";
 
 describe("SwitchableEvent", () => {
 	let timeline: Timeline;
-	let behavior: State<Event<number>>;
+	let dynamic: State<Event<number>>;
 	let source1: Source<number>;
 	let source2: Source<number>;
 	let switchEvent: Source<Event<number>>;
@@ -23,11 +23,11 @@ describe("SwitchableEvent", () => {
 		// Create a switch event to change between sources
 		switchEvent = new Source<Event<number>>(timeline);
 
-		// Create a State behavior that holds the current source
-		behavior = new State<Event<number>>(timeline, source1, switchEvent);
+		// Create a State dynamic that holds the current source
+		dynamic = new State<Event<number>>(timeline, source1, switchEvent);
 
 		// Create the SwitchableEvent that will switch between sources
-		switchableEvent = new SwitchableEvent(timeline, behavior, (x) => x);
+		switchableEvent = new SwitchableEvent(timeline, dynamic, (x) => x);
 	});
 
 	it("should forward events from the current source", () => {
@@ -41,7 +41,7 @@ describe("SwitchableEvent", () => {
 		expect(callback).toHaveBeenCalledWith(42);
 	});
 
-	it("should switch to a new source when behavior updates", () => {
+	it("should switch to a new source when dynamic updates", () => {
 		const callback = vi.fn();
 		switchableEvent.on(callback);
 

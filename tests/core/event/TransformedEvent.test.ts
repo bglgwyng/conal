@@ -90,7 +90,7 @@ describe("TransformedEvent", () => {
 		expect(mockCallback).toHaveBeenCalledWith("Number: 7");
 	});
 
-	describe("caching behavior", () => {
+	describe("caching dynamic", () => {
 		it("should cache emitted value and not recompute on multiple getEmission calls", () => {
 			const transformFn = vitest.fn((n: number) => `Number: ${n}`);
 			transformedEvent = new TransformedEvent(

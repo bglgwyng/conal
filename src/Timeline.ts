@@ -1,6 +1,6 @@
-import type { Behavior } from "./core/behavior/Behavior";
-import type { ComputedBehavior } from "./core/behavior/ComputedBehavior";
-import { State } from "./core/behavior/State";
+import type { ComputedDynamic } from "./core/dynamic/ComputedDynamic";
+import type { Dynamic } from "./core/dynamic/Dynamic";
+import { State } from "./core/dynamic/State";
 import type { Event } from "./core/event/Event";
 import { Never } from "./core/event/Never";
 import { Source } from "./core/event/Source";
@@ -101,10 +101,10 @@ export class Timeline {
 				for (const state of event.dependenedStates) {
 					state.prepareUpdate();
 
-					for (const behavior of collectDependendedBehaviors(
-						state.dependedBehaviors,
+					for (const dynamic of collectDependendedDynamics(
+						state.dependedDynamics,
 					)) {
-						pushEventToQueue(behavior.updated);
+						pushEventToQueue(dynamic.updated);
 					}
 				}
 
@@ -147,14 +147,14 @@ export class Timeline {
 			eventQueue.add(event);
 		}
 
-		function* collectDependendedBehaviors(
-			behaviors: Iterable<ComputedBehavior<unknown>>,
-		): IterableIterator<ComputedBehavior<unknown>> {
-			for (const behavior of behaviors) {
-				assert(behavior.updated.isActive, "Behavior is not active");
+		function* collectDependendedDynamics(
+			dynamics: Iterable<ComputedDynamic<unknown>>,
+		): IterableIterator<ComputedDynamic<unknown>> {
+			for (const dynamic of dynamics) {
+				assert(dynamic.updated.isActive, "Dynamic is not active");
 
-				yield behavior;
-				yield* collectDependendedBehaviors(behavior.dependedBehaviors);
+				yield dynamic;
+				yield* collectDependendedDynamics(dynamic.dependedDynamics);
 			}
 		}
 	}
@@ -175,21 +175,21 @@ export class Timeline {
 		});
 	}
 
-	#readTrackings: Set<Behavior<any>>[] = [];
+	#readTrackings: Set<Dynamic<any>>[] = [];
 
 	// @internal
-	reportRead(behavior: Behavior<any>) {
-		this.#readTrackings.at(-1)?.add(behavior);
+	reportRead(dynamic: Dynamic<any>) {
+		this.#readTrackings.at(-1)?.add(dynamic);
 	}
 
 	// @internal
 	withTrackingRead<T>(
 		fn: () => T,
-	): readonly [value: T, dependencies: Set<Behavior<any>>] {
+	): readonly [value: T, dependencies: Set<Dynamic<any>>] {
 		this.#readTrackings.push(new Set());
 
 		let value: T;
-		let dependencies: Set<Behavior<any>>;
+		let dependencies: Set<Dynamic<any>>;
 		try {
 			value = fn();
 		} finally {

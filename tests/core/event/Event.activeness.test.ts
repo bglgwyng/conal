@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { State } from "../../../src/core/behavior/State";
+import { State } from "../../../src/core/dynamic/State";
 import { Source } from "../../../src/core/event/Source";
 import { Timeline } from "../../../src/Timeline";
 
-describe("Event isActive behavior", () => {
+describe("Event isActive dynamic", () => {
 	let timeline: Timeline;
 	let source: Source<number>;
 	let state: State<number>;

@@ -1,6 +1,6 @@
 import { assert } from "../../utils/assert";
 import { just, type Maybe } from "../../utils/Maybe";
-import type { State } from "../behavior/State";
+import type { State } from "../dynamic/State";
 import { Node } from "../Node";
 
 export abstract class Event<T> extends Node {
