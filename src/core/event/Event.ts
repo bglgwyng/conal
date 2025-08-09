@@ -52,7 +52,7 @@ export abstract class Event<T> extends Node {
 	}
 
 	// @internal
-	abstract getEmittedValue(): Maybe<T>;
+	abstract getEmission(): Maybe<T>;
 
 	// @internal
 	writeOn(state: State<T>) {
@@ -73,37 +73,37 @@ export abstract class Event<T> extends Node {
 }
 
 export class EffectEvent<T> extends Event<T> {
-	maybeLastEmitedValue: Maybe<T>;
+	maybeLastEmission: Maybe<T>;
 
 	emit(value: T) {
-		this.maybeLastEmitedValue = just(value);
+		this.maybeLastEmission = just(value);
 
 		this.timeline.needCommit(this);
 	}
 
-	getEmittedValue() {
-		return this.maybeLastEmitedValue;
+	getEmission() {
+		return this.maybeLastEmission;
 	}
 
 	commit() {
-		this.maybeLastEmitedValue = undefined;
+		this.maybeLastEmission = undefined;
 	}
 }
 
 export class Emmittable<T> extends Event<T> {
-	maybeLastEmitedValue: Maybe<T>;
+	maybeLastEmission: Maybe<T>;
 
 	emit(value: T) {
-		this.maybeLastEmitedValue = just(value);
+		this.maybeLastEmission = just(value);
 
 		this.timeline.needCommit(this);
 	}
 
-	getEmittedValue() {
-		return this.maybeLastEmitedValue;
+	getEmission() {
+		return this.maybeLastEmission;
 	}
 
 	commit() {
-		this.maybeLastEmitedValue = undefined;
+		this.maybeLastEmission = undefined;
 	}
 }

@@ -23,7 +23,7 @@ export class State<T> extends Behavior<T> {
 	}
 
 	readNextValue(): { value: T; isUpdated: boolean } {
-		const maybeValue = this.updated.getEmittedValue();
+		const maybeValue = this.updated.getEmission();
 		if (!maybeValue) return { value: this.value, isUpdated: false };
 
 		const value = maybeValue();
@@ -33,7 +33,7 @@ export class State<T> extends Behavior<T> {
 	}
 
 	prepareUpdate() {
-		this.maybeNextValue = this.updated.getEmittedValue();
+		this.maybeNextValue = this.updated.getEmission();
 		this.timeline.needCommit(this);
 	}
 

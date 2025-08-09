@@ -7,7 +7,7 @@ export class UpdateEvent<T> extends Event<T> {
 		super(computed.timeline);
 	}
 
-	getEmittedValue() {
+	getEmission() {
 		const { value, isUpdated } = this.computed.readNextValue();
 		if (!isUpdated) return;
 

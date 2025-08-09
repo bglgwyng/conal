@@ -91,7 +91,7 @@ describe("TransformedEvent", () => {
 	});
 
 	describe("caching behavior", () => {
-		it("should cache emitted value and not recompute on multiple getEmittedValue calls", () => {
+		it("should cache emitted value and not recompute on multiple getEmission calls", () => {
 			const transformFn = vitest.fn((n: number) => `Number: ${n}`);
 			transformedEvent = new TransformedEvent(
 				timeline,
@@ -102,12 +102,12 @@ describe("TransformedEvent", () => {
 			parentEvent.emit(42);
 
 			// First call should compute the value
-			const firstResult = transformedEvent.getEmittedValue();
+			const firstResult = transformedEvent.getEmission();
 			expect(transformFn).toHaveBeenCalledTimes(1);
 			expect(firstResult?.()).toBe("Number: 42");
 
 			// Second call should use cached value, not recompute
-			const secondResult = transformedEvent.getEmittedValue();
+			const secondResult = transformedEvent.getEmission();
 			expect(transformFn).toHaveBeenCalledTimes(1); // Still only called once
 			expect(secondResult?.()).toBe("Number: 42");
 
@@ -115,7 +115,7 @@ describe("TransformedEvent", () => {
 			expect(firstResult).toBe(secondResult);
 		});
 
-		it("should clear cache after commit and recompute on next getEmittedValue", () => {
+		it("should clear cache after commit and recompute on next getEmission", () => {
 			const transformFn = vitest.fn((n: number) => `Number: ${n}`);
 			transformedEvent = new TransformedEvent(
 				timeline,
@@ -126,7 +126,7 @@ describe("TransformedEvent", () => {
 			parentEvent.emit(42);
 
 			// First computation
-			const firstResult = transformedEvent.getEmittedValue();
+			const firstResult = transformedEvent.getEmission();
 			expect(transformFn).toHaveBeenCalledTimes(1);
 			expect(firstResult?.()).toBe("Number: 42");
 
@@ -137,7 +137,7 @@ describe("TransformedEvent", () => {
 			parentEvent.emit(100);
 
 			// Should recompute since cache was cleared
-			const secondResult = transformedEvent.getEmittedValue();
+			const secondResult = transformedEvent.getEmission();
 			expect(transformFn).toHaveBeenCalledTimes(2); // Called twice now
 			expect(secondResult?.()).toBe("Number: 100");
 		});
@@ -153,21 +153,21 @@ describe("TransformedEvent", () => {
 			parentEvent.emit(42);
 
 			// First call caches the value
-			const firstResult = transformedEvent.getEmittedValue();
+			const firstResult = transformedEvent.getEmission();
 			expect(firstResult?.()).toBe("Number: 42");
 			expect(transformFn).toHaveBeenCalledTimes(1);
 
 			// Verify cache exists by calling again (should not recompute)
-			const cachedResult = transformedEvent.getEmittedValue();
+			const cachedResult = transformedEvent.getEmission();
 			expect(cachedResult).toBe(firstResult); // Same reference
 			expect(transformFn).toHaveBeenCalledTimes(1); // Still only 1 call
 
 			// Call commit - this should clear maybeEmittedValue
 			transformedEvent.commit();
 
-			// Now getEmittedValue should recompute even with same parent value
+			// Now getEmission should recompute even with same parent value
 			// because maybeEmittedValue was cleared
-			const afterCommitResult = transformedEvent.getEmittedValue();
+			const afterCommitResult = transformedEvent.getEmission();
 			expect(afterCommitResult?.()).toBe("Number: 42"); // Same value
 			expect(afterCommitResult).not.toBe(firstResult); // Different reference
 			expect(transformFn).toHaveBeenCalledTimes(2); // Recomputed
@@ -184,12 +184,12 @@ describe("TransformedEvent", () => {
 			// Don't emit anything to parent
 
 			// Should return undefined and not call transform function
-			const result = transformedEvent.getEmittedValue();
+			const result = transformedEvent.getEmission();
 			expect(result).toBeUndefined();
 			expect(transformFn).not.toHaveBeenCalled();
 
 			// Multiple calls should still not cache anything
-			const result2 = transformedEvent.getEmittedValue();
+			const result2 = transformedEvent.getEmission();
 			expect(result2).toBeUndefined();
 			expect(transformFn).not.toHaveBeenCalled();
 		});
@@ -208,12 +208,12 @@ describe("TransformedEvent", () => {
 			parentEvent.emit(42); // Even number, should be discarded
 
 			// Should return undefined and not cache
-			const result = transformedEvent.getEmittedValue();
+			const result = transformedEvent.getEmission();
 			expect(result).toBeUndefined();
 			expect(transformFn).toHaveBeenCalledTimes(1);
 
 			// Second call should call transform function again (no caching)
-			const result2 = transformedEvent.getEmittedValue();
+			const result2 = transformedEvent.getEmission();
 			expect(result2).toBeUndefined();
 			expect(transformFn).toHaveBeenCalledTimes(2);
 		});
@@ -231,18 +231,18 @@ describe("TransformedEvent", () => {
 
 			// First emit even number (discarded)
 			parentEvent.emit(42);
-			const discardedResult = transformedEvent.getEmittedValue();
+			const discardedResult = transformedEvent.getEmission();
 			expect(discardedResult).toBeUndefined();
 			expect(transformFn).toHaveBeenCalledTimes(1);
 
 			// Then emit odd number (should be cached)
 			parentEvent.emit(7);
-			const successResult1 = transformedEvent.getEmittedValue();
+			const successResult1 = transformedEvent.getEmission();
 			expect(successResult1?.()).toBe("Number: 7");
 			expect(transformFn).toHaveBeenCalledTimes(2);
 
 			// Second call should use cache
-			const successResult2 = transformedEvent.getEmittedValue();
+			const successResult2 = transformedEvent.getEmission();
 			expect(successResult2?.()).toBe("Number: 7");
 			expect(transformFn).toHaveBeenCalledTimes(2); // Still only 2 calls
 			expect(successResult1).toBe(successResult2);
@@ -262,11 +262,11 @@ describe("TransformedEvent", () => {
 			parentEvent.emit(42);
 
 			// Should throw error and not cache
-			expect(() => transformedEvent.getEmittedValue()).toThrow("Test error");
+			expect(() => transformedEvent.getEmission()).toThrow("Test error");
 			expect(transformFn).toHaveBeenCalledTimes(1);
 
 			// Second call should throw again (no caching of errors)
-			expect(() => transformedEvent.getEmittedValue()).toThrow("Test error");
+			expect(() => transformedEvent.getEmission()).toThrow("Test error");
 			expect(transformFn).toHaveBeenCalledTimes(2);
 		});
 
@@ -288,21 +288,21 @@ describe("TransformedEvent", () => {
 			parentEvent.emit(42);
 
 			// First call computes both levels
-			const result1 = transformed2.getEmittedValue();
+			const result1 = transformed2.getEmission();
 			expect(result1?.()).toBe("Number: 42!");
 			expect(transformFn1).toHaveBeenCalledTimes(1);
 			expect(transformFn2).toHaveBeenCalledTimes(1);
 
 			// Second call should use both caches
-			const result2 = transformed2.getEmittedValue();
+			const result2 = transformed2.getEmission();
 			expect(result2?.()).toBe("Number: 42!");
 			expect(transformFn1).toHaveBeenCalledTimes(1); // Still cached
 			expect(transformFn2).toHaveBeenCalledTimes(1); // Still cached
 			expect(result1).toBe(result2);
 
 			// Accessing intermediate result should also be cached
-			const intermediate1 = transformed1.getEmittedValue();
-			const intermediate2 = transformed1.getEmittedValue();
+			const intermediate1 = transformed1.getEmission();
+			const intermediate2 = transformed1.getEmission();
 			expect(intermediate1?.()).toBe("Number: 42");
 			expect(intermediate1).toBe(intermediate2);
 			expect(transformFn1).toHaveBeenCalledTimes(1); // Still cached

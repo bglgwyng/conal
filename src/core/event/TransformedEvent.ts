@@ -14,11 +14,11 @@ export class TransformedEvent<T, U> extends Event<T> {
 		super(timeline);
 	}
 
-	getEmittedValue() {
+	getEmission() {
 		const { maybeEmittedValue } = this;
 		if (maybeEmittedValue) return maybeEmittedValue();
 
-		const maybeParentEmittedValue = this.parent.getEmittedValue();
+		const maybeParentEmittedValue = this.parent.getEmission();
 		if (!maybeParentEmittedValue) return;
 
 		try {

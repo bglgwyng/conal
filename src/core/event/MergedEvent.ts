@@ -13,13 +13,13 @@ export class MergedEvent<L, R> extends Event<These<L, R>> {
 		super(timeline);
 	}
 
-	getEmittedValue() {
+	getEmission() {
 		const { maybeEmittedValue } = this;
 		if (maybeEmittedValue) return maybeEmittedValue();
 
 		const { left, right } = this;
-		const maybeLeft = left.getEmittedValue();
-		const maybeRight = right.getEmittedValue();
+		const maybeLeft = left.getEmission();
+		const maybeRight = right.getEmission();
 
 		let result: Maybe<These<L, R>>;
 

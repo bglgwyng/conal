@@ -75,7 +75,7 @@ export class Timeline {
 
 				let maybeValue: Maybe<unknown>;
 				try {
-					maybeValue = event.getEmittedValue();
+					maybeValue = event.getEmission();
 				} catch (ex) {
 					console.error("Event failed", ex);
 					continue;

@@ -12,8 +12,8 @@ export class SwitchableEvent<U, T> extends Event<T> {
 		super(timeline);
 	}
 
-	getEmittedValue(): Maybe<T> {
-		return this.extractEvent(this.behavior.read()).getEmittedValue();
+	getEmission(): Maybe<T> {
+		return this.extractEvent(this.behavior.read()).getEmission();
 	}
 
 	activate(): void {

@@ -6,7 +6,7 @@ export class Source<T> extends Emmittable<T> {
 		const { timeline } = this;
 		assert(!timeline.isProceeding, "Timeline is proceeding");
 
-		if (this.maybeLastEmitedValue) {
+		if (this.maybeLastEmission) {
 			// TODO: warn
 			timeline.proceed();
 		}
