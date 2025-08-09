@@ -18,11 +18,13 @@ export class SwitchableEvent<U, T> extends Event<T> {
 
 	activate(): void {
 		this.dispose = this.listen(this.extractEvent(this.behavior.read()));
-		[, this.disposeBehaviorUpdated] = this.behavior.updated.on((event) => {
-			// biome-ignore lint/style/noNonNullAssertion: `dispose` is set in activate
-			this.dispose!();
-			this.dispose = this.listen(this.extractEvent(event));
-		});
+		[, this.disposeBehaviorUpdated] = this.behavior.updated.adjustOn(
+			(event) => {
+				// biome-ignore lint/style/noNonNullAssertion: `dispose` is set in activate
+				this.dispose!();
+				this.dispose = this.listen(this.extractEvent(event));
+			},
+		);
 	}
 
 	deactivate(): void {

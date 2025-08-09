@@ -65,6 +65,7 @@ export class Timeline {
 
 		const eventQueue = new DedupQueue<Event<unknown>>();
 		const processedEvents: Set<Event<unknown>> = new Set();
+		const effects: (() => unknown)[] = [];
 
 		try {
 			for (const source of this.#emittingSources) {
@@ -107,15 +108,16 @@ export class Timeline {
 					}
 				}
 
-				for (const [runEffect, effectEvent] of event.effects) {
+				effects.push(...event.effects.map((f) => () => f(value)));
+				for (const [runAdjustment, adjustmentEvent] of event.adjustments) {
 					try {
 						this.#isRunningEffect = true;
-						const result = runEffect(value);
+						const result = runAdjustment(value);
 
-						if (!effectEvent.isActive) continue;
-						effectEvent.emit(result);
+						if (!adjustmentEvent.isActive) continue;
+						adjustmentEvent.emit(result);
 
-						eventQueue.add(effectEvent);
+						eventQueue.add(adjustmentEvent);
 					} catch (ex) {
 						console.warn("Effect failed", ex);
 					} finally {
@@ -133,6 +135,10 @@ export class Timeline {
 		}
 
 		this.#timestamp = nextTimestamp;
+
+		for (const runEffect of effects) {
+			runEffect();
+		}
 
 		function pushEventToQueue(event: Event<unknown>) {
 			if (eventQueue.has(event)) return;

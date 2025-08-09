@@ -58,7 +58,7 @@ describe("SwitchableEvent", () => {
 
 	it("should not receive events after unsubscribing", () => {
 		const callback = vi.fn();
-		const [, unsubscribe] = switchableEvent.on(callback);
+		const unsubscribe = switchableEvent.on(callback);
 
 		// Emit and verify
 		source1.emit(1);
@@ -89,7 +89,7 @@ describe("SwitchableEvent", () => {
 
 	it("should clean up old source when switching", () => {
 		const callback = vi.fn();
-		switchableEvent.on(callback);
+		switchableEvent.adjustOn(callback);
 
 		// Switch to second source
 		switchEvent.emit(source2);

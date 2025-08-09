@@ -18,8 +18,12 @@ export class Event<T> {
 		return this.internalEvent.isActive;
 	}
 
-	on<U>(fn: (value: T) => U): readonly [Event<U>, () => void] {
-		const [effectEvent, dispose] = this.internalEvent.on(fn);
+	on<U>(fn: (value: T) => U): () => void {
+		return this.internalEvent.on(fn);
+	}
+
+	adjustOn<U>(fn: (value: T) => U): readonly [Event<U>, () => void] {
+		const [effectEvent, dispose] = this.internalEvent.adjustOn(fn);
 
 		return [new Event(effectEvent), dispose];
 	}

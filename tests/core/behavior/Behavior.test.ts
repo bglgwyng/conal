@@ -13,7 +13,7 @@ describe("Behavior.on", () => {
 		const state = timeline.state(0, source);
 
 		// Transform number to string
-		const [transformedState, dispose] = state.on(
+		const [transformedState, dispose] = state.adjustOn(
 			(value: number) => `value: ${value}`,
 		);
 
@@ -26,7 +26,9 @@ describe("Behavior.on", () => {
 		const state = timeline.state(5, source);
 
 		// Transform number by doubling it
-		const [doubledState, dispose] = state.on((value: number) => value * 2);
+		const [doubledState, dispose] = state.adjustOn(
+			(value: number) => value * 2,
+		);
 
 		expect(doubledState.read()).toBe(10); // 5 * 2
 
@@ -44,7 +46,7 @@ describe("Behavior.on", () => {
 		const state = timeline.state("hello", source);
 
 		// Transform string to uppercase
-		const [upperState, dispose] = state.on((value: string) =>
+		const [upperState, dispose] = state.adjustOn((value: string) =>
 			value.toUpperCase(),
 		);
 
@@ -62,7 +64,7 @@ describe("Behavior.on", () => {
 		const source = timeline.source<number>();
 		const state = timeline.state(1, source);
 
-		const [transformedState, dispose] = state.on(
+		const [transformedState, dispose] = state.adjustOn(
 			(value: number) => value + 100,
 		);
 
@@ -89,7 +91,7 @@ describe("Behavior.on", () => {
 		const state = timeline.state({ x: 1, y: 2 }, source);
 
 		// Transform object to calculate distance from origin
-		const [distanceState, dispose] = state.on((point) =>
+		const [distanceState, dispose] = state.adjustOn((point) =>
 			Math.sqrt(point.x * point.x + point.y * point.y),
 		);
 
@@ -107,11 +109,13 @@ describe("Behavior.on", () => {
 		const source = timeline.source<number>();
 		const state = timeline.state(10, source);
 
-		const [doubledState, dispose1] = state.on((value: number) => value * 2);
-		const [stringState, dispose2] = state.on(
+		const [doubledState, dispose1] = state.adjustOn(
+			(value: number) => value * 2,
+		);
+		const [stringState, dispose2] = state.adjustOn(
 			(value: number) => `Number: ${value}`,
 		);
-		const [negatedState, dispose3] = state.on((value: number) => -value);
+		const [negatedState, dispose3] = state.adjustOn((value: number) => -value);
 
 		expect(doubledState.read()).toBe(20);
 		expect(stringState.read()).toBe("Number: 10");
@@ -135,7 +139,7 @@ describe("Behavior.on", () => {
 		const state = timeline.state(1, source);
 
 		// Transformation that throws for certain values
-		const [transformedState, dispose] = state.on((value: number) => {
+		const [transformedState, dispose] = state.adjustOn((value: number) => {
 			if (value === 0) throw new Error("Division by zero");
 			return 10 / value;
 		});
@@ -157,10 +161,10 @@ describe("Behavior.on", () => {
 		const source = timeline.source<number>();
 		const state = timeline.state(42, source);
 
-		const [transformedState1, dispose1] = state.on((value: number) =>
+		const [transformedState1, dispose1] = state.adjustOn((value: number) =>
 			value.toString(),
 		);
-		const [transformedState2, dispose2] = state.on((value: number) =>
+		const [transformedState2, dispose2] = state.adjustOn((value: number) =>
 			value.toString(),
 		);
 

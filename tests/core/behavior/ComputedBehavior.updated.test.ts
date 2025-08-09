@@ -23,7 +23,7 @@ describe("ComputedBehavior - updated event", () => {
 
 		// Set up a spy to track the updated event
 		const updateSpy = vi.fn();
-		const [, unsubscribe] = computed.updated.on(updateSpy);
+		const unsubscribe = computed.updated.on(updateSpy);
 
 		// Initial read to set up dependencies
 		expect(computed.read()).toBe(0);
@@ -72,7 +72,7 @@ describe("ComputedBehavior - updated event", () => {
 
 		// Add an effect to the updated event - this should trigger activate()
 		const updateSpy = vi.fn();
-		const [, unsubscribe] = computed.updated.on(updateSpy);
+		const unsubscribe = computed.updated.on(updateSpy);
 
 		// After adding the effect, dependencies should be tracked due to activate() call
 		expect(computed.dependencies).toBeDefined();
@@ -169,7 +169,7 @@ describe("ComputedBehavior - updated event", () => {
 
 		// Add both effect and writeOn
 		const updateSpy = vi.fn();
-		const [, unsubscribeEffect] = computed.updated.on(updateSpy);
+		const [, unsubscribeAdjustment] = computed.updated.adjustOn(updateSpy);
 
 		// Dependencies should be tracked
 		expect(computed.dependencies).toBeDefined();
@@ -178,7 +178,7 @@ describe("ComputedBehavior - updated event", () => {
 		expect(state.dependedBehaviors.has(computed)).toBe(true);
 
 		// Both effect and writeOn should be registered
-		expect(computed.updated.effects.length).toBe(1);
+		expect(computed.updated.adjustments.length).toBe(1);
 		expect(computed.updated.dependenedStates.has(targetState)).toBe(true);
 
 		// Update source
@@ -191,7 +191,7 @@ describe("ComputedBehavior - updated event", () => {
 		expect(targetState.read()).toBe(30);
 
 		// Clean up
-		unsubscribeEffect();
+		unsubscribeAdjustment();
 	});
 
 	it("should call activate and deactivate methods correctly", () => {
@@ -216,7 +216,7 @@ describe("ComputedBehavior - updated event", () => {
 
 		// Add an effect - this should trigger activate()
 		const updateSpy = vi.fn();
-		const [, unsubscribe] = computed.updated.on(updateSpy);
+		const unsubscribe = computed.updated.on(updateSpy);
 
 		// activate() should have been called
 		expect(activateSpy).toHaveBeenCalledTimes(1);
@@ -249,12 +249,12 @@ describe("ComputedBehavior - updated event", () => {
 		const deactivateSpy = vi.spyOn(computed, "deactivate");
 
 		// Add first effect
-		const [, unsubscribe1] = computed.updated.on(() => {});
+		const unsubscribe1 = computed.updated.on(() => {});
 		expect(activateSpy).toHaveBeenCalledTimes(1);
 		expect(deactivateSpy).toHaveBeenCalledTimes(0);
 
 		// Add second effect - should not trigger activate again
-		const [, unsubscribe2] = computed.updated.on(() => {});
+		const unsubscribe2 = computed.updated.on(() => {});
 		expect(activateSpy).toHaveBeenCalledTimes(1);
 		expect(deactivateSpy).toHaveBeenCalledTimes(0);
 
@@ -307,7 +307,7 @@ describe("ComputedBehavior - updated event", () => {
 
 		new TransformedEvent(timeline, computed.updated, (value) => {
 			return { current: computed.read(), next: value };
-		}).on(updateSpy);
+		}).adjustOn(updateSpy);
 
 		source.emit(20);
 		timeline.proceed();

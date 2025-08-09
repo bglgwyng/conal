@@ -14,8 +14,8 @@ export class Behavior<T> {
 
 	read = (): T => withTimeline(this.internal.timeline, this.internal.read);
 
-	on<U>(fn: (value: T) => U): readonly [Behavior<U>, () => void] {
-		const [effectEvent, dispose] = this.internal.on((value) =>
+	adjustOn<U>(fn: (value: T) => U): readonly [Behavior<U>, () => void] {
+		const [effectEvent, dispose] = this.internal.adjustOn((value) =>
 			withTimeline(this.internal.timeline, () => fn(value)),
 		);
 

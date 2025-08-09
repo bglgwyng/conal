@@ -50,7 +50,7 @@ describe("ComputedBehavior - Memoization", () => {
 		});
 
 		// Activate the computed behavior to enable dependency tracking
-		computed.on(() => {});
+		computed.updated.on(() => {});
 
 		// Initial read - fn should be called once
 		expect(computed.read()).toBe(43); // 42 + 1

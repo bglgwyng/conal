@@ -17,8 +17,10 @@ export abstract class Behavior<T> extends Node {
 
 	abstract updated: Event<T>;
 
-	on<U>(fn: (value: T) => U): readonly [state: State<U>, dispose: () => void] {
-		const [effectfulUpdateEvent, dispose] = this.updated.on(fn);
+	adjustOn<U>(
+		fn: (value: T) => U,
+	): readonly [state: State<U>, dispose: () => void] {
+		const [effectfulUpdateEvent, dispose] = this.updated.adjustOn(fn);
 
 		return [
 			this.timeline.state(fn(this.readCurrentValue()), effectfulUpdateEvent),

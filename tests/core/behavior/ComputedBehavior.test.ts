@@ -68,7 +68,7 @@ describe("ComputedBehavior", () => {
 		);
 
 		// Make it active by adding an effect
-		const [, unsubscribe] = computed.updated.on(() => {});
+		const unsubscribe = computed.updated.on(() => {});
 		expect(computed.isActive).toBe(true);
 
 		// Read when active - should track dependencies

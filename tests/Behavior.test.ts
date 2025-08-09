@@ -141,7 +141,7 @@ describe("Behavior", () => {
 				const [event, emit] = source<number>();
 				const behavior = state(10, event);
 
-				const [newBehavior, dispose] = behavior.on((value) => value * 2);
+				const [newBehavior, dispose] = behavior.adjustOn((value) => value * 2);
 
 				expect(newBehavior).toBeInstanceOf(Behavior);
 				expect(typeof dispose).toBe("function");
@@ -153,7 +153,9 @@ describe("Behavior", () => {
 				const [event, emit] = source<number>();
 				const behavior = state(5, event);
 
-				const [doubledBehavior, dispose] = behavior.on((value) => value * 2);
+				const [doubledBehavior, dispose] = behavior.adjustOn(
+					(value) => value * 2,
+				);
 
 				expect(doubledBehavior.read()).toBe(10);
 			});
@@ -164,7 +166,7 @@ describe("Behavior", () => {
 				const [event, emit] = source<number>();
 				const behavior = state(3, event);
 
-				const [squaredBehavior, dispose] = behavior.on(
+				const [squaredBehavior, dispose] = behavior.adjustOn(
 					(value) => value * value,
 				);
 
@@ -187,8 +189,8 @@ describe("Behavior", () => {
 				const [event, emit] = source<number>();
 				const behavior = state(2, event);
 
-				const [doubled, dispose1] = behavior.on((value) => value * 2);
-				const [plusTen, dispose2] = doubled.on((value) => value + 10);
+				const [doubled, dispose1] = behavior.adjustOn((value) => value * 2);
+				const [plusTen, dispose2] = doubled.adjustOn((value) => value + 10);
 
 				expect(plusTen.read()).toBe(14); // (2 * 2) + 10
 
@@ -204,10 +206,12 @@ describe("Behavior", () => {
 				const [event, emit] = source<number>();
 				const behavior = state(42, event);
 
-				const [stringBehavior, dispose1] = behavior.on(
+				const [stringBehavior, dispose1] = behavior.adjustOn(
 					(value) => `Number: ${value}`,
 				);
-				const [booleanBehavior, dispose2] = behavior.on((value) => value > 50);
+				const [booleanBehavior, dispose2] = behavior.adjustOn(
+					(value) => value > 50,
+				);
 
 				expect(stringBehavior.read()).toBe("Number: 42");
 				expect(booleanBehavior.read()).toBe(false);
@@ -230,8 +234,10 @@ describe("Behavior", () => {
 				const [event, emit] = source<Person>();
 				const behavior = state({ name: "Alice", age: 30 }, event);
 
-				const [nameBehavior, dispose1] = behavior.on((person) => person.name);
-				const [isAdultBehavior, dispose2] = behavior.on(
+				const [nameBehavior, dispose1] = behavior.adjustOn(
+					(person) => person.name,
+				);
+				const [isAdultBehavior, dispose2] = behavior.adjustOn(
 					(person) => person.age >= 18,
 				);
 
@@ -251,7 +257,7 @@ describe("Behavior", () => {
 				const [event, emit] = source<number>();
 				const behavior = state(1, event);
 
-				const [transformedBehavior, dispose] = behavior.on(
+				const [transformedBehavior, dispose] = behavior.adjustOn(
 					(value) => value * 10,
 				);
 
@@ -277,7 +283,7 @@ describe("Behavior", () => {
 				const [event, emit] = source<number>();
 				const behavior = state(1, event);
 
-				const [errorBehavior, dispose] = behavior.on((value) => {
+				const [errorBehavior, dispose] = behavior.adjustOn((value) => {
 					if (value === 42) throw new Error("Test error");
 					return value * 2;
 				});
@@ -300,7 +306,7 @@ describe("Behavior", () => {
 				const baseBehavior = state(3, event);
 				const computedBehavior = computed(() => baseBehavior.read() + 1);
 
-				const [doubledComputed, dispose] = computedBehavior.on(
+				const [doubledComputed, dispose] = computedBehavior.adjustOn(
 					(value) => value * 2,
 				);
 
@@ -324,7 +330,9 @@ describe("Behavior", () => {
 				const behavior2 = state(20, event2);
 
 				const sumBehavior = computed(() => behavior1.read() + behavior2.read());
-				const [doubledSum, dispose] = sumBehavior.on((value) => value * 2);
+				const [doubledSum, dispose] = sumBehavior.adjustOn(
+					(value) => value * 2,
+				);
 
 				expect(doubledSum.read()).toBe(60); // (10 + 20) * 2
 
@@ -348,7 +356,7 @@ describe("Behavior", () => {
 				// The behavior should work within the timeline context
 				expect(() => behavior.read()).not.toThrow();
 				expect(() => behavior.updated).not.toThrow();
-				expect(() => behavior.on((x) => x)).not.toThrow();
+				expect(() => behavior.adjustOn((x) => x)).not.toThrow();
 			});
 		});
 	});
