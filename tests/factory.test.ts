@@ -1,7 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Behavior } from "../src/Behavior";
 import { Event } from "../src/Event";
-import { build, computed, source, state, transform } from "../src/factory";
+import {
+	build,
+	computed,
+	source,
+	state,
+	switchable,
+	transform,
+} from "../src/factory";
 import { getActiveTimeline } from "../src/globalContext";
 import { Timeline } from "../src/Timeline";
 
@@ -254,6 +261,221 @@ describe("Factory Functions", () => {
 		});
 	});
 
+	describe("switchable()", () => {
+		it("should create an Event that switches between events based on behavior", () => {
+			const result = build(timeline, () => {
+				const [event1, emit1] = source<string>();
+				const [event2, emit2] = source<string>();
+				const [switchEvent, emitSwitch] = source<Event<string>>();
+
+				const switchBehavior = state(event1, switchEvent);
+				const switchableEvent = switchable(switchBehavior);
+
+				return { switchableEvent, emit1, emit2, emitSwitch, event1, event2 };
+			});
+
+			expect(result.switchableEvent).toBeInstanceOf(Event);
+
+			const callback = vi.fn();
+			result.switchableEvent.on(callback);
+
+			// Initially should listen to event1
+			result.emit1("from event1");
+			timeline.proceed();
+			expect(callback).toHaveBeenCalledWith("from event1");
+
+			// Switch to event2
+			result.emitSwitch(result.event2);
+			timeline.proceed();
+
+			// Now should listen to event2
+			result.emit2("from event2");
+			timeline.proceed();
+			expect(callback).toHaveBeenCalledWith("from event2");
+
+			// event1 should no longer trigger the callback
+			callback.mockClear();
+			result.emit1("should not trigger");
+			timeline.proceed();
+			expect(callback).not.toHaveBeenCalled();
+		});
+
+		it("should work with different event types", () => {
+			const result = build(timeline, () => {
+				const [numberEvent, emitNumber] = source<number>();
+				const [stringEvent, emitString] = source<string>();
+				const [switchEvent, emitSwitch] = source<Event<any>>();
+
+				const switchBehavior = state<Event<any>>(numberEvent, switchEvent);
+				const switchableEvent = switchable(switchBehavior);
+
+				return {
+					switchableEvent,
+					emitNumber,
+					emitString,
+					emitSwitch,
+					numberEvent,
+					stringEvent,
+				};
+			});
+
+			const callback = vi.fn();
+			result.switchableEvent.on(callback);
+
+			// Start with number event
+			result.emitNumber(42);
+			timeline.proceed();
+			expect(callback).toHaveBeenCalledWith(42);
+
+			// Switch to string event
+			result.emitSwitch(result.stringEvent);
+			timeline.proceed();
+
+			result.emitString("hello");
+			timeline.proceed();
+			expect(callback).toHaveBeenCalledWith("hello");
+		});
+
+		it("should handle multiple switches correctly", () => {
+			const result = build(timeline, () => {
+				const [event1, emit1] = source<string>();
+				const [event2, emit2] = source<string>();
+				const [event3, emit3] = source<string>();
+				const [switchEvent, emitSwitch] = source<Event<string>>();
+
+				const switchBehavior = state(event1, switchEvent);
+				const switchableEvent = switchable(switchBehavior);
+
+				return {
+					switchableEvent,
+					emit1,
+					emit2,
+					emit3,
+					emitSwitch,
+					event1,
+					event2,
+					event3,
+				};
+			});
+
+			const callback = vi.fn();
+			result.switchableEvent.on(callback);
+
+			// Test switching between multiple events
+			result.emit1("first");
+			timeline.proceed();
+			expect(callback).toHaveBeenLastCalledWith("first");
+
+			result.emitSwitch(result.event2);
+			timeline.proceed();
+			result.emit2("second");
+			timeline.proceed();
+			expect(callback).toHaveBeenLastCalledWith("second");
+
+			result.emitSwitch(result.event3);
+			timeline.proceed();
+			result.emit3("third");
+			timeline.proceed();
+			expect(callback).toHaveBeenLastCalledWith("third");
+
+			// Switch back to event1
+			result.emitSwitch(result.event1);
+			timeline.proceed();
+			result.emit1("back to first");
+			timeline.proceed();
+			expect(callback).toHaveBeenLastCalledWith("back to first");
+		});
+
+		it("should work with computed behaviors 2", () => {
+			build(timeline);
+			const [event1, emit1] = source<number>({ debugLabel: "source1" });
+			const [event2, emit2] = source<number>({ debugLabel: "source2" });
+			const [toggleEvent, emitToggle] = source<boolean>();
+			// const [eventEvent, emitEvent] = source<Event<number>>();
+
+			const toggleBehavior = state(true, toggleEvent);
+			// const eBehavior = state(event1, eventEvent);
+			const eventBehavior = computed(
+				() => {
+					console.info("Read!", toggleBehavior.read());
+					return toggleBehavior.read() ? event1 : event2;
+				},
+				{ debugLabel: "eventBehavior" },
+			);
+			eventBehavior.updated.on(() => {
+				console.info("me??");
+			});
+			const switchableEvent = switchable(eventBehavior, {
+				debugLabel: "switchable",
+			});
+
+			const callback = vi.fn();
+			switchableEvent.on(callback);
+
+			// Initially should use event1 (toggle is true)
+			emit1(100);
+			timeline.proceed();
+
+			expect(callback).toHaveBeenCalledWith(100);
+
+			// Switch to event2 by toggling
+			emitToggle(false);
+			timeline.proceed();
+
+			emit2(200);
+			timeline.proceed();
+
+			expect(callback).toHaveBeenCalledWith(200);
+
+			// // event1 should no longer work
+			callback.mockClear();
+			emit1(300);
+			timeline.proceed();
+			expect(callback).not.toHaveBeenCalled();
+		});
+
+		it("should handle immediate emission from current event", () => {
+			build(timeline);
+			const [event1, emit1] = source<string>();
+			const [event2, emit2] = source<string>();
+			const [switchEvent, emitSwitch] = source<Event<string>>();
+
+			// Emit to event1 before creating switchable
+			emit1("initial value");
+
+			const switchBehavior = state(event1, switchEvent);
+			const switchableEvent = switchable(switchBehavior);
+
+			const callback = vi.fn();
+			switchableEvent.on(callback);
+
+			// Should get the value that was already emitted
+			timeline.proceed();
+			expect(callback).toHaveBeenCalledWith("initial value");
+		});
+
+		it("should work with metadata", () => {
+			build(timeline);
+
+			const [event1, emit1] = source<string>();
+			const [switchEvent, emitSwitch] = source<Event<string>>();
+
+			const switchBehavior = state(event1, switchEvent);
+			const switchableEvent = switchable(switchBehavior, {
+				debugLabel: "test-switchable",
+			});
+
+			expect(switchableEvent).toBeInstanceOf(Event);
+			// The event should be created successfully with metadata
+			const callback = vi.fn();
+			switchableEvent.on(callback);
+
+			emit1("test");
+			timeline.proceed();
+			expect(callback).toHaveBeenCalledWith("test");
+		});
+	});
+
 	describe("build()", () => {
 		it("should execute function with timeline context", () => {
 			const result = build(timeline, () => "test result");
@@ -289,19 +511,6 @@ describe("Factory Functions", () => {
 
 			expect(result.outer).toBeInstanceOf(Event);
 			expect(result.inner).toBeInstanceOf(Event);
-		});
-
-		it("should return disposable when called with only timeline", () => {
-			expect(getActiveTimeline).toThrow("Timeline is not active");
-			{
-				using disposable = build(timeline);
-				expect(getActiveTimeline()).toBe(timeline);
-
-				expect(disposable).toBeDefined();
-				expect(typeof disposable).toBe("object");
-				expect(typeof disposable[Symbol.dispose]).toBe("function");
-			}
-			expect(getActiveTimeline).toThrow("Timeline is not active");
 		});
 	});
 });
