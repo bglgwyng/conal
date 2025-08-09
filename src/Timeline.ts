@@ -1,4 +1,3 @@
-import assert from "assert";
 import type { Behavior } from "./core/behavior/Behavior";
 import type { ComputedBehavior } from "./core/behavior/ComputedBehavior";
 import { State } from "./core/behavior/State";
@@ -6,6 +5,7 @@ import type { Event } from "./core/event/Event";
 import { Never } from "./core/event/Never";
 import { Source } from "./core/event/Source";
 import type { Node } from "./core/Node";
+import { assert } from "./utils/assert";
 import { DedupQueue } from "./utils/DedupQueue";
 import type { Maybe } from "./utils/Maybe";
 
