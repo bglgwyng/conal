@@ -220,3 +220,10 @@ export class Timeline {
 export type TimelineOptions = {
 	onSourceEmission: (event: Source<unknown>, proceed: () => void) => void;
 };
+
+export function proceedImmediately(
+	_event: Source<unknown>,
+	proceed: () => void,
+) {
+	proceed();
+}
