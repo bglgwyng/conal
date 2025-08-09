@@ -21,4 +21,10 @@ export class Behavior<T> {
 
 		return [new Behavior(effectEvent), dispose];
 	}
+
+	// @internal
+	tag(tag: string): Behavior<T> {
+		this.internal.tag(tag);
+		return this;
+	}
 }

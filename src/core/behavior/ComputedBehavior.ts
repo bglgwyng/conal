@@ -2,7 +2,6 @@ import assert from "assert";
 import type { Timeline } from "../../Timeline";
 import type { Event } from "../event/Event";
 import { UpdateEvent } from "../event/UpdateEvent";
-import type { Metadata } from "../Node";
 import { Behavior } from "./Behavior";
 
 export class ComputedBehavior<T> extends Behavior<T> {
@@ -18,12 +17,9 @@ export class ComputedBehavior<T> extends Behavior<T> {
 	constructor(
 		public timeline: Timeline,
 		public fn: () => T,
-		public metadata?: Metadata,
 	) {
-		super(timeline, metadata);
-		this.updated = new UpdateEvent(this, {
-			debugLabel: `UpdateEvent(${this.metadata?.debugLabel})`,
-		});
+		super(timeline);
+		this.updated = new UpdateEvent(this);
 	}
 
 	readCurrentValue(): T {

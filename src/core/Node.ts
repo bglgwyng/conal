@@ -1,14 +1,12 @@
 import type { Timeline } from "../Timeline";
 
 export abstract class Node {
-	constructor(
-		public timeline: Timeline,
-		public metadata?: Metadata,
-	) {}
+	_tag?: string;
+	constructor(public timeline: Timeline) {}
 
 	commit() {}
-}
 
-export type Metadata = {
-	debugLabel?: string;
-};
+	tag(tag: string) {
+		this._tag = tag;
+	}
+}

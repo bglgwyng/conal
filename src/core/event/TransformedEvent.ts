@@ -1,7 +1,6 @@
 import assert from "assert";
 import type { Timeline } from "../../Timeline";
 import { just, type Maybe } from "../../utils/Maybe";
-import type { Metadata } from "../Node";
 import { Event } from "./Event";
 
 export class TransformedEvent<T, U> extends Event<T> {
@@ -11,9 +10,8 @@ export class TransformedEvent<T, U> extends Event<T> {
 		timeline: Timeline,
 		public readonly parent: Event<U>,
 		public readonly fn: (value: U) => T,
-		metadata?: Metadata,
 	) {
-		super(timeline, metadata);
+		super(timeline);
 	}
 
 	getEmittedValue() {

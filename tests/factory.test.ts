@@ -453,27 +453,6 @@ describe("Factory Functions", () => {
 			timeline.proceed();
 			expect(callback).toHaveBeenCalledWith("initial value");
 		});
-
-		it("should work with metadata", () => {
-			build(timeline);
-
-			const [event1, emit1] = source<string>();
-			const [switchEvent, emitSwitch] = source<Event<string>>();
-
-			const switchBehavior = state(event1, switchEvent);
-			const switchableEvent = switchable(switchBehavior, {
-				debugLabel: "test-switchable",
-			});
-
-			expect(switchableEvent).toBeInstanceOf(Event);
-			// The event should be created successfully with metadata
-			const callback = vi.fn();
-			switchableEvent.on(callback);
-
-			emit1("test");
-			timeline.proceed();
-			expect(callback).toHaveBeenCalledWith("test");
-		});
 	});
 
 	describe("build()", () => {

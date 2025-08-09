@@ -39,4 +39,10 @@ export class Event<T> {
 			new TransformedEvent(this.internalEvent.timeline, this.internalEvent, fn),
 		);
 	}
+
+	// @internal
+	tag(tag: string): Event<T> {
+		this.internalEvent.tag(tag);
+		return this;
+	}
 }
