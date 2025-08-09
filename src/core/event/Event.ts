@@ -6,7 +6,7 @@ import { Node } from "../Node";
 export abstract class Event<T> extends Node {
 	childEvents: Set<Event<any>> = new Set();
 	dependenedStates: Set<State<T>> = new Set();
-	effects: (readonly [(value: any) => void, Event<any>])[] = [];
+	effects: (readonly [(value: any) => void, Emmittable<any>])[] = [];
 
 	get isActive() {
 		return (
