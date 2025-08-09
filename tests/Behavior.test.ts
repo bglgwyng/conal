@@ -8,7 +8,7 @@ describe("Behavior", () => {
 	let timeline: Timeline;
 
 	beforeEach(() => {
-		timeline = new Timeline();
+		timeline = new Timeline({ onSourceEmission() {} });
 	});
 
 	describe("constructor", () => {

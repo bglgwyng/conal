@@ -5,7 +5,7 @@ describe("Behavior.on", () => {
 	let timeline: Timeline;
 
 	beforeEach(() => {
-		timeline = new Timeline();
+		timeline = new Timeline({ onSourceEmission() {} });
 	});
 
 	it("should return dispose function and transformed state", () => {

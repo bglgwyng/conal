@@ -6,7 +6,7 @@ describe("ComputedBehavior - Memoization", () => {
 	let timeline: Timeline;
 
 	beforeEach(() => {
-		timeline = new Timeline();
+		timeline = new Timeline({ onSourceEmission() {} });
 	});
 
 	it("should memoize computed values within the same timestamp", () => {

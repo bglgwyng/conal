@@ -10,7 +10,7 @@ describe("MergedEvent", () => {
 	let mergedEvent: MergedEvent<string, number>;
 
 	beforeEach(() => {
-		timeline = new Timeline();
+		timeline = new Timeline({ onSourceEmission() {} });
 		leftSource = new Source<string>(timeline);
 		rightSource = new Source<number>(timeline);
 	});

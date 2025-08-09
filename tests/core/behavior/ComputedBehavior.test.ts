@@ -6,7 +6,7 @@ describe("ComputedBehavior", () => {
 	let timeline: Timeline;
 
 	beforeEach(() => {
-		timeline = new Timeline();
+		timeline = new Timeline({ onSourceEmission() {} });
 	});
 
 	it("should compute computed value from state", () => {

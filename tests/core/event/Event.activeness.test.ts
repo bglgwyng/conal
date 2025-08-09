@@ -10,7 +10,7 @@ describe("Event isActive behavior", () => {
 	let switchEvent: Source<number>;
 
 	beforeEach(() => {
-		timeline = new Timeline();
+		timeline = new Timeline({ onSourceEmission() {} });
 		source = new Source<number>(timeline);
 		switchEvent = new Source<number>(timeline);
 		state = new State<number>(timeline, 0, switchEvent);

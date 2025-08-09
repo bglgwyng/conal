@@ -12,7 +12,7 @@ describe("TransformedEvent", () => {
 	let transformedEvent: TransformedEvent<string, number>;
 
 	beforeEach(() => {
-		timeline = new Timeline();
+		timeline = new Timeline({ onSourceEmission() {} });
 		parentEvent = new Source<number>(timeline);
 	});
 

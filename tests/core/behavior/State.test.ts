@@ -6,7 +6,7 @@ describe("State", () => {
 	let timeline: Timeline;
 
 	beforeEach(() => {
-		timeline = new Timeline();
+		timeline = new Timeline({ onSourceEmission() {} });
 	});
 
 	test("update state", () => {

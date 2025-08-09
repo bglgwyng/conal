@@ -9,14 +9,13 @@ import {
 	switchable,
 	transform,
 } from "../src/factory";
-import { getActiveTimeline } from "../src/globalContext";
 import { Timeline } from "../src/Timeline";
 
 describe("Factory Functions", () => {
 	let timeline: Timeline;
 
 	beforeEach(() => {
-		timeline = new Timeline();
+		timeline = new Timeline({ onSourceEmission() {} });
 	});
 
 	describe("source()", () => {
@@ -464,7 +463,7 @@ describe("Factory Functions", () => {
 		});
 
 		it("should handle nested builds", () => {
-			const timeline2 = new Timeline();
+			const timeline2 = new Timeline({ onSourceEmission() {} });
 
 			const result = build(timeline, () => {
 				const [outer] = source<number>();

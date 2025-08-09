@@ -9,7 +9,7 @@ describe("Event", () => {
 	let event: Event<number>;
 
 	beforeEach(() => {
-		timeline = new Timeline();
+		timeline = new Timeline({ onSourceEmission() {} });
 		source = new Source<number>(timeline);
 		event = new Event(source);
 	});

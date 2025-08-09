@@ -3,7 +3,7 @@ import { Timeline } from "../src/Timeline";
 
 describe("Timeline", () => {
 	test("increment timestamp", () => {
-		const timeline = new Timeline();
+		const timeline = new Timeline({ onSourceEmission() {} });
 
 		expect(timeline.timestamp).toBe(0);
 

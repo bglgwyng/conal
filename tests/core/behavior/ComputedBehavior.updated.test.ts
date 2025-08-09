@@ -7,7 +7,7 @@ describe("ComputedBehavior - updated event", () => {
 	let timeline: Timeline;
 
 	beforeEach(() => {
-		timeline = new Timeline();
+		timeline = new Timeline({ onSourceEmission() {} });
 	});
 
 	it("should trigger updated event when value changes", () => {

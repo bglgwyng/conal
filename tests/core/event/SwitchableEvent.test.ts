@@ -14,7 +14,7 @@ describe("SwitchableEvent", () => {
 	let switchableEvent: SwitchableEvent<Event<number>, number>;
 
 	beforeEach(() => {
-		timeline = new Timeline();
+		timeline = new Timeline({ onSourceEmission() {} });
 
 		// Create two source events for testing
 		source1 = new Source<number>(timeline);

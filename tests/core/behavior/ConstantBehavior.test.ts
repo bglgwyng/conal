@@ -4,7 +4,7 @@ import { Timeline } from "../../../src/Timeline";
 
 describe("ConstantBehavior", () => {
 	it("should always return the initial value", () => {
-		const timeline = new Timeline();
+		const timeline = new Timeline({ onSourceEmission() {} });
 		const value = { test: "value" };
 		const behavior = new ConstantBehavior(timeline, value);
 
@@ -21,7 +21,7 @@ describe("ConstantBehavior", () => {
 	});
 
 	it("should never update its value", () => {
-		const timeline = new Timeline();
+		const timeline = new Timeline({ onSourceEmission() {} });
 		const initialValue = 42;
 		const behavior = new ConstantBehavior(timeline, initialValue);
 
@@ -37,7 +37,7 @@ describe("ConstantBehavior", () => {
 	});
 
 	it("should work with different types of values", () => {
-		const timeline = new Timeline();
+		const timeline = new Timeline({ onSourceEmission() {} });
 
 		// Test with number
 		const numBehavior = new ConstantBehavior(timeline, 42);
@@ -55,7 +55,7 @@ describe("ConstantBehavior", () => {
 	});
 
 	it("should maintain referential equality", () => {
-		const timeline = new Timeline();
+		const timeline = new Timeline({ onSourceEmission() {} });
 
 		const obj = { data: 1 };
 		const behavior = new ConstantBehavior(timeline, obj);

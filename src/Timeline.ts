@@ -10,6 +10,12 @@ import { DedupQueue } from "./utils/DedupQueue";
 import type { Maybe } from "./utils/Maybe";
 
 export class Timeline {
+	constructor(options: TimelineOptions) {
+		this.#onSourceEmission = options.onSourceEmission;
+	}
+
+	#onSourceEmission: (event: Source<unknown>, proceed: () => void) => void;
+
 	#timestamp = 0;
 	get timestamp() {
 		return this.#timestamp;
@@ -49,6 +55,7 @@ export class Timeline {
 
 	never = new Never<any>(this);
 
+	// @internal
 	proceed() {
 		assert(!this.#isProceeding, "Timeline is already proceeding");
 
@@ -151,6 +158,15 @@ export class Timeline {
 	// @internal
 	reportEmission(event: Source<unknown>) {
 		this.#emittingSources.add(event);
+
+		this.#onSourceEmission(event, () => {
+			assert(
+				this.timestamp === this.#emittingSources.size,
+				"Timeline has already proceeded",
+			);
+			assert(!this.isProceeding, "Timeline is already proceeding");
+			this.proceed();
+		});
 	}
 
 	#readTrackings: Set<Behavior<any>>[] = [];
@@ -200,3 +216,7 @@ export class Timeline {
 		this.#toCommitNodes.add(node);
 	}
 }
+
+export type TimelineOptions = {
+	onSourceEmission: (event: Source<unknown>, proceed: () => void) => void;
+};

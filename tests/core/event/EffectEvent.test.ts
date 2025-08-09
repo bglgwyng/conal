@@ -13,7 +13,7 @@ describe("EffectEvent", () => {
 	let dispose: () => void;
 
 	beforeEach(() => {
-		timeline = new Timeline();
+		timeline = new Timeline({ onSourceEmission() {} });
 		source = timeline.source<number>();
 		[effectEvent, dispose] = source.on((value) => value * 2);
 	});
