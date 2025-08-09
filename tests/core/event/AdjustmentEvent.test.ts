@@ -1,4 +1,6 @@
+import { stat } from "fs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { ComputedDynamic } from "../../../src/core/dynamic/ComputedDynamic";
 import type { State } from "../../../src/core/dynamic/State";
 import type { Event } from "../../../src/core/event/Event";
 import { MergedEvent } from "../../../src/core/event/MergedEvent";
@@ -445,6 +447,39 @@ describe("AdjustmentEvent", () => {
 
 			disposeChainedSpy();
 			disposeChain();
+		});
+	});
+
+	it("should allow reading current and next values in adjustOn callback", () => {
+		const source = timeline.source<number>();
+		const state = timeline.state(10, source);
+
+		const onSpy = vi.fn();
+		const adjustOnSpy = vi.fn();
+
+		state.updated.on((value) => {
+			onSpy({
+				current: state.read(),
+				next: value,
+			});
+		});
+		state.updated.adjustOn((value) => {
+			adjustOnSpy({
+				current: state.read(),
+				next: value,
+			});
+		});
+
+		source.emit(20);
+		timeline.proceed();
+
+		expect(onSpy).toHaveBeenCalledExactlyOnceWith({
+			current: 20,
+			next: 20,
+		});
+		expect(adjustOnSpy).toHaveBeenCalledExactlyOnceWith({
+			current: 10,
+			next: 20,
 		});
 	});
 });
