@@ -218,7 +218,7 @@ describe("EffectEvent", () => {
 			expect(createdStates[1].state.read()).toBe("Second dynamic");
 
 			// Clean up all dynamic callbacks
-			allCallbacks.forEach((dispose) => dispose());
+			allCallbacks.forEach(dispose);
 			disposeEffect();
 		});
 

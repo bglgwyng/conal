@@ -139,7 +139,7 @@ describe("Event isActive behavior", () => {
 			expect(source.isActive).toBe(false);
 
 			// Should not throw or cause issues
-			expect(() => dispose()).not.toThrow();
+			expect(dispose).not.toThrow();
 			expect(source.isActive).toBe(false);
 		});
 
