@@ -1,5 +1,5 @@
-export { State } from "./core/behavior/State";
-export { Event } from "./core/event/Event";
-export { Source } from "./core/event/Source";
-export { TransformedEvent } from "./core/event/TransformedEvent";
+export * from "./Behavior";
+export * from "./Event";
+export * from "./factory";
+export { getActiveTimeline, useTimeline, withTimeline } from "./globalContext";
 export { Timeline } from "./Timeline";
