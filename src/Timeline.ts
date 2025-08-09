@@ -15,7 +15,7 @@ export class Timeline {
 		return this.#timestamp;
 	}
 
-	get nextTimestamp() {
+	getNextTimestamp() {
 		return this.#timestamp + 1;
 	}
 
@@ -53,6 +53,8 @@ export class Timeline {
 		assert(!this.#isProceeding, "Timeline is already proceeding");
 
 		this.#isProceeding = true;
+
+		const nextTimestamp = this.getNextTimestamp();
 
 		const eventQueue = new DedupQueue<Event<unknown>>();
 		const processedEvents: Set<Event<unknown>> = new Set();
@@ -116,14 +118,14 @@ export class Timeline {
 			}
 
 			for (const node of this.#toCommitNodes) {
-				node.commit();
+				node.commit(nextTimestamp);
 			}
 			this.#toCommitNodes.clear();
 		} finally {
 			this.#isProceeding = false;
 		}
 
-		this.#timestamp = this.nextTimestamp;
+		this.#timestamp = nextTimestamp;
 
 		function pushEventToQueue(event: Event<unknown>) {
 			if (eventQueue.has(event)) return;

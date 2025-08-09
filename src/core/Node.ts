@@ -4,7 +4,7 @@ export abstract class Node {
 	_tag?: string;
 	constructor(public timeline: Timeline) {}
 
-	commit() {}
+	commit(nextTimestamp: number) {}
 
 	tag(tag: string) {
 		this._tag = tag;
