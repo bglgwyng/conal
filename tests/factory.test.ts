@@ -388,26 +388,21 @@ describe("Factory Functions", () => {
 
 		it("should work with computed behaviors 2", () => {
 			build(timeline);
-			const [event1, emit1] = source<number>({ debugLabel: "source1" });
-			const [event2, emit2] = source<number>({ debugLabel: "source2" });
+			const [event1, emit1] = source<number>();
+			const [event2, emit2] = source<number>();
 			const [toggleEvent, emitToggle] = source<boolean>();
 			// const [eventEvent, emitEvent] = source<Event<number>>();
 
 			const toggleBehavior = state(true, toggleEvent);
 			// const eBehavior = state(event1, eventEvent);
-			const eventBehavior = computed(
-				() => {
-					console.info("Read!", toggleBehavior.read());
-					return toggleBehavior.read() ? event1 : event2;
-				},
-				{ debugLabel: "eventBehavior" },
-			);
+			const eventBehavior = computed(() => {
+				console.info("Read!", toggleBehavior.read());
+				return toggleBehavior.read() ? event1 : event2;
+			});
 			eventBehavior.updated.on(() => {
 				console.info("me??");
 			});
-			const switchableEvent = switchable(eventBehavior, {
-				debugLabel: "switchable",
-			});
+			const switchableEvent = switchable(eventBehavior);
 
 			const callback = vi.fn();
 			switchableEvent.on(callback);

@@ -234,7 +234,6 @@ describe("EffectEvent", () => {
 				timeline,
 				effectEvent,
 				(value) => `Result: ${value}`, // Transform number to string
-				{ debugLabel: "NumberToString" },
 			);
 
 			const spy = vi.fn();
@@ -314,7 +313,6 @@ describe("EffectEvent", () => {
 				timeline,
 				effectEvent, // left: EffectEvent<number>
 				rightSource, // right: Source<string>
-				{ debugLabel: "EffectEvent-Source Merge" },
 			);
 
 			const spy = vi.fn();
