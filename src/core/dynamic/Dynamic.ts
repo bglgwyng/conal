@@ -1,20 +1,8 @@
 import type { Event } from "../event/Event";
-import { Node } from "../Node";
-import type { ComputedDynamic } from "./ComputedDynamic";
+import { Behavior } from "./Behavior";
 import type { State } from "./State";
 
-export abstract class Dynamic<T> extends Node {
-	dependedDynamics: Set<ComputedDynamic<any>> = new Set();
-
-	read = (): T => {
-		const { timeline } = this;
-		timeline.reportRead(this);
-
-		return timeline.isReadingNextValue
-			? this.readNextValue().value
-			: this.readCurrentValue();
-	};
-
+export abstract class Dynamic<T> extends Behavior<T> {
 	abstract updated: Event<T>;
 
 	adjustOn<U>(
@@ -27,7 +15,4 @@ export abstract class Dynamic<T> extends Node {
 			dispose,
 		];
 	}
-
-	abstract readCurrentValue(): T;
-	abstract readNextValue(): { value: T; isUpdated: boolean };
 }

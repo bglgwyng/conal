@@ -2,16 +2,17 @@ import type { Timeline } from "../../Timeline";
 import { assert } from "../../utils/assert";
 import type { Event } from "../event/Event";
 import { UpdateEvent } from "../event/UpdateEvent";
+import type { Behavior } from "./Behavior";
 import { Dynamic } from "./Dynamic";
 
 export class ComputedDynamic<T> extends Dynamic<T> {
 	updated: Event<T> = new UpdateEvent(this);
 
-	lastRead?: { value: T; at: number; dependencies?: Set<Dynamic<any>> };
+	lastRead?: { value: T; at: number; dependencies?: Set<Behavior<any>> };
 	nextUpdate?: {
 		value: T;
 		isUpdated: boolean;
-		dependencies: Set<Dynamic<any>>;
+		dependencies: Set<Behavior<any>>;
 	};
 
 	constructor(
@@ -74,7 +75,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		return nextUpdate;
 	}
 
-	updateDependencies(newDependencies: Set<Dynamic<any>>) {
+	updateDependencies(newDependencies: Set<Behavior<any>>) {
 		assert(this.lastRead, "lastRead is not set");
 
 		for (const dependency of newDependencies) {
@@ -83,7 +84,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		this.lastRead.dependencies = newDependencies;
 	}
 
-	get dependencies(): Set<Dynamic<any>> | undefined {
+	get dependencies(): Set<Behavior<any>> | undefined {
 		return this.lastRead?.dependencies;
 	}
 
