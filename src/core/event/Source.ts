@@ -1,4 +1,4 @@
-import assert from "assert";
+import { assert } from "../../utils/assert";
 import { Emmittable } from "./Event";
 
 export class Source<T> extends Emmittable<T> {

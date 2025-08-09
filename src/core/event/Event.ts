@@ -1,4 +1,4 @@
-import assert from "assert";
+import { assert } from "../../utils/assert";
 import { just, type Maybe } from "../../utils/Maybe";
 import type { State } from "../behavior/State";
 import { Node } from "../Node";

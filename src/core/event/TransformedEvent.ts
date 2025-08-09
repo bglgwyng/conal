@@ -1,5 +1,5 @@
-import assert from "assert";
 import type { Timeline } from "../../Timeline";
+import { assert } from "../../utils/assert";
 import { just, type Maybe } from "../../utils/Maybe";
 import { Event } from "./Event";
 

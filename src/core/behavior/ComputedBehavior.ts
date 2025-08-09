@@ -1,5 +1,5 @@
-import assert from "assert";
 import type { Timeline } from "../../Timeline";
+import { assert } from "../../utils/assert";
 import type { Event } from "../event/Event";
 import { UpdateEvent } from "../event/UpdateEvent";
 import { Behavior } from "./Behavior";
@@ -29,10 +29,7 @@ export class ComputedBehavior<T> extends Behavior<T> {
 		if (_lastRead?.at === timeline.timestamp) {
 			if (isActive && !_lastRead.dependencies) {
 				const [value, dependencies] = this.timeline.withTrackingRead(this.fn);
-				assert(
-					value === _lastRead.value,
-					new Error("Value should be the same"),
-				);
+				assert(value === _lastRead.value, "Value should be the same");
 
 				this.updateDependencies(dependencies);
 			}

@@ -1,5 +1,5 @@
-import assert from "assert";
 import type { Timeline } from "./Timeline";
+import { assert } from "./utils/assert";
 
 const globalContext = {
 	activeTimeline: undefined as Timeline | undefined,
