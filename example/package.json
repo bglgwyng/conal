@@ -1,27 +1,31 @@
 {
-	"name": "example",
-	"private": true,
-	"version": "0.0.0",
-	"type": "module",
-	"scripts": {
-		"dev": "vite",
-		"build": "tsc -b && vite build",
-		"lint": "biome check .",
-		"lint:fix": "biome check --fix .",
-		"preview": "vite preview"
-	},
-	"dependencies": {
-		"conal": "file:..",
-		"react": "^19.1.1",
-		"react-dom": "^19.1.1"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "^2.1.4",
-		"@types/react": "^19.1.9",
-		"@types/react-dom": "^19.1.7",
-		"@vitejs/plugin-react": "^4.7.0",
-		"globals": "^16.3.0",
-		"typescript": "~5.8.3",
-		"vite": "^7.1.0"
-	}
+  "name": "example",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "biome check .",
+    "lint:fix": "biome check --fix .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@mantine/core": "^8.2.4",
+    "@mantine/hooks": "^8.2.4",
+    "@tabler/icons-react": "^3.34.1",
+    "conal": "file:..",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.1.4",
+    "@types/react": "^19.1.9",
+    "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-react": "^4.7.0",
+    "globals": "^16.3.0",
+    "typescript": "~5.8.3",
+    "vite": "^7.1.0",
+    "vite-plugin-node-polyfills": "^0.24.0"
+  }
 }
