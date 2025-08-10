@@ -165,11 +165,9 @@ export class Timeline {
 	reportEmission(event: Source<unknown>) {
 		this.#emittingSources.add(event);
 
+		const { timestamp } = this;
 		this.#onSourceEmission(event, () => {
-			assert(
-				this.timestamp === this.#emittingSources.size,
-				"Timeline has already proceeded",
-			);
+			assert(timestamp === this.timestamp, "Timeline has already proceeded");
 			assert(!this.isProceeding, "Timeline is already proceeding");
 			this.proceed();
 		});
