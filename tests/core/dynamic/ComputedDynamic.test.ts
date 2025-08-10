@@ -17,7 +17,7 @@ describe("ComputedDynamic", () => {
 		// Create a computed dynamic that doubles the state value
 		const computed = new ComputedDynamic(
 			timeline,
-			(read) => read(state1) + read(state2),
+			() => state1.read() + state2.read(),
 		);
 
 		expect(computed.readCurrent()).toBe(0);
@@ -39,7 +39,7 @@ describe("ComputedDynamic", () => {
 		// Create a computed dynamic that depends on two states
 		const computed = new ComputedDynamic(
 			timeline,
-			(read) => read(state1) + read(state2),
+			() => state1.read() + state2.read(),
 		);
 
 		// Initially inactive, so no dependencies should be tracked
@@ -64,7 +64,7 @@ describe("ComputedDynamic", () => {
 		// Create a computed dynamic that depends on two states
 		const computed = new ComputedDynamic(
 			timeline,
-			(read) => read(state1) + read(state2),
+			() => state1.read() + state2.read(),
 		);
 
 		// Make it active by adding an effect
@@ -95,14 +95,14 @@ describe("ComputedDynamic", () => {
 		// Create a computed dynamic that will be used inside another computed dynamic
 		const innerComputed = new ComputedDynamic(
 			timeline,
-			(read) => read(state1) * 2, // Double the value of state1
+			() => state1.read() * 2, // Double the value of state1
 		);
 		innerComputed.updated.on(() => {});
 
 		// Create an outer computed dynamic that uses the inner computed dynamic
 		const outerComputed = new ComputedDynamic(
 			timeline,
-			(read) => read(innerComputed) + read(state2), // Use innerComputed + state2
+			() => innerComputed.read() + state2.read(), // Use innerComputed + state2
 		);
 		outerComputed.updated.on(() => {});
 
