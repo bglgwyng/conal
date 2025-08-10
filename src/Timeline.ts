@@ -66,7 +66,6 @@ export class Timeline {
 
 		const eventQueue = new DedupQueue<Event<unknown>>();
 		const processedEvents: Set<Event<unknown>> = new Set();
-		const effects: (() => unknown)[] = [];
 
 		try {
 			for (const source of this.#emittingSources) {
