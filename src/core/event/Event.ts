@@ -35,14 +35,14 @@ export abstract class Event<T> extends Node {
 	adjustOn<U>(fn: (value: T) => U): readonly [Event<U>, () => void] {
 		const { isActive } = this;
 
-		const adjustmentEvent = new Emmittable<U>(this.timeline);
+		const effectEvent = new Emmittable<U>(this.timeline);
 
-		const effect = [fn, adjustmentEvent] as const;
+		const effect = [fn, effectEvent] as const;
 		this.adjustments.push(effect);
 		if (!isActive) this.activate();
 
 		return [
-			adjustmentEvent,
+			effectEvent,
 			() => {
 				this.adjustments.splice(this.adjustments.indexOf(effect), 1);
 
