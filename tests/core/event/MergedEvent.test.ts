@@ -19,7 +19,7 @@ describe("MergedEvent", () => {
 		mergedEvent = new MergedEvent(timeline, leftSource, rightSource);
 
 		const mockCallback = vitest.fn();
-		mergedEvent.adjustOn(mockCallback);
+		mergedEvent.on(mockCallback);
 
 		// Emit left value first
 		leftSource.emit("hello");
@@ -37,7 +37,7 @@ describe("MergedEvent", () => {
 		mergedEvent = new MergedEvent(timeline, leftSource, rightSource);
 
 		const mockCallback = vitest.fn();
-		mergedEvent.adjustOn(mockCallback);
+		mergedEvent.on(mockCallback);
 
 		// Emit only left value
 		leftSource.emit("left only");
@@ -53,7 +53,7 @@ describe("MergedEvent", () => {
 		mergedEvent = new MergedEvent(timeline, leftSource, rightSource);
 
 		const mockCallback = vitest.fn();
-		mergedEvent.adjustOn(mockCallback);
+		mergedEvent.on(mockCallback);
 
 		// Emit only right value
 		rightSource.emit(100);
@@ -69,7 +69,7 @@ describe("MergedEvent", () => {
 		mergedEvent = new MergedEvent(timeline, leftSource, rightSource);
 
 		const mockCallback = vitest.fn();
-		mergedEvent.adjustOn(mockCallback);
+		mergedEvent.on(mockCallback);
 
 		leftSource.emit("first");
 		rightSource.emit(1);

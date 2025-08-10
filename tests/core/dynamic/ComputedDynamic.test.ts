@@ -68,7 +68,7 @@ describe("ComputedDynamic", () => {
 		);
 
 		// Make it active by adding an effect
-		const unsubscribe = computed.updated.on(() => {});
+		const [, dispose] = computed.updated.on(() => {});
 		expect(computed.isActive).toBe(true);
 
 		// Read when active - should track dependencies
@@ -83,7 +83,7 @@ describe("ComputedDynamic", () => {
 		expect(state2.dependedDynamics.has(computed)).toBe(true);
 
 		// Clean up
-		unsubscribe();
+		dispose();
 	});
 	it("should track dependencies correctly with nested reads", () => {
 		// Create source states

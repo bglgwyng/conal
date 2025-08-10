@@ -141,7 +141,7 @@ describe("Dynamic", () => {
 				const [event, emit] = source<number>();
 				const dynamic = state(10, event);
 
-				const [newDynamic, dispose] = dynamic.adjustOn((value) => value * 2);
+				const [newDynamic, dispose] = dynamic.on((value) => value * 2);
 
 				expect(newDynamic).toBeInstanceOf(Dynamic);
 				expect(typeof dispose).toBe("function");
@@ -153,9 +153,7 @@ describe("Dynamic", () => {
 				const [event, emit] = source<number>();
 				const dynamic = state(5, event);
 
-				const [doubledDynamic, dispose] = dynamic.adjustOn(
-					(value) => value * 2,
-				);
+				const [doubledDynamic, dispose] = dynamic.on((value) => value * 2);
 
 				expect(doubledDynamic.read()).toBe(10);
 			});
@@ -166,9 +164,7 @@ describe("Dynamic", () => {
 				const [event, emit] = source<number>();
 				const dynamic = state(3, event);
 
-				const [squaredDynamic, dispose] = dynamic.adjustOn(
-					(value) => value * value,
-				);
+				const [squaredDynamic, dispose] = dynamic.on((value) => value * value);
 
 				expect(squaredDynamic.read()).toBe(9);
 
@@ -189,8 +185,8 @@ describe("Dynamic", () => {
 				const [event, emit] = source<number>();
 				const dynamic = state(2, event);
 
-				const [doubled, dispose1] = dynamic.adjustOn((value) => value * 2);
-				const [plusTen, dispose2] = doubled.adjustOn((value) => value + 10);
+				const [doubled, dispose1] = dynamic.on((value) => value * 2);
+				const [plusTen, dispose2] = doubled.on((value) => value + 10);
 
 				expect(plusTen.read()).toBe(14); // (2 * 2) + 10
 
@@ -206,12 +202,10 @@ describe("Dynamic", () => {
 				const [event, emit] = source<number>();
 				const dynamic = state(42, event);
 
-				const [stringDynamic, dispose1] = dynamic.adjustOn(
+				const [stringDynamic, dispose1] = dynamic.on(
 					(value) => `Number: ${value}`,
 				);
-				const [booleanDynamic, dispose2] = dynamic.adjustOn(
-					(value) => value > 50,
-				);
+				const [booleanDynamic, dispose2] = dynamic.on((value) => value > 50);
 
 				expect(stringDynamic.read()).toBe("Number: 42");
 				expect(booleanDynamic.read()).toBe(false);
@@ -234,10 +228,8 @@ describe("Dynamic", () => {
 				const [event, emit] = source<Person>();
 				const dynamic = state({ name: "Alice", age: 30 }, event);
 
-				const [nameDynamic, dispose1] = dynamic.adjustOn(
-					(person) => person.name,
-				);
-				const [isAdultDynamic, dispose2] = dynamic.adjustOn(
+				const [nameDynamic, dispose1] = dynamic.on((person) => person.name);
+				const [isAdultDynamic, dispose2] = dynamic.on(
 					(person) => person.age >= 18,
 				);
 
@@ -257,9 +249,7 @@ describe("Dynamic", () => {
 				const [event, emit] = source<number>();
 				const dynamic = state(1, event);
 
-				const [transformedDynamic, dispose] = dynamic.adjustOn(
-					(value) => value * 10,
-				);
+				const [transformedDynamic, dispose] = dynamic.on((value) => value * 10);
 
 				expect(transformedDynamic.read()).toBe(10);
 
@@ -283,7 +273,7 @@ describe("Dynamic", () => {
 				const [event, emit] = source<number>();
 				const dynamic = state(1, event);
 
-				const [errorDynamic, dispose] = dynamic.adjustOn((value) => {
+				const [errorDynamic, dispose] = dynamic.on((value) => {
 					if (value === 42) throw new Error("Test error");
 					return value * 2;
 				});
@@ -306,7 +296,7 @@ describe("Dynamic", () => {
 				const baseDynamic = state(3, event);
 				const computedDynamic = computed(() => baseDynamic.read() + 1);
 
-				const [doubledComputed, dispose] = computedDynamic.adjustOn(
+				const [doubledComputed, dispose] = computedDynamic.on(
 					(value) => value * 2,
 				);
 
@@ -330,7 +320,7 @@ describe("Dynamic", () => {
 				const dynamic2 = state(20, event2);
 
 				const sumDynamic = computed(() => dynamic1.read() + dynamic2.read());
-				const [doubledSum, dispose] = sumDynamic.adjustOn((value) => value * 2);
+				const [doubledSum, dispose] = sumDynamic.on((value) => value * 2);
 
 				expect(doubledSum.read()).toBe(60); // (10 + 20) * 2
 
@@ -354,7 +344,7 @@ describe("Dynamic", () => {
 				// The dynamic should work within the timeline context
 				expect(() => dynamic.read()).not.toThrow();
 				expect(() => dynamic.updated).not.toThrow();
-				expect(() => dynamic.adjustOn((x) => x)).not.toThrow();
+				expect(() => dynamic.on((x) => x)).not.toThrow();
 			});
 		});
 	});

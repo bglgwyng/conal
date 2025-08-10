@@ -18,7 +18,7 @@ export class SwitchableEvent<U, T> extends Event<T> {
 
 	activate(): void {
 		this.dispose = this.listen(this.extractEvent(this.dynamic.read()));
-		[, this.disposeDynamicUpdated] = this.dynamic.updated.adjustOn((event) => {
+		[, this.disposeDynamicUpdated] = this.dynamic.updated.on((event) => {
 			// biome-ignore lint/style/noNonNullAssertion: `dispose` is set in activate
 			this.dispose!();
 			this.dispose = this.listen(this.extractEvent(event));

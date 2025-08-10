@@ -14,8 +14,8 @@ export class Dynamic<T> {
 
 	read = (): T => withTimeline(this.internal.timeline, this.internal.read);
 
-	adjustOn<U>(fn: (value: T) => U): readonly [Dynamic<U>, () => void] {
-		const [effectEvent, dispose] = this.internal.adjustOn((value) =>
+	on<U>(fn: (value: T) => U): readonly [Dynamic<U>, () => void] {
+		const [effectEvent, dispose] = this.internal.on((value) =>
 			withTimeline(this.internal.timeline, () => fn(value)),
 		);
 

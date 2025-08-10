@@ -26,7 +26,7 @@ describe("Event isActive dynamic", () => {
 		it("should become active when adding an effect", () => {
 			expect(source.isActive).toBe(false);
 
-			const dispose = source.on(() => {});
+			const [, dispose] = source.on(() => {});
 
 			expect(source.isActive).toBe(true);
 
@@ -35,8 +35,8 @@ describe("Event isActive dynamic", () => {
 		});
 
 		it("should remain active with multiple effects", () => {
-			const dispose1 = source.on(() => {});
-			const dispose2 = source.on(() => {});
+			const [, dispose1] = source.on(() => {});
+			const [, dispose2] = source.on(() => {});
 
 			expect(source.isActive).toBe(true);
 
@@ -53,7 +53,7 @@ describe("Event isActive dynamic", () => {
 			const activateSpy = vi.spyOn(source as any, "activate");
 			const deactivateSpy = vi.spyOn(source as any, "deactivate");
 
-			const dispose = source.on(() => {});
+			const [, dispose] = source.on(() => {});
 			expect(activateSpy).toHaveBeenCalledTimes(1);
 
 			dispose();
@@ -94,7 +94,7 @@ describe("Event isActive dynamic", () => {
 	describe("combined conditions", () => {
 		it("should remain active when multiple conditions are met", () => {
 			// Add effect
-			const dispose = source.on(() => {});
+			const [, dispose] = source.on(() => {});
 			expect(source.isActive).toBe(true);
 
 			// Add state dependency
@@ -116,7 +116,7 @@ describe("Event isActive dynamic", () => {
 
 			// Multiple rapid activations
 			for (let i = 0; i < 5; i++) {
-				const dispose = source.on(() => {});
+				const [, dispose] = source.on(() => {});
 				expect(source.isActive).toBe(true);
 				dispose();
 				expect(source.isActive).toBe(false);
@@ -130,7 +130,7 @@ describe("Event isActive dynamic", () => {
 	describe("edge cases", () => {
 		it("should handle removing non-existent effects gracefully", () => {
 			const callback = () => {};
-			const dispose = source.on(callback);
+			const [, dispose] = source.on(callback);
 
 			expect(source.isActive).toBe(true);
 
@@ -144,9 +144,9 @@ describe("Event isActive dynamic", () => {
 		});
 
 		it("should maintain correct state when effects are added and removed in different orders", () => {
-			const dispose1 = source.on(() => {});
-			const dispose2 = source.on(() => {});
-			const dispose3 = source.on(() => {});
+			const [, dispose1] = source.on(() => {});
+			const [, dispose2] = source.on(() => {});
+			const [, dispose3] = source.on(() => {});
 
 			expect(source.isActive).toBe(true);
 

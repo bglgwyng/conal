@@ -1,6 +1,4 @@
-import { stat } from "fs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ComputedDynamic } from "../../../src/core/dynamic/ComputedDynamic";
 import type { State } from "../../../src/core/dynamic/State";
 import type { Event } from "../../../src/core/event/Event";
 import { MergedEvent } from "../../../src/core/event/MergedEvent";
@@ -17,13 +15,13 @@ describe("AdjustmentEvent", () => {
 	beforeEach(() => {
 		timeline = new Timeline({ onSourceEmission() {} });
 		source = timeline.source<number>();
-		[adjustmentEvent, dispose] = source.adjustOn((value) => value * 2);
+		[adjustmentEvent, dispose] = source.on((value) => value * 2);
 	});
 
 	describe("adjustment event emission", () => {
 		it("should emit transformed value when source emits", () => {
 			const spy = vi.fn();
-			const [, disposeEffect] = adjustmentEvent.adjustOn(spy);
+			const [, disposeEffect] = adjustmentEvent.on(spy);
 
 			source.emit(21); // effect will transform to 42
 			timeline.proceed();
@@ -34,7 +32,7 @@ describe("AdjustmentEvent", () => {
 
 		it("should emit updated values on subsequent source emits", () => {
 			const spy = vi.fn();
-			const [, disposeEffect] = adjustmentEvent.adjustOn(spy);
+			const [, disposeEffect] = adjustmentEvent.on(spy);
 
 			source.emit(5); // effect will transform to 10
 			timeline.proceed();
@@ -51,7 +49,7 @@ describe("AdjustmentEvent", () => {
 		it("should call timeline.needCommit when effect emits", () => {
 			const needCommitSpy = vi.spyOn(timeline, "needCommit");
 			const spy = vi.fn();
-			const [, disposeEffect] = adjustmentEvent.adjustOn(spy);
+			const [, disposeEffect] = adjustmentEvent.on(spy);
 
 			source.emit(21);
 			timeline.proceed();
@@ -65,7 +63,7 @@ describe("AdjustmentEvent", () => {
 	describe("commit", () => {
 		it("should not emit after commit until new source emit", () => {
 			const spy = vi.fn();
-			const [, disposeEffect] = adjustmentEvent.adjustOn(spy);
+			const [, disposeEffect] = adjustmentEvent.on(spy);
 
 			// First emit
 			source.emit(21);
@@ -87,7 +85,7 @@ describe("AdjustmentEvent", () => {
 
 		it("should handle commit when no value was emitted", () => {
 			const spy = vi.fn();
-			const [, disposeEffect] = adjustmentEvent.adjustOn(spy);
+			const [, disposeEffect] = adjustmentEvent.on(spy);
 
 			// Should not throw
 			timeline.proceed();
@@ -105,7 +103,7 @@ describe("AdjustmentEvent", () => {
 		it("should emit, receive, and commit in sequence", () => {
 			const spy = vi.fn();
 
-			const [, disposeEffect] = adjustmentEvent.adjustOn(spy);
+			const [, disposeEffect] = adjustmentEvent.on(spy);
 
 			// Initial state - no emissions yet
 			expect(spy).not.toHaveBeenCalled();
@@ -130,7 +128,7 @@ describe("AdjustmentEvent", () => {
 		it("should inherit Event functionality", () => {
 			expect(adjustmentEvent.isActive).toBe(false);
 
-			const [, disposeEffect] = adjustmentEvent.adjustOn(() => {});
+			const [, disposeEffect] = adjustmentEvent.on(() => {});
 			expect(adjustmentEvent.isActive).toBe(true);
 
 			disposeEffect();
@@ -139,7 +137,7 @@ describe("AdjustmentEvent", () => {
 
 		it("should work as a chained effect", () => {
 			const spy = vi.fn();
-			const [, disposeChain] = adjustmentEvent.adjustOn(spy);
+			const [, disposeChain] = adjustmentEvent.on(spy);
 
 			source.emit(10); // source -> effect (20) -> spy
 			timeline.proceed();
@@ -159,7 +157,7 @@ describe("AdjustmentEvent", () => {
 			const allCallbacks: Array<() => void> = [];
 
 			// Create an effect that dynamically creates new sources and states
-			const [, disposeEffect] = adjustmentEvent.adjustOn((transformedValue) => {
+			const [, disposeEffect] = adjustmentEvent.on((transformedValue) => {
 				// Create a new source within the callback
 				const newSource = timeline.source<string>();
 				createdSources.push({ value: transformedValue, source: newSource });
@@ -173,7 +171,7 @@ describe("AdjustmentEvent", () => {
 				});
 
 				// Set up a callback on the newly created source
-				const [, disposeNewCallback] = newSource.adjustOn((stringValue) => {
+				const [, disposeNewCallback] = newSource.on((stringValue) => {
 					// This callback should be able to access the new state
 					expect(newState.read()).toBe(stringValue);
 				});
@@ -236,7 +234,7 @@ describe("AdjustmentEvent", () => {
 			);
 
 			const spy = vi.fn();
-			const [, disposeDerived] = derivedEvent.adjustOn(spy);
+			const [, disposeDerived] = derivedEvent.on(spy);
 
 			// Source emits -> Effect transforms -> TransformedEvent transforms
 			source.emit(15); // source(15) -> effect(30) -> derived("Result: 30")
@@ -266,7 +264,7 @@ describe("AdjustmentEvent", () => {
 			);
 
 			const spy = vi.fn();
-			const [, disposeSecond] = secondDerived.adjustOn(spy);
+			const [, disposeSecond] = secondDerived.on(spy);
 
 			// Test the full chain
 			source.emit(12); // source(12) -> effect(24) -> first("Value: 24") -> second({message: "Value: 24", length: 9})
@@ -290,7 +288,7 @@ describe("AdjustmentEvent", () => {
 			);
 
 			const spy = vi.fn();
-			const [, disposeDerived] = derivedEvent.adjustOn(spy);
+			const [, disposeDerived] = derivedEvent.on(spy);
 
 			source.emit(25);
 			timeline.proceed();
@@ -315,7 +313,7 @@ describe("AdjustmentEvent", () => {
 			);
 
 			const spy = vi.fn();
-			const [, disposeMerged] = mergedEvent.adjustOn(spy);
+			const [, disposeMerged] = mergedEvent.on(spy);
 
 			// Only left (AdjustmentEvent) emits
 			source.emit(10); // source(10) -> effect(20) -> merged({type: "left", value: 20})
@@ -337,7 +335,7 @@ describe("AdjustmentEvent", () => {
 			);
 
 			const spy = vi.fn();
-			const [, disposeMerged] = mergedEvent.adjustOn(spy);
+			const [, disposeMerged] = mergedEvent.on(spy);
 
 			// Only right source emits
 			rightSource.emit("hello");
@@ -359,7 +357,7 @@ describe("AdjustmentEvent", () => {
 			);
 
 			const spy = vi.fn();
-			const [, disposeMerged] = mergedEvent.adjustOn(spy);
+			const [, disposeMerged] = mergedEvent.on(spy);
 
 			// Both events emit in same timeline flush
 			source.emit(15); // Will trigger effectEvent with value 30
@@ -383,7 +381,7 @@ describe("AdjustmentEvent", () => {
 			);
 
 			const spy = vi.fn();
-			const [, disposeMerged] = mergedEvent.adjustOn(spy);
+			const [, disposeMerged] = mergedEvent.on(spy);
 
 			// First: left only
 			source.emit(5); // effect will emit 10
@@ -423,14 +421,14 @@ describe("AdjustmentEvent", () => {
 			);
 
 			// Create another EffectEvent from MergedEvent
-			const [chainedEffect, disposeChain] = mergedEvent.adjustOn((merged) => {
+			const [chainedEffect, disposeChain] = mergedEvent.on((merged) => {
 				if (merged.type === "left") return `Left: ${merged.value}`;
 				if (merged.type === "right") return `Right: ${merged.value}`;
 				return `Both: ${merged.left} & ${merged.right}`;
 			});
 
 			const spy = vi.fn();
-			const [, disposeChainedSpy] = chainedEffect.adjustOn(spy);
+			const [, disposeChainedSpy] = chainedEffect.on(spy);
 
 			// Test the full chain
 			source.emit(8); // source(8) -> effect(16) -> merged({type: "left", value: 16}) -> chained("Left: 16")
@@ -450,21 +448,14 @@ describe("AdjustmentEvent", () => {
 		});
 	});
 
-	it("should allow reading current and next values in adjustOn callback", () => {
+	it("should allow reading current and next values in on callback", () => {
 		const source = timeline.source<number>();
 		const state = timeline.state(10, source);
 
 		const onSpy = vi.fn();
-		const adjustOnSpy = vi.fn();
 
 		state.updated.on((value) => {
 			onSpy({
-				current: state.read(),
-				next: value,
-			});
-		});
-		state.updated.adjustOn((value) => {
-			adjustOnSpy({
 				current: state.read(),
 				next: value,
 			});
@@ -474,10 +465,6 @@ describe("AdjustmentEvent", () => {
 		timeline.proceed();
 
 		expect(onSpy).toHaveBeenCalledExactlyOnceWith({
-			current: 20,
-			next: 20,
-		});
-		expect(adjustOnSpy).toHaveBeenCalledExactlyOnceWith({
 			current: 10,
 			next: 20,
 		});

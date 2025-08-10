@@ -29,7 +29,7 @@ describe("State", () => {
 
 		new TransformedEvent(timeline, state.updated, (value) => {
 			return { current: state.read(), next: value };
-		}).adjustOn(updateSpy);
+		}).on(updateSpy);
 
 		source.emit(20);
 		timeline.proceed();

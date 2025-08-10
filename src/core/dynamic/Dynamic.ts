@@ -5,10 +5,8 @@ import type { State } from "./State";
 export abstract class Dynamic<T> extends Behavior<T> {
 	abstract updated: Event<T>;
 
-	adjustOn<U>(
-		fn: (value: T) => U,
-	): readonly [state: State<U>, dispose: () => void] {
-		const [effectfulUpdateEvent, dispose] = this.updated.adjustOn(fn);
+	on<U>(fn: (value: T) => U): readonly [state: State<U>, dispose: () => void] {
+		const [effectfulUpdateEvent, dispose] = this.updated.on(fn);
 
 		return [
 			this.timeline.state(fn(this.readCurrentValue()), effectfulUpdateEvent),

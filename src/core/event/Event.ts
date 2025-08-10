@@ -19,20 +19,7 @@ export abstract class Event<T> extends Node {
 		);
 	}
 
-	on<U>(fn: (value: T) => U): () => void {
-		const { isActive } = this;
-
-		this.effects.push(fn);
-		if (!isActive) this.activate();
-
-		return () => {
-			this.effects.splice(this.effects.indexOf(fn), 1);
-
-			if (!this.isActive) this.deactivate();
-		};
-	}
-
-	adjustOn<U>(fn: (value: T) => U): readonly [Event<U>, () => void] {
+	on<U>(fn: (value: T) => U): readonly [Event<U>, () => void] {
 		const { isActive } = this;
 
 		const effectEvent = new Emmittable<U>(this.timeline);
