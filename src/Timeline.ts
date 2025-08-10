@@ -108,7 +108,6 @@ export class Timeline {
 					}
 				}
 
-				effects.push(...event.effects.map((f) => () => f(value)));
 				for (const [runAdjustment, adjustmentEvent] of event.adjustments) {
 					try {
 						this.#isRunningEffect = true;
@@ -136,9 +135,10 @@ export class Timeline {
 
 		this.#timestamp = nextTimestamp;
 
-		for (const runEffect of effects) {
-			runEffect();
+		for (const fn of this.#tasksAfterProceed) {
+			fn();
 		}
+		this.#tasksAfterProceed = [];
 
 		function pushEventToQueue(event: Event<unknown>) {
 			if (eventQueue.has(event)) return;
@@ -220,6 +220,13 @@ export class Timeline {
 	// @internal
 	needCommit(node: Node) {
 		this.#toCommitNodes.add(node);
+	}
+
+	#tasksAfterProceed: (() => void)[] = [];
+	// @internal
+	queueTaskAfterProceed(fn: () => void) {
+		assert(this.#isProceeding, "Timeline is not proceeding");
+		this.#tasksAfterProceed.push(fn);
 	}
 }
 

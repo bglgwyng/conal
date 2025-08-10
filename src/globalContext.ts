@@ -33,3 +33,7 @@ export function withTimeline<T>(timeline: Timeline, fn: () => T): T {
 		globalContext.activeTimeline = previousTimeline;
 	}
 }
+
+export function queueTaskAfterProceed(fn: () => void) {
+	getActiveTimeline().queueTaskAfterProceed(fn);
+}
