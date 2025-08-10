@@ -16,5 +16,11 @@ export abstract class Dynamic<T> extends Behavior<T> {
 		];
 	}
 
-	abstract readNext(): { value: T; isUpdated: boolean };
+	readNext(): { value: T; isUpdated: boolean } {
+		const maybeEmission = this.updated.getEmission();
+
+		return maybeEmission
+			? { value: maybeEmission(), isUpdated: true }
+			: { value: this.readCurrent(), isUpdated: false };
+	}
 }

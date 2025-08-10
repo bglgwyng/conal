@@ -16,8 +16,4 @@ export class ConstantDynamic<T> extends Dynamic<T> {
 	readCurrent(): T {
 		return this.value;
 	}
-
-	readNext() {
-		return { value: this.value, isUpdated: false };
-	}
 }

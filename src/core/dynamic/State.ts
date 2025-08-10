@@ -22,16 +22,6 @@ export class State<T> extends Dynamic<T> {
 		return this.value;
 	}
 
-	readNext(): { value: T; isUpdated: boolean } {
-		const maybeValue = this.updated.getEmission();
-		if (!maybeValue) return { value: this.value, isUpdated: false };
-
-		const value = maybeValue();
-		this.maybeNextValue = just(value);
-
-		return { value, isUpdated: true };
-	}
-
 	prepareUpdate() {
 		this.maybeNextValue = this.updated.getEmission();
 		this.timeline.needCommit(this);
