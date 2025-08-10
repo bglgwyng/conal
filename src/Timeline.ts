@@ -1,4 +1,3 @@
-import type { Behavior } from "./core/dynamic/Behavior";
 import type { ComputedDynamic } from "./core/dynamic/ComputedDynamic";
 import type { Dynamic } from "./core/dynamic/Dynamic";
 import { State } from "./core/dynamic/State";

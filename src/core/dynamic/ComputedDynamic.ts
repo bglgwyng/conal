@@ -2,7 +2,6 @@ import type { Timeline } from "../../Timeline";
 import { assert } from "../../utils/assert";
 import type { Event } from "../event/Event";
 import { UpdateEvent } from "../event/UpdateEvent";
-import type { Behavior } from "./Behavior";
 import { Dynamic } from "./Dynamic";
 
 export class ComputedDynamic<T> extends Dynamic<T> {
@@ -85,7 +84,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		this.lastRead.dependencies = newDependencies;
 	}
 
-	get dependencies(): Set<Behavior<any>> | undefined {
+	get dependencies(): Set<Dynamic<any>> | undefined {
 		return this.lastRead?.dependencies;
 	}
 
