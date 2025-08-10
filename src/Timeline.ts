@@ -182,6 +182,12 @@ export class Timeline {
 		this.#readTrackings.at(-1)?.add(behavior);
 	}
 
+	read = <T>(behavior: Behavior<T>) => {
+		this.reportRead(behavior);
+
+		return behavior.read();
+	};
+
 	// @internal
 	withTrackingRead<T>(
 		fn: () => T,

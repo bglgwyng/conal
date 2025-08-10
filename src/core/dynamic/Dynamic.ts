@@ -13,4 +13,6 @@ export abstract class Dynamic<T> extends Behavior<T> {
 			dispose,
 		];
 	}
+
+	abstract readNextValue(): { value: T; isUpdated: boolean };
 }

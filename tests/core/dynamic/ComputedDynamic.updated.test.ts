@@ -18,7 +18,7 @@ describe("ComputedDynamic - updated event", () => {
 
 		const computed = new ComputedDynamic(
 			timeline,
-			() => state1.read() + state2.read(),
+			(read) => read(state1) + read(state2),
 		);
 
 		// Set up a spy to track the updated event
@@ -64,7 +64,7 @@ describe("ComputedDynamic - updated event", () => {
 
 		const computed = new ComputedDynamic(
 			timeline,
-			() => state1.read() + state2.read(),
+			(read) => read(state1) + read(state2),
 		);
 
 		// Initially, no dependencies should be tracked
@@ -100,7 +100,7 @@ describe("ComputedDynamic - updated event", () => {
 		const source1 = timeline.source<number>();
 		const state1 = timeline.state(10, source1);
 
-		const computed = new ComputedDynamic(timeline, () => state1.read() * 2);
+		const computed = new ComputedDynamic(timeline, (read) => read(state1) * 2);
 
 		// No effect added, so no dependencies should be tracked
 		expect(computed.dependencies).toBeUndefined();
@@ -124,7 +124,7 @@ describe("ComputedDynamic - updated event", () => {
 		// Create a computed dynamic that computes sum
 		const computed = new ComputedDynamic(
 			timeline,
-			() => state1.read() + state2.read(),
+			(read) => read(state1) + read(state2),
 		);
 
 		// Create a target state that will receive updates from computed
@@ -162,7 +162,7 @@ describe("ComputedDynamic - updated event", () => {
 		const source = timeline.source<number>();
 		const state = timeline.state(5, source);
 
-		const computed = new ComputedDynamic(timeline, () => state.read() * 3);
+		const computed = new ComputedDynamic(timeline, (read) => read(state) * 3);
 
 		// Create target state for writeOn
 		const targetState = timeline.state(0, computed.updated);
@@ -202,7 +202,7 @@ describe("ComputedDynamic - updated event", () => {
 
 		const computed = new ComputedDynamic(
 			timeline,
-			() => state1.read() + state2.read(),
+			(read) => read(state1) + read(state2),
 		);
 
 		// Spy on activate and deactivate methods
@@ -243,7 +243,7 @@ describe("ComputedDynamic - updated event", () => {
 		const source = timeline.source<number>();
 		const state = timeline.state(5, source);
 
-		const computed = new ComputedDynamic(timeline, () => state.read() * 2);
+		const computed = new ComputedDynamic(timeline, (read) => read(state) * 2);
 
 		const activateSpy = vi.spyOn(computed, "activate");
 		const deactivateSpy = vi.spyOn(computed, "deactivate");
@@ -275,7 +275,7 @@ describe("ComputedDynamic - updated event", () => {
 		const source = timeline.source<number>();
 		const state = timeline.state(10, source);
 
-		const computed = new ComputedDynamic(timeline, () => state.read() + 5);
+		const computed = new ComputedDynamic(timeline, (read) => read(state) + 5);
 
 		const activateSpy = vi.spyOn(computed, "activate");
 		const deactivateSpy = vi.spyOn(computed, "deactivate");
@@ -301,7 +301,7 @@ describe("ComputedDynamic - updated event", () => {
 		const source = timeline.source<number>();
 		const state = timeline.state(10, source);
 
-		const computed = new ComputedDynamic(timeline, () => state.read() + 5);
+		const computed = new ComputedDynamic(timeline, (read) => read(state) + 5);
 
 		const updateSpy = vi.fn();
 
