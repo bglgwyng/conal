@@ -8,7 +8,7 @@ export class UpdateEvent<T> extends Event<T> {
 	}
 
 	getEmission() {
-		const { value, isUpdated } = this.computed.readNextValue();
+		const { value, isUpdated } = this.computed.readNext();
 		if (!isUpdated) return;
 
 		return just(value);

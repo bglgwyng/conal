@@ -8,11 +8,11 @@ import { Dynamic } from "./Dynamic";
 export class ComputedDynamic<T> extends Dynamic<T> {
 	updated: Event<T> = new UpdateEvent(this);
 
-	lastRead?: { value: T; at: number; dependencies?: Set<Behavior<any>> };
+	lastRead?: { value: T; at: number; dependencies?: Set<Dynamic<any>> };
 	nextUpdate?: {
 		value: T;
 		isUpdated: boolean;
-		dependencies: Set<Behavior<any>>;
+		dependencies: Set<Dynamic<any>>;
 	};
 
 	constructor(
@@ -23,7 +23,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		this.updated = new UpdateEvent(this);
 	}
 
-	readCurrentValue(): T {
+	readCurrent(): T {
 		assert(!this.timeline.isReadingNextValue, "Timeline is reading next value");
 		const { lastRead, timeline, isActive } = this;
 
@@ -41,7 +41,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 
 		if (isActive) {
 			const [value, dependencies] = this.timeline.withTrackingRead(() =>
-				this.fn((dynamic) => this.timeline.read(dynamic)),
+				this.fn(this.timeline.read),
 			);
 
 			this.lastRead = { value, at: timeline.timestamp };
@@ -49,23 +49,24 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 
 			return value;
 		} else {
-			const value = this.fn((dynamic) => dynamic.readCurrentValue());
+			const value = this.fn(this.timeline.read);
 			this.lastRead = { value, at: timeline.timestamp };
 
 			return value;
 		}
 	}
 
-	readNextValue() {
-		assert(this.timeline.isProceeding, "Timeline is not proceeding");
-		assert(this.isActive, "ComputedDynamic is not active");
+	readNext() {
+		const { timeline, isActive } = this;
+		assert(timeline.isProceeding, "Timeline is not proceeding");
+		assert(isActive, "ComputedDynamic is not active");
 
 		if (this.nextUpdate) return this.nextUpdate;
 
-		const currentValue = this.readCurrentValue();
-		const nextUpdate = this.timeline.withReadingNextValue(() => {
-			const [value, dependencies] = this.timeline.withTrackingRead(() =>
-				this.fn((dynamic) => this.timeline.read(dynamic)),
+		const currentValue = this.readCurrent();
+		const nextUpdate = timeline.withReadingNextValue(() => {
+			const [value, dependencies] = timeline.withTrackingRead(() =>
+				this.fn(timeline.read),
 			);
 
 			return {
@@ -81,7 +82,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		return nextUpdate;
 	}
 
-	updateDependencies(newDependencies: Set<Behavior<any>>) {
+	updateDependencies(newDependencies: Set<Dynamic<any>>) {
 		assert(this.lastRead, "lastRead is not set");
 
 		for (const dependency of newDependencies) {
@@ -110,7 +111,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 	}
 
 	activate() {
-		this.readCurrentValue();
+		this.readCurrent();
 	}
 
 	deactivate() {

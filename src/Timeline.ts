@@ -1,5 +1,6 @@
 import type { Behavior } from "./core/dynamic/Behavior";
 import type { ComputedDynamic } from "./core/dynamic/ComputedDynamic";
+import type { Dynamic } from "./core/dynamic/Dynamic";
 import { State } from "./core/dynamic/State";
 import type { Event } from "./core/event/Event";
 import { Never } from "./core/event/Never";
@@ -175,27 +176,24 @@ export class Timeline {
 		});
 	}
 
-	#readTrackings: Set<Behavior<any>>[] = [];
+	#readTrackings: Set<Dynamic<any>>[] = [];
 
-	// @internal
-	reportRead(behavior: Behavior<any>) {
-		this.#readTrackings.at(-1)?.add(behavior);
-	}
+	read = <T>(dynamic: Dynamic<T>) => {
+		this.#readTrackings.at(-1)?.add(dynamic);
 
-	read = <T>(behavior: Behavior<T>) => {
-		this.reportRead(behavior);
-
-		return behavior.read();
+		return this.isReadingNextValue
+			? dynamic.readNext().value
+			: dynamic.readCurrent();
 	};
 
 	// @internal
 	withTrackingRead<T>(
 		fn: () => T,
-	): readonly [value: T, dependencies: Set<Behavior<any>>] {
+	): readonly [value: T, dependencies: Set<Dynamic<any>>] {
 		this.#readTrackings.push(new Set());
 
 		let value: T;
-		let dependencies: Set<Behavior<any>>;
+		let dependencies: Set<Dynamic<any>>;
 		try {
 			value = fn();
 		} finally {

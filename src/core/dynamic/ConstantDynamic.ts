@@ -13,11 +13,11 @@ export class ConstantDynamic<T> extends Dynamic<T> {
 		this.updated = this.timeline.never;
 	}
 
-	readCurrentValue(): T {
+	readCurrent(): T {
 		return this.value;
 	}
 
-	readNextValue() {
+	readNext() {
 		return { value: this.value, isUpdated: false };
 	}
 }

@@ -18,11 +18,11 @@ export class State<T> extends Dynamic<T> {
 		this.updated.writeOn(this);
 	}
 
-	readCurrentValue(): T {
+	readCurrent(): T {
 		return this.value;
 	}
 
-	readNextValue(): { value: T; isUpdated: boolean } {
+	readNext(): { value: T; isUpdated: boolean } {
 		const maybeValue = this.updated.getEmission();
 		if (!maybeValue) return { value: this.value, isUpdated: false };
 

@@ -173,7 +173,7 @@ describe("AdjustmentEvent", () => {
 				// Set up a callback on the newly created source
 				const [, disposeNewCallback] = newSource.on((stringValue) => {
 					// This callback should be able to access the new state
-					expect(newState.read()).toBe(stringValue);
+					expect(newState.readCurrent()).toBe(stringValue);
 				});
 				allCallbacks.push(disposeNewCallback);
 			});
@@ -187,14 +187,16 @@ describe("AdjustmentEvent", () => {
 			expect(createdStates).toHaveLength(1);
 			expect(createdSources[0].value).toBe(10);
 			expect(createdStates[0].initialValue).toBe("State for 10");
-			expect(createdStates[0].state.read()).toBe("State for 10");
+			expect(createdStates[0].state.readCurrent()).toBe("State for 10");
 
 			// Test that the newly created source works
 			createdSources[0].source.emit("Hello from dynamic source!");
 			timeline.proceed();
 
 			// The state should now have the emitted value
-			expect(createdStates[0].state.read()).toBe("Hello from dynamic source!");
+			expect(createdStates[0].state.readCurrent()).toBe(
+				"Hello from dynamic source!",
+			);
 
 			// Trigger another effect to create more dynamic elements
 			source.emit(15); // effect transforms to 30
@@ -211,8 +213,8 @@ describe("AdjustmentEvent", () => {
 			createdSources[1].source.emit("Second dynamic");
 			timeline.proceed();
 
-			expect(createdStates[0].state.read()).toBe("First dynamic");
-			expect(createdStates[1].state.read()).toBe("Second dynamic");
+			expect(createdStates[0].state.readCurrent()).toBe("First dynamic");
+			expect(createdStates[1].state.readCurrent()).toBe("Second dynamic");
 
 			// Clean up all dynamic callbacks
 			allCallbacks.forEach(dispose);
@@ -456,7 +458,7 @@ describe("AdjustmentEvent", () => {
 
 		state.updated.on((value) => {
 			onSpy({
-				current: state.read(),
+				current: state.readCurrent(),
 				next: value,
 			});
 		});

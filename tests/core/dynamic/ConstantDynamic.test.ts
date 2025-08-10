@@ -9,15 +9,15 @@ describe("ConstantDynamic", () => {
 		const dynamic = new ConstantDynamic(timeline, value);
 
 		// Test readCurrentValue
-		expect(dynamic.readCurrentValue()).toBe(value);
+		expect(dynamic.readCurrent()).toBe(value);
 
 		// Test readNextValue
-		const nextValue = dynamic.readNextValue();
+		const nextValue = dynamic.readNext();
 		expect(nextValue.value).toBe(value);
 		expect(nextValue.isUpdated).toBe(false);
 
 		// Test read()
-		expect(dynamic.read()).toBe(value);
+		expect(dynamic.readCurrent()).toBe(value);
 	});
 
 	it("should never update its value", () => {
@@ -49,9 +49,9 @@ describe("ConstantDynamic", () => {
 		const obj = { key: "value" };
 		const objDynamic = new ConstantDynamic(timeline, obj);
 
-		expect(numDynamic.read()).toBe(42);
-		expect(strDynamic.read()).toBe("test");
-		expect(objDynamic.read()).toBe(obj);
+		expect(numDynamic.readCurrent()).toBe(42);
+		expect(strDynamic.readCurrent()).toBe("test");
+		expect(objDynamic.readCurrent()).toBe(obj);
 	});
 
 	it("should maintain referential equality", () => {
@@ -61,8 +61,8 @@ describe("ConstantDynamic", () => {
 		const dynamic = new ConstantDynamic(timeline, obj);
 
 		// Multiple reads should return the same object reference
-		const firstRead = dynamic.read();
-		const secondRead = dynamic.read();
+		const firstRead = dynamic.readCurrent();
+		const secondRead = dynamic.readCurrent();
 
 		expect(firstRead).toBe(obj);
 		expect(secondRead).toBe(obj);

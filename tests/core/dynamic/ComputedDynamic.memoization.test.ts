@@ -17,23 +17,23 @@ describe("ComputedDynamic - Memoization", () => {
 		const computed = new ComputedDynamic(timeline, computeFn);
 
 		// First read - should compute the value
-		expect(computed.read()).toBe(0);
+		expect(computed.readCurrent()).toBe(0);
 		expect(computeFn).toHaveBeenCalledTimes(1);
 
 		// Second read within same timestamp - should use cached value
-		expect(computed.read()).toBe(0);
+		expect(computed.readCurrent()).toBe(0);
 		expect(computeFn).toHaveBeenCalledTimes(1);
 
 		// Change timestamp and read again - should recompute
 		timeline.proceed();
-		expect(computed.read()).toBe(0);
+		expect(computed.readCurrent()).toBe(0);
 		expect(computeFn).toHaveBeenCalledTimes(2);
 
 		// // Update state and verify recomputation
 		source.emit(5);
 		timeline.proceed();
 
-		expect(computed.read()).toBe(10);
+		expect(computed.readCurrent()).toBe(10);
 		expect(computeFn).toHaveBeenCalledTimes(3);
 	});
 
@@ -51,7 +51,7 @@ describe("ComputedDynamic - Memoization", () => {
 		computed.updated.on(() => {});
 
 		// Initial read - fn should be called once
-		expect(computed.read()).toBe(43); // 42 + 1
+		expect(computed.readCurrent()).toBe(43); // 42 + 1
 		expect(mockFn).toHaveBeenCalledTimes(1);
 
 		// Update state to trigger recomputation
@@ -59,13 +59,13 @@ describe("ComputedDynamic - Memoization", () => {
 		timeline.proceed(); // This triggers commit with new cached value
 
 		// After commit, the cache should be updated
-		expect(computed.read()).toBe(44); // 42 + 2
+		expect(computed.readCurrent()).toBe(44); // 42 + 2
 		expect(mockFn).toHaveBeenCalledTimes(2);
 
 		// Multiple reads at the same timestamp should use cache - fn should not be called again
-		expect(computed.read()).toBe(44);
-		expect(computed.read()).toBe(44);
-		expect(computed.read()).toBe(44);
+		expect(computed.readCurrent()).toBe(44);
+		expect(computed.readCurrent()).toBe(44);
+		expect(computed.readCurrent()).toBe(44);
 		expect(mockFn).toHaveBeenCalledTimes(2); // Still only 2 calls, no additional calls
 	});
 });

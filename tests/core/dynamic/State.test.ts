@@ -13,12 +13,12 @@ describe("State", () => {
 		const source = timeline.source<number>();
 
 		const state = timeline.state(0, source);
-		expect(state.read()).toBe(0);
+		expect(state.readCurrent()).toBe(0);
 
 		source.emit(1);
 		timeline.proceed();
 
-		expect(state.read()).toBe(1);
+		expect(state.readCurrent()).toBe(1);
 	});
 
 	test("should read the current value of the state in the update event", () => {
@@ -28,7 +28,7 @@ describe("State", () => {
 		const updateSpy = vi.fn();
 
 		new TransformedEvent(timeline, state.updated, (value) => {
-			return { current: state.read(), next: value };
+			return { current: state.readCurrent(), next: value };
 		}).on(updateSpy);
 
 		source.emit(20);

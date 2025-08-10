@@ -20,7 +20,7 @@ describe("ComputedDynamic", () => {
 			(read) => read(state1) + read(state2),
 		);
 
-		expect(computed.read()).toBe(0);
+		expect(computed.readCurrent()).toBe(0);
 
 		// Set initial state value
 		source1.emit(5); // This will update both state1 and state2
@@ -28,7 +28,7 @@ describe("ComputedDynamic", () => {
 		timeline.proceed();
 
 		// Check if computed value is computed correctly
-		expect(computed.read()).toBe(15);
+		expect(computed.readCurrent()).toBe(15);
 	});
 
 	it("should not track dependencies when inactive", () => {
@@ -47,7 +47,7 @@ describe("ComputedDynamic", () => {
 		expect(computed.dependencies).toBeUndefined();
 
 		// Read when inactive - should not track dependencies
-		const result = computed.read();
+		const result = computed.readCurrent();
 		expect(result).toBe(0);
 
 		// Should still not track dependencies when inactive
@@ -72,7 +72,7 @@ describe("ComputedDynamic", () => {
 		expect(computed.isActive).toBe(true);
 
 		// Read when active - should track dependencies
-		const result = computed.read();
+		const result = computed.readCurrent();
 		expect(result).toBe(0);
 
 		// Should now track dependencies when active
@@ -107,7 +107,7 @@ describe("ComputedDynamic", () => {
 		outerComputed.updated.on(() => {});
 
 		// Initial read - should track all dependencies
-		expect(outerComputed.read()).toBe(0); // 0*2 + 0 = 0
+		expect(outerComputed.readCurrent()).toBe(0); // 0*2 + 0 = 0
 
 		// Verify dependencies
 		expect(outerComputed.dependencies?.has(innerComputed)).toBe(true);
@@ -123,12 +123,12 @@ describe("ComputedDynamic", () => {
 		source1.emit(5);
 		timeline.proceed();
 
-		expect(outerComputed.read()).toBe(10); // 5*2 + 0 = 10
+		expect(outerComputed.readCurrent()).toBe(10); // 5*2 + 0 = 10
 
 		// Update state2 and verify
 		source2.emit(3);
 		timeline.proceed();
 
-		expect(outerComputed.read()).toBe(13); // 5*2 + 3 = 13
+		expect(outerComputed.readCurrent()).toBe(13); // 5*2 + 3 = 13
 	});
 });

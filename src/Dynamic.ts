@@ -12,7 +12,7 @@ export class Dynamic<T> {
 		this.updated = new Event(internalDynamic.updated);
 	}
 
-	read = (): T => withTimeline(this.internal.timeline, this.internal.read);
+	read = (): T => this.internal.timeline.read(this.internal);
 
 	on<U>(fn: (value: T) => U): readonly [Dynamic<U>, () => void] {
 		const [effectEvent, dispose] = this.internal.on((value) =>

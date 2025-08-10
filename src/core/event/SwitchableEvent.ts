@@ -13,11 +13,11 @@ export class SwitchableEvent<U, T> extends Event<T> {
 	}
 
 	getEmission(): Maybe<T> {
-		return this.extractEvent(this.dynamic.read()).getEmission();
+		return this.extractEvent(this.dynamic.readCurrent()).getEmission();
 	}
 
 	activate(): void {
-		this.dispose = this.listen(this.extractEvent(this.dynamic.read()));
+		this.dispose = this.listen(this.extractEvent(this.dynamic.readCurrent()));
 		[, this.disposeDynamicUpdated] = this.dynamic.updated.on((event) => {
 			// biome-ignore lint/style/noNonNullAssertion: `dispose` is set in activate
 			this.dispose!();

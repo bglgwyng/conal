@@ -26,7 +26,7 @@ describe("ComputedDynamic - updated event", () => {
 		const [, dispose] = computed.updated.on(updateSpy);
 
 		// Initial read to set up dependencies
-		expect(computed.read()).toBe(0);
+		expect(computed.readCurrent()).toBe(0);
 		expect(updateSpy).not.toHaveBeenCalled();
 
 		// Update first state and flush
@@ -148,14 +148,14 @@ describe("ComputedDynamic - updated event", () => {
 		timeline.proceed();
 
 		// Target state should be updated with the new computed value
-		expect(targetState.read()).toBe(45); // 25 + 20
+		expect(targetState.readCurrent()).toBe(45); // 25 + 20
 
 		// Update the other source
 		source2.emit(30);
 		timeline.proceed();
 
 		// Target state should be updated again
-		expect(targetState.read()).toBe(55); // 25 + 30
+		expect(targetState.readCurrent()).toBe(55); // 25 + 30
 	});
 
 	it("should track dependencies with both effect and writeOn", () => {
@@ -188,7 +188,7 @@ describe("ComputedDynamic - updated event", () => {
 		// Both effect and writeOn should work
 		expect(updateSpy).toHaveBeenCalledTimes(1);
 		expect(updateSpy).toHaveBeenLastCalledWith(30); // 10 * 3
-		expect(targetState.read()).toBe(30);
+		expect(targetState.readCurrent()).toBe(30);
 
 		// Clean up
 		unsubscribeAdjustment();
@@ -294,7 +294,7 @@ describe("ComputedDynamic - updated event", () => {
 		// Update source to verify the connection works
 		source.emit(20);
 		timeline.proceed();
-		expect(targetState.read()).toBe(25); // 20 + 5
+		expect(targetState.readCurrent()).toBe(25); // 20 + 5
 	});
 
 	it("should read the current value of the computed dynamic in the update event", () => {
@@ -306,7 +306,7 @@ describe("ComputedDynamic - updated event", () => {
 		const updateSpy = vi.fn();
 
 		new TransformedEvent(timeline, computed.updated, (value) => {
-			return { current: computed.read(), next: value };
+			return { current: computed.readCurrent(), next: value };
 		}).on(updateSpy);
 
 		source.emit(20);

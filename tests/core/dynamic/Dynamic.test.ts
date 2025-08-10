@@ -18,7 +18,7 @@ describe("Dynamic.on", () => {
 		);
 
 		expect(typeof dispose).toBe("function");
-		expect(transformedState.read()).toBe("value: 0");
+		expect(transformedState.readCurrent()).toBe("value: 0");
 	});
 
 	it("should create state that updates when source dynamic updates", () => {
@@ -28,13 +28,13 @@ describe("Dynamic.on", () => {
 		// Transform number by doubling it
 		const [doubledState, dispose] = state.on((value: number) => value * 2);
 
-		expect(doubledState.read()).toBe(10); // 5 * 2
+		expect(doubledState.readCurrent()).toBe(10); // 5 * 2
 
 		// Update source and check if transformed state updates
 		source.emit(7);
 		timeline.proceed();
 
-		expect(doubledState.read()).toBe(14); // 7 * 2
+		expect(doubledState.readCurrent()).toBe(14); // 7 * 2
 
 		dispose();
 	});
@@ -48,12 +48,12 @@ describe("Dynamic.on", () => {
 			value.toUpperCase(),
 		);
 
-		expect(upperState.read()).toBe("HELLO");
+		expect(upperState.readCurrent()).toBe("HELLO");
 
 		source.emit("world");
 		timeline.proceed();
 
-		expect(upperState.read()).toBe("WORLD");
+		expect(upperState.readCurrent()).toBe("WORLD");
 
 		dispose();
 	});
@@ -66,12 +66,12 @@ describe("Dynamic.on", () => {
 			(value: number) => value + 100,
 		);
 
-		expect(transformedState.read()).toBe(101);
+		expect(transformedState.readCurrent()).toBe(101);
 
 		// Update before disposing
 		source.emit(2);
 		timeline.proceed();
-		expect(transformedState.read()).toBe(102);
+		expect(transformedState.readCurrent()).toBe(102);
 
 		// Dispose the subscription
 		dispose();
@@ -81,7 +81,7 @@ describe("Dynamic.on", () => {
 		timeline.proceed();
 
 		// The transformed state should still have the last value before disposal
-		expect(transformedState.read()).toBe(102);
+		expect(transformedState.readCurrent()).toBe(102);
 	});
 
 	it("should handle complex transformations", () => {
@@ -93,12 +93,12 @@ describe("Dynamic.on", () => {
 			Math.sqrt(point.x * point.x + point.y * point.y),
 		);
 
-		expect(distanceState.read()).toBeCloseTo(Math.sqrt(5), 5); // sqrt(1^2 + 2^2)
+		expect(distanceState.readCurrent()).toBeCloseTo(Math.sqrt(5), 5); // sqrt(1^2 + 2^2)
 
 		source.emit({ x: 3, y: 4 });
 		timeline.proceed();
 
-		expect(distanceState.read()).toBe(5); // sqrt(3^2 + 4^2) = 5
+		expect(distanceState.readCurrent()).toBe(5); // sqrt(3^2 + 4^2) = 5
 
 		dispose();
 	});
@@ -113,16 +113,16 @@ describe("Dynamic.on", () => {
 		);
 		const [negatedState, dispose3] = state.on((value: number) => -value);
 
-		expect(doubledState.read()).toBe(20);
-		expect(stringState.read()).toBe("Number: 10");
-		expect(negatedState.read()).toBe(-10);
+		expect(doubledState.readCurrent()).toBe(20);
+		expect(stringState.readCurrent()).toBe("Number: 10");
+		expect(negatedState.readCurrent()).toBe(-10);
 
 		source.emit(5);
 		timeline.proceed();
 
-		expect(doubledState.read()).toBe(10);
-		expect(stringState.read()).toBe("Number: 5");
-		expect(negatedState.read()).toBe(-5);
+		expect(doubledState.readCurrent()).toBe(10);
+		expect(stringState.readCurrent()).toBe("Number: 5");
+		expect(negatedState.readCurrent()).toBe(-5);
 
 		// Dispose all
 		dispose1();
@@ -140,15 +140,15 @@ describe("Dynamic.on", () => {
 			return 10 / value;
 		});
 
-		expect(transformedState.read()).toBe(10); // 10 / 1
+		expect(transformedState.readCurrent()).toBe(10); // 10 / 1
 
 		source.emit(2);
 		timeline.proceed();
-		expect(transformedState.read()).toBe(5); // 10 / 2
+		expect(transformedState.readCurrent()).toBe(5); // 10 / 2
 
 		source.emit(0);
 		timeline.proceed();
-		expect(transformedState.read()).toBe(5);
+		expect(transformedState.readCurrent()).toBe(5);
 
 		dispose();
 	});
@@ -168,8 +168,10 @@ describe("Dynamic.on", () => {
 		expect(transformedState1).not.toBe(transformedState2);
 
 		// But they should have the same value
-		expect(transformedState1.read()).toBe(transformedState2.read());
-		expect(transformedState1.read()).toBe("42");
+		expect(transformedState1.readCurrent()).toBe(
+			transformedState2.readCurrent(),
+		);
+		expect(transformedState1.readCurrent()).toBe("42");
 
 		dispose1();
 		dispose2();
