@@ -12,6 +12,7 @@ import App from "./App.tsx";
 import { CounterPage } from "./pages";
 import { ComputedPage } from "./pages/ComputedPage.tsx";
 import { EventPage } from "./pages/EventPage.tsx";
+import { GlitchlessExample } from "./pages/GlitchlessExample.tsx";
 import { SwitchingPage } from "./pages/SwitchingPage.tsx";
 
 const router = createBrowserRouter([
@@ -38,6 +39,10 @@ const router = createBrowserRouter([
 			{
 				path: "switching",
 				element: <SwitchingPage />,
+			},
+			{
+				path: "glitch",
+				element: <GlitchlessExample />,
 			},
 		],
 	},

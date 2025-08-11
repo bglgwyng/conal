@@ -18,6 +18,7 @@ function App() {
 		{ path: "/computed", label: "Computed" },
 		{ path: "/event", label: "Event" },
 		{ path: "/switching", label: "Switching" },
+		{ path: "/glitch", label: "Glitch" },
 	];
 
 	return (
