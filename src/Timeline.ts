@@ -30,11 +30,6 @@ export class Timeline {
 		return this.#isProceeding;
 	}
 
-	#isRunningEffect = true;
-	get isRunningEffect() {
-		return this.#isRunningEffect;
-	}
-
 	state<T>(initialValue: T, updated: Event<T>): State<T> {
 		return new State(this, initialValue, updated);
 	}
@@ -100,7 +95,6 @@ export class Timeline {
 
 				for (const [runAdjustment, adjustmentEvent] of event.adjustments) {
 					try {
-						this.#isRunningEffect = true;
 						const result = runAdjustment(value);
 
 						if (!adjustmentEvent.isActive) continue;
@@ -109,8 +103,6 @@ export class Timeline {
 						eventQueue.add(adjustmentEvent);
 					} catch (ex) {
 						console.warn("Effect failed", ex);
-					} finally {
-						this.#isRunningEffect = false;
 					}
 				}
 			}
