@@ -17,7 +17,7 @@ export function ComputedPage() {
 	// const count = useDynamic(dynamic);
 	return (
 		<Stack>
-			<Title order={2}>Counter Example</Title>
+			<Title order={2}>Computed Example</Title>
 			<div className="card">
 				<Input
 					type="number"

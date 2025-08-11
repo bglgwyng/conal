@@ -8,7 +8,7 @@ export function EventPage() {
 
 	return (
 		<Stack>
-			<Title order={2}>Counter Example</Title>
+			<Title order={2}>Event Example</Title>
 			<div className="card">
 				<Button onClick={onClick}>Bounce</Button>
 				<BouncingBox event={eClick} />
