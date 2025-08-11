@@ -9,6 +9,7 @@ import {
 	CounterPage,
 } from "./pages";
 import { ComputedPage } from "./pages/ComputedPage.tsx";
+import { EventPage } from "./pages/EventPage.tsx";
 
 
 
@@ -28,6 +29,10 @@ const router = createBrowserRouter([
 			{
 				path: "computed",
 				element: <ComputedPage />,
+			},
+			{
+				path: "event",
+				element: <EventPage />,
 			}
 		],
 	},
