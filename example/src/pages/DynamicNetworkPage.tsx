@@ -22,7 +22,6 @@ const dCounters: Dynamic<[Dynamic<number>, () => void][]> = t.state<
 	),
 );
 
-
 export function DynamicNetworkPage() {
 	const counters = useDynamic(dCounters);
 

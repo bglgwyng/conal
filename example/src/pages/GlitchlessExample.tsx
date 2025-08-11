@@ -32,7 +32,13 @@ export function GlitchlessExample() {
 	return (
 		<Stack>
 			<Title order={2}>Glitchless Example</Title>
-			<Text>See <Anchor href="https://en.wikipedia.org/wiki/Reactive_programming#Glitches">Glitches</Anchor>.</Text>
+			<Text>
+				See{" "}
+				<Anchor href="https://en.wikipedia.org/wiki/Reactive_programming#Glitches">
+					Glitches
+				</Anchor>
+				.
+			</Text>
 			<Text>Conal is glitchless.</Text>
 			<Stack w={1000}>
 				<Slider min={0} max={100} onChange={(value) => emitSlider(value)} />

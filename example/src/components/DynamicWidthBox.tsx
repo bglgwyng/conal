@@ -30,10 +30,10 @@ export function DynamicWidthBox(props: Props) {
 				backgroundColor: color ?? "#007bff",
 				margin: "20px auto",
 				color: "white",
-				display:"flex",
-				flexDirection:"row",
-				alignItems:"center",
-				justifyContent:"center"
+				display: "flex",
+				flexDirection: "row",
+				alignItems: "center",
+				justifyContent: "center",
 			}}
 		>
 			{text}
