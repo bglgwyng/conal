@@ -19,6 +19,7 @@ function App() {
 		{ path: "/event", label: "Event" },
 		{ path: "/switching", label: "Switching" },
 		{ path: "/glitch", label: "Glitch" },
+		{ path: "/dynamic-network", label: "Dynamic Network" },
 	];
 
 	return (

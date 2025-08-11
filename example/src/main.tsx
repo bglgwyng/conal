@@ -11,6 +11,7 @@ import "./index.css";
 import App from "./App.tsx";
 import { CounterPage } from "./pages";
 import { ComputedPage } from "./pages/ComputedPage.tsx";
+import { DynamicNetworkPage } from "./pages/DynamicNetworkPage.tsx";
 import { EventPage } from "./pages/EventPage.tsx";
 import { GlitchlessExample } from "./pages/GlitchlessExample.tsx";
 import { SwitchingPage } from "./pages/SwitchingPage.tsx";
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
 			{
 				path: "glitch",
 				element: <GlitchlessExample />,
+			},
+			{
+				path: "dynamic-network",
+				element: <DynamicNetworkPage />,
 			},
 		],
 	},
