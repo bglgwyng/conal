@@ -1,11 +1,11 @@
 import type { Timeline } from "../../Timeline";
 import { assert } from "../../utils/assert";
-import type { Event } from "../event/Event";
-import { UpdateEvent } from "../event/UpdateEvent";
+import { just } from "../../utils/Maybe";
+import { Event } from "../event/Event";
 import { Dynamic } from "./Dynamic";
 
 export class ComputedDynamic<T> extends Dynamic<T> {
-	updated: Event<T> = new UpdateEvent(this);
+	updated: Event<T> = new UpdatedEvent(this);
 
 	lastRead?: { value: T; at: number; dependencies?: Set<Dynamic<any>> };
 	nextUpdate?: {
@@ -19,7 +19,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		public fn: () => T,
 	) {
 		super(timeline);
-		this.updated = new UpdateEvent(this);
+		this.updated = new UpdatedEvent(this);
 	}
 
 	readCurrent(): T {
@@ -122,5 +122,26 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 
 	get isActive() {
 		return this.updated.isActive;
+	}
+}
+
+class UpdatedEvent<T> extends Event<T> {
+	constructor(public computed: ComputedDynamic<T>) {
+		super(computed.timeline);
+	}
+
+	getEmission() {
+		const { value, isUpdated } = this.computed.readNext();
+		if (!isUpdated) return;
+
+		return just(value);
+	}
+
+	activate(): void {
+		this.computed.activate();
+	}
+
+	deactivate(): void {
+		this.computed.deactivate();
 	}
 }
