@@ -1,4 +1,4 @@
-import type { Timeline } from "../../Timeline";
+import { ReadMode, type Timeline } from "../../Timeline";
 import { assert } from "../../utils/assert";
 import { just } from "../../utils/Maybe";
 import { Event } from "../event/Event";
@@ -22,8 +22,11 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		this.updated = new UpdatedEvent(this);
 	}
 
-	readCurrent(): T {
-		assert(!this.timeline.isReadingNextValue, "Timeline is reading next value");
+	readCurrent = (): T => {
+		assert(
+			this.timeline.readMode === ReadMode.Current,
+			"Timeline is reading next value",
+		);
 		const { lastRead, timeline, isActive } = this;
 
 		if (lastRead?.at === timeline.timestamp) {
@@ -49,31 +52,36 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 
 			return value;
 		}
-	}
+	};
 
-	readNext() {
+	readNext = () => {
 		const { timeline, isActive } = this;
 		assert(timeline.isProceeding, "Timeline is not proceeding");
+		assert(
+			timeline.readMode === ReadMode.Next,
+			"Timeline is not reading next value",
+		);
 		assert(isActive, "ComputedDynamic is not active");
 
 		if (this.nextUpdate) return this.nextUpdate;
 
-		const currentValue = this.readCurrent();
-		const nextUpdate = this.timeline.withReadingNextValue(() => {
-			const [value, dependencies] = this.timeline.withTrackingRead(this.fn);
+		const currentValue = this.timeline.withReadMode(
+			ReadMode.Current,
+			this.readCurrent,
+		);
+		const [value, dependencies] = this.timeline.withTrackingRead(this.fn);
 
-			return {
-				value,
-				isUpdated: value !== currentValue,
-				dependencies,
-			};
-		});
+		const nextUpdate = {
+			value,
+			isUpdated: value !== currentValue,
+			dependencies,
+		};
 
 		this.nextUpdate = nextUpdate;
 		this.timeline.needCommit(this);
 
 		return nextUpdate;
-	}
+	};
 
 	updateDependencies(newDependencies: Set<Dynamic<any>>) {
 		assert(this.lastRead, "lastRead is not set");
@@ -131,7 +139,10 @@ class UpdatedEvent<T> extends Event<T> {
 	}
 
 	getEmission() {
-		const { value, isUpdated } = this.computed.readNext();
+		const { value, isUpdated } = this.timeline.withReadMode(
+			ReadMode.Next,
+			this.computed.readNext,
+		);
 		if (!isUpdated) return;
 
 		return just(value);

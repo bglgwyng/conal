@@ -30,11 +30,6 @@ export class Timeline {
 		return this.#isProceeding;
 	}
 
-	#isReadingNextValue = false;
-	get isReadingNextValue() {
-		return this.#isReadingNextValue;
-	}
-
 	#hasStarted = false;
 	get hasStarted() {
 		return this.#hasStarted;
@@ -178,9 +173,9 @@ export class Timeline {
 	read = <T>(dynamic: Dynamic<T>) => {
 		this.#readTrackings.at(-1)?.add(dynamic);
 
-		return this.isReadingNextValue
-			? dynamic.readNext().value
-			: dynamic.readCurrent();
+		return this.readMode === ReadMode.Current
+			? dynamic.readCurrent()
+			: dynamic.readNext().value;
 	};
 
 	// @internal
@@ -205,14 +200,19 @@ export class Timeline {
 		return this.#readTrackings.length > 0;
 	}
 
-	// @internal
-	withReadingNextValue<U>(fn: () => U): U {
-		this.#isReadingNextValue = true;
+	#readMode = ReadMode.Current;
+	get readMode() {
+		return this.#readMode;
+	}
+
+	withReadMode<U>(mode: ReadMode, fn: () => U): U {
+		const previousReadingNextValue = this.#readMode;
+		this.#readMode = mode;
 
 		try {
 			return fn();
 		} finally {
-			this.#isReadingNextValue = false;
+			this.#readMode = previousReadingNextValue;
 		}
 	}
 
@@ -240,4 +240,9 @@ export function proceedImmediately(
 	proceed: () => void,
 ) {
 	proceed();
+}
+
+export enum ReadMode {
+	Current,
+	Next,
 }
