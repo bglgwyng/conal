@@ -1,4 +1,4 @@
-import { just, type Maybe } from "../../utils/Maybe";
+import type { Maybe } from "../../utils/Maybe";
 import type { Event } from "../event/Event";
 import type { Timeline } from "../Timeline";
 import { Dynamic } from "./Dynamic";

@@ -1,17 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Source } from "../src/core/event/Source";
-import { Timeline } from "../src/core/Timeline";
 import { Event } from "../src/Event";
+import { proceedImmediately, Timeline } from "../src/Timeline";
 
 describe("Event", () => {
-	let timeline: Timeline;
-	let source: Source<number>;
+	let t: Timeline;
 	let event: Event<number>;
+	let emit: (value: number) => void;
 
 	beforeEach(() => {
-		timeline = new Timeline({ onSourceEmission() {} });
-		source = new Source<number>(timeline);
-		event = new Event(source);
+		t = new Timeline({ onSourceEmission: proceedImmediately });
+		[event, emit] = t.source<number>();
 	});
 
 	describe("transform()", () => {
@@ -23,15 +21,13 @@ describe("Event", () => {
 			const callback = vi.fn();
 			transformedEvent.on(callback);
 
-			source.emit(42);
-			timeline.proceed();
+			emit(42);
 
 			expect(callback).toHaveBeenCalledWith("Number: 42");
 		});
 
 		it("should transform different types correctly", () => {
-			const stringSource = new Source<string>(timeline);
-			const stringEvent = new Event(stringSource);
+			const [stringEvent, emitString] = t.source<string>();
 
 			const lengthEvent = stringEvent.transform((s) => s.length);
 			const booleanEvent = event.transform((n) => n > 0);
@@ -42,17 +38,14 @@ describe("Event", () => {
 			booleanEvent.on(booleanCallback);
 
 			// Test string to length transformation
-			stringSource.emit("hello");
-			timeline.proceed();
+			emitString("hello");
 			expect(lengthCallback).toHaveBeenCalledWith(5);
 
 			// Test number to boolean transformation
-			source.emit(10);
-			timeline.proceed();
+			emit(10);
 			expect(booleanCallback).toHaveBeenCalledWith(true);
 
-			source.emit(-5);
-			timeline.proceed();
+			emit(-5);
 			expect(booleanCallback).toHaveBeenCalledWith(false);
 		});
 
@@ -63,8 +56,7 @@ describe("Event", () => {
 			const callback = vi.fn();
 			toStringEvent.on(callback);
 
-			source.emit(5);
-			timeline.proceed();
+			emit(5);
 
 			expect(callback).toHaveBeenCalledWith("Result: 10"); // 5 * 2 = 10
 		});
@@ -75,8 +67,7 @@ describe("Event", () => {
 				age: number;
 			}
 
-			const personSource = new Source<Person>(timeline);
-			const personEvent = new Event(personSource);
+			const [personEvent, emitPerson] = t.source<Person>();
 
 			const nameEvent = personEvent.transform((person) => person.name);
 			const ageEvent = personEvent.transform((person) => person.age);
@@ -86,8 +77,7 @@ describe("Event", () => {
 			nameEvent.on(nameCallback);
 			ageEvent.on(ageCallback);
 
-			personSource.emit({ name: "Alice", age: 30 });
-			timeline.proceed();
+			emitPerson({ name: "Alice", age: 30 });
 
 			expect(nameCallback).toHaveBeenCalledWith("Alice");
 			expect(ageCallback).toHaveBeenCalledWith(30);
@@ -102,8 +92,7 @@ describe("Event", () => {
 			transform1.on(callback1);
 			transform2.on(callback2);
 
-			source.emit(5);
-			timeline.proceed();
+			emit(5);
 
 			expect(callback1).toHaveBeenCalledWith(10); // 5 * 2
 			expect(callback2).toHaveBeenCalledWith(15); // 5 + 10
@@ -119,18 +108,18 @@ describe("Event", () => {
 			errorTransform.on(callback);
 
 			// This should not crash the timeline
-			source.emit(42);
+			emit(42);
 
 			// Other values should still work
-			source.emit(5);
-			timeline.proceed();
+			emit(5);
+
 			expect(callback).toHaveBeenCalledWith(10);
 		});
 
 		it("should preserve timeline reference", () => {
 			const transformedEvent = event.transform((n) => n * 2);
 
-			expect(transformedEvent.timeline).toBe(timeline);
+			expect(transformedEvent.timeline).toBe(t);
 		});
 
 		it("should work with identity transformation", () => {
@@ -139,8 +128,7 @@ describe("Event", () => {
 			const callback = vi.fn();
 			identityEvent.on(callback);
 
-			source.emit(42);
-			timeline.proceed();
+			emit(42);
 
 			expect(callback).toHaveBeenCalledWith(42);
 		});
@@ -156,8 +144,7 @@ describe("Event", () => {
 			transformedEvent.on(callback2);
 			transformedEvent.on(callback3);
 
-			source.emit(5);
-			timeline.proceed();
+			emit(5);
 
 			expect(callback1).toHaveBeenCalledWith(10);
 			expect(callback2).toHaveBeenCalledWith(10);

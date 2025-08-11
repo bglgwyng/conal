@@ -14,7 +14,7 @@ describe("Incremental", () => {
 
 	describe("constructor", () => {
 		it("should create an Incremental instance that extends Dynamic", () => {
-			const [transitionEvent, emit] = t.source<readonly [number, number]>();
+			const [transitionEvent, _emit] = t.source<readonly [number, number]>();
 			const incremental = t.incremental(0, transitionEvent);
 
 			expect(incremental).toBeInstanceOf(Incremental);
@@ -23,7 +23,7 @@ describe("Incremental", () => {
 		});
 
 		it("should initialize with the provided initial value", () => {
-			const [transitionEvent, emit] = t.source<readonly [number, number]>();
+			const [transitionEvent, _emit] = t.source<readonly [number, number]>();
 			const initialValue = 42;
 			const incremental = t.incremental(initialValue, transitionEvent);
 
@@ -31,7 +31,7 @@ describe("Incremental", () => {
 		});
 
 		it("should store the transition event", () => {
-			const [transitionEvent, emit] = t.source<readonly [number, number]>();
+			const [transitionEvent, _emit] = t.source<readonly [number, number]>();
 			const incremental = t.incremental(10, transitionEvent);
 
 			expect(incremental.transition).toBe(transitionEvent);
@@ -148,7 +148,7 @@ describe("Incremental", () => {
 		});
 
 		it("should maintain value when no transitions occur", () => {
-			const [transitionEvent, emit] = t.source<readonly [number, number]>();
+			const [transitionEvent, _emit] = t.source<readonly [number, number]>();
 			const initialValue = 42;
 			const incremental = t.incremental(initialValue, transitionEvent);
 

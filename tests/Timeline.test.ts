@@ -321,8 +321,7 @@ describe("Timeline", () => {
 
 			it("should handle immediate emission from current event", () => {
 				const [event1, emit1] = t.source<string>();
-				const [event2, emit2] = t.source<string>();
-				const [switchEvent, emitSwitch] = t.source<Event<string>>();
+				const [switchEvent, _emitSwitch] = t.source<Event<string>>();
 
 				// Emit to event1 before creating switching
 

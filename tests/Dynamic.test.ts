@@ -13,7 +13,7 @@ describe("Dynamic", () => {
 
 	describe("constructor", () => {
 		it("should create a Dynamic instance with internal dynamic", () => {
-			const [event, emit] = t.source<number>();
+			const [event, _emit] = t.source<number>();
 			const dynamic = t.state(10, event);
 
 			expect(dynamic).toBeInstanceOf(Dynamic);
@@ -23,7 +23,7 @@ describe("Dynamic", () => {
 
 	describe("updated()", () => {
 		it("should return an Event instance", () => {
-			const [event, emit] = t.source<number>();
+			const [event, _emit] = t.source<number>();
 			const dynamic = t.state(10, event);
 
 			expect(dynamic.updated).toBeInstanceOf(Event);
@@ -63,7 +63,7 @@ describe("Dynamic", () => {
 
 	describe("read()", () => {
 		it("should return the current value of the dynamic", () => {
-			const [event, emit] = t.source<number>();
+			const [event, _emit] = t.source<number>();
 			const dynamic = t.state(42, event);
 
 			const value = dynamic.read();
@@ -116,7 +116,7 @@ describe("Dynamic", () => {
 
 	describe("on()", () => {
 		it("should return a new dynamic and dispose function", () => {
-			const [event, emit] = t.source<number>();
+			const [event, _emit] = t.source<number>();
 			const dynamic = t.state(10, event);
 
 			const [newDynamic, dispose] = dynamic.on((value) => value * 2);
@@ -126,10 +126,10 @@ describe("Dynamic", () => {
 		});
 
 		it("should create a dynamic with transformed initial value", () => {
-			const [event, emit] = t.source<number>();
+			const [event, _emit] = t.source<number>();
 			const dynamic = t.state(5, event);
 
-			const [doubledDynamic, dispose] = dynamic.on((value) => value * 2);
+			const [doubledDynamic, _dispose] = dynamic.on((value) => value * 2);
 
 			expect(doubledDynamic.read()).toBe(10);
 		});
@@ -138,7 +138,7 @@ describe("Dynamic", () => {
 			const [event, emit] = t.source<number>();
 			const dynamic = t.state(3, event);
 
-			const [squaredDynamic, dispose] = dynamic.on((value) => value * value);
+			const [squaredDynamic, _dispose] = dynamic.on((value) => value * value);
 
 			expect(squaredDynamic.read()).toBe(9);
 
@@ -155,8 +155,8 @@ describe("Dynamic", () => {
 			const [event, emit] = t.source<number>();
 			const dynamic = t.state(2, event);
 
-			const [doubled, dispose1] = dynamic.on((value) => value * 2);
-			const [plusTen, dispose2] = doubled.on((value) => value + 10);
+			const [doubled, _dispose1] = dynamic.on((value) => value * 2);
+			const [plusTen, _dispose2] = doubled.on((value) => value + 10);
 
 			expect(plusTen.read()).toBe(14); // (2 * 2) + 10
 
@@ -169,10 +169,10 @@ describe("Dynamic", () => {
 			const [event, emit] = t.source<number>();
 			const dynamic = t.state(42, event);
 
-			const [stringDynamic, dispose1] = dynamic.on(
+			const [stringDynamic, _dispose1] = dynamic.on(
 				(value) => `Number: ${value}`,
 			);
-			const [booleanDynamic, dispose2] = dynamic.on((value) => value > 50);
+			const [booleanDynamic, _dispose2] = dynamic.on((value) => value > 50);
 
 			expect(stringDynamic.read()).toBe("Number: 42");
 			expect(booleanDynamic.read()).toBe(false);
@@ -192,8 +192,8 @@ describe("Dynamic", () => {
 			const [event, emit] = t.source<Person>();
 			const dynamic = t.state({ name: "Alice", age: 30 }, event);
 
-			const [nameDynamic, dispose1] = dynamic.on((person) => person.name);
-			const [isAdultDynamic, dispose2] = dynamic.on(
+			const [nameDynamic, _dispose1] = dynamic.on((person) => person.name);
+			const [isAdultDynamic, _dispose2] = dynamic.on(
 				(person) => person.age >= 18,
 			);
 
@@ -231,7 +231,7 @@ describe("Dynamic", () => {
 			const [event, emit] = t.source<number>();
 			const dynamic = t.state(1, event);
 
-			const [errorDynamic, dispose] = dynamic.on((value) => {
+			const [errorDynamic, _dispose] = dynamic.on((value) => {
 				if (value === 42) throw new Error("Test error");
 				return value * 2;
 			});
@@ -252,7 +252,7 @@ describe("Dynamic", () => {
 			const baseDynamic = t.state(3, event);
 			const computedDynamic = t.computed(() => baseDynamic.read() + 1);
 
-			const [doubledComputed, dispose] = computedDynamic.on(
+			const [doubledComputed, _dispose] = computedDynamic.on(
 				(value) => value * 2,
 			);
 
@@ -273,7 +273,7 @@ describe("Dynamic", () => {
 			const dynamic2 = t.state(20, event2);
 
 			const sumDynamic = t.computed(() => dynamic1.read() + dynamic2.read());
-			const [doubledSum, dispose] = sumDynamic.on((value) => value * 2);
+			const [doubledSum, _dispose] = sumDynamic.on((value) => value * 2);
 
 			expect(doubledSum.read()).toBe(60); // (10 + 20) * 2
 
@@ -287,7 +287,7 @@ describe("Dynamic", () => {
 		});
 
 		it("should maintain proper timeline context", () => {
-			const [event, emit] = t.source<number>();
+			const [event, _emit] = t.source<number>();
 			const dynamic = t.state(5, event);
 
 			// The dynamic should work within the timeline context
