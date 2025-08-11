@@ -14,8 +14,8 @@ function App() {
 	const navigate = useNavigate();
 
 	const examples = [
-		{ path: "/counter", label: "Counter Example" },
-		{ path: "/computed", label: "Computed Example" },
+		{ path: "/counter", label: "Counter" },
+		{ path: "/computed", label: "Computed" },
 	];
 
 	return (
