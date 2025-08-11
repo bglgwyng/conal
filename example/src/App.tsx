@@ -15,6 +15,7 @@ function App() {
 
 	const examples = [
 		{ path: "/counter", label: "Counter Example" },
+		{ path: "/computed", label: "Computed Example" },
 	];
 
 	return (
