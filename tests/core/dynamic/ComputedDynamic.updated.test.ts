@@ -169,7 +169,7 @@ describe("ComputedDynamic - updated event", () => {
 
 		// Add both effect and writeOn
 		const updateSpy = vi.fn();
-		const [, unsubscribeAdjustment] = computed.updated.on(updateSpy);
+		const [, unsubscribe] = computed.updated.on(updateSpy);
 
 		// Dependencies should be tracked
 		expect(computed.dependencies).toBeDefined();
@@ -178,7 +178,7 @@ describe("ComputedDynamic - updated event", () => {
 		expect(state.dependedDynamics.has(computed)).toBe(true);
 
 		// Both effect and writeOn should be registered
-		expect(computed.updated.adjustments.length).toBe(1);
+		expect(computed.updated.effects.length).toBe(1);
 		expect(computed.updated.dependenedStates.has(targetState)).toBe(true);
 
 		// Update source
@@ -191,7 +191,7 @@ describe("ComputedDynamic - updated event", () => {
 		expect(targetState.readCurrent()).toBe(30);
 
 		// Clean up
-		unsubscribeAdjustment();
+		unsubscribe();
 	});
 
 	it("should call activate and deactivate methods correctly", () => {

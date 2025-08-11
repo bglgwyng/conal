@@ -7,13 +7,11 @@ export abstract class Event<T> extends Node {
 	childEvents: Set<Event<any>> = new Set();
 	dependenedStates: Set<State<T>> = new Set();
 
-	effects: ((value: any) => void)[] = [];
-	adjustments: (readonly [(value: any) => void, Emmittable<any>])[] = [];
+	effects: (readonly [(value: any) => void, Emmittable<any>])[] = [];
 
 	get isActive() {
 		return (
 			this.effects.length > 0 ||
-			this.adjustments.length > 0 ||
 			this.dependenedStates.size > 0 ||
 			this.childEvents.size > 0
 		);
@@ -25,13 +23,13 @@ export abstract class Event<T> extends Node {
 		const effectEvent = new Emmittable<U>(this.timeline);
 
 		const effect = [fn, effectEvent] as const;
-		this.adjustments.push(effect);
+		this.effects.push(effect);
 		if (!isActive) this.activate();
 
 		return [
 			effectEvent,
 			() => {
-				this.adjustments.splice(this.adjustments.indexOf(effect), 1);
+				this.effects.splice(this.effects.indexOf(effect), 1);
 
 				if (!this.isActive) this.deactivate();
 			},

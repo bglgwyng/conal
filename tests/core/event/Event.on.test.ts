@@ -6,22 +6,22 @@ import type { Source } from "../../../src/core/event/Source";
 import { TransformedEvent } from "../../../src/core/event/TransformedEvent";
 import { Timeline } from "../../../src/Timeline";
 
-describe("AdjustmentEvent", () => {
+describe("EffectEvent", () => {
 	let timeline: Timeline;
 	let source: Source<number>;
-	let adjustmentEvent: Event<number>;
+	let effectEvent: Event<number>;
 	let dispose: () => void;
 
 	beforeEach(() => {
 		timeline = new Timeline({ onSourceEmission() {} });
 		source = timeline.source<number>();
-		[adjustmentEvent, dispose] = source.on((value) => value * 2);
+		[effectEvent, dispose] = source.on((value) => value * 2);
 	});
 
-	describe("adjustment event emission", () => {
+	describe("effect event emission", () => {
 		it("should emit transformed value when source emits", () => {
 			const spy = vi.fn();
-			const [, disposeEffect] = adjustmentEvent.on(spy);
+			const [, disposeEffect] = effectEvent.on(spy);
 
 			source.emit(21); // effect will transform to 42
 			timeline.proceed();
@@ -32,7 +32,7 @@ describe("AdjustmentEvent", () => {
 
 		it("should emit updated values on subsequent source emits", () => {
 			const spy = vi.fn();
-			const [, disposeEffect] = adjustmentEvent.on(spy);
+			const [, disposeEffect] = effectEvent.on(spy);
 
 			source.emit(5); // effect will transform to 10
 			timeline.proceed();
@@ -49,12 +49,12 @@ describe("AdjustmentEvent", () => {
 		it("should call timeline.needCommit when effect emits", () => {
 			const needCommitSpy = vi.spyOn(timeline, "needCommit");
 			const spy = vi.fn();
-			const [, disposeEffect] = adjustmentEvent.on(spy);
+			const [, disposeEffect] = effectEvent.on(spy);
 
 			source.emit(21);
 			timeline.proceed();
 
-			expect(needCommitSpy).toHaveBeenCalledWith(adjustmentEvent);
+			expect(needCommitSpy).toHaveBeenCalledWith(effectEvent);
 			expect(spy).toHaveBeenCalledWith(42);
 			disposeEffect();
 		});
@@ -63,7 +63,7 @@ describe("AdjustmentEvent", () => {
 	describe("commit", () => {
 		it("should not emit after commit until new source emit", () => {
 			const spy = vi.fn();
-			const [, disposeEffect] = adjustmentEvent.on(spy);
+			const [, disposeEffect] = effectEvent.on(spy);
 
 			// First emit
 			source.emit(21);
@@ -85,7 +85,7 @@ describe("AdjustmentEvent", () => {
 
 		it("should handle commit when no value was emitted", () => {
 			const spy = vi.fn();
-			const [, disposeEffect] = adjustmentEvent.on(spy);
+			const [, disposeEffect] = effectEvent.on(spy);
 
 			// Should not throw
 			timeline.proceed();
@@ -103,7 +103,7 @@ describe("AdjustmentEvent", () => {
 		it("should emit, receive, and commit in sequence", () => {
 			const spy = vi.fn();
 
-			const [, disposeEffect] = adjustmentEvent.on(spy);
+			const [, disposeEffect] = effectEvent.on(spy);
 
 			// Initial state - no emissions yet
 			expect(spy).not.toHaveBeenCalled();
@@ -126,18 +126,18 @@ describe("AdjustmentEvent", () => {
 
 	describe("integration with Event base class", () => {
 		it("should inherit Event functionality", () => {
-			expect(adjustmentEvent.isActive).toBe(false);
+			expect(effectEvent.isActive).toBe(false);
 
-			const [, disposeEffect] = adjustmentEvent.on(() => {});
-			expect(adjustmentEvent.isActive).toBe(true);
+			const [, disposeEffect] = effectEvent.on(() => {});
+			expect(effectEvent.isActive).toBe(true);
 
 			disposeEffect();
-			expect(adjustmentEvent.isActive).toBe(false);
+			expect(effectEvent.isActive).toBe(false);
 		});
 
 		it("should work as a chained effect", () => {
 			const spy = vi.fn();
-			const [, disposeChain] = adjustmentEvent.on(spy);
+			const [, disposeChain] = effectEvent.on(spy);
 
 			source.emit(10); // source -> effect (20) -> spy
 			timeline.proceed();
@@ -157,7 +157,7 @@ describe("AdjustmentEvent", () => {
 			const allCallbacks: Array<() => void> = [];
 
 			// Create an effect that dynamically creates new sources and states
-			const [, disposeEffect] = adjustmentEvent.on((transformedValue) => {
+			const [, disposeEffect] = effectEvent.on((transformedValue) => {
 				// Create a new source within the callback
 				const newSource = timeline.source<string>();
 				createdSources.push({ value: transformedValue, source: newSource });
@@ -226,12 +226,12 @@ describe("AdjustmentEvent", () => {
 		});
 	});
 
-	describe("TransformedEvent from AdjustmentEvent", () => {
-		it("should create TransformedEvent from AdjustmentEvent and transform values", () => {
+	describe("TransformedEvent from EffectEvent", () => {
+		it("should create TransformedEvent from EffectEvent and transform values", () => {
 			// Create TransformedEvent that transforms EffectEvent values
 			const derivedEvent = new TransformedEvent(
 				timeline,
-				adjustmentEvent,
+				effectEvent,
 				(value) => `Result: ${value}`, // Transform number to string
 			);
 
@@ -251,7 +251,7 @@ describe("AdjustmentEvent", () => {
 			// First derived event: number -> string
 			const firstDerived = new TransformedEvent(
 				timeline,
-				adjustmentEvent,
+				effectEvent,
 				(value) => `Value: ${value}`,
 			);
 
@@ -283,7 +283,7 @@ describe("AdjustmentEvent", () => {
 		it("should handle error in TransformedEvent transformation", () => {
 			const derivedEvent = new TransformedEvent(
 				timeline,
-				adjustmentEvent,
+				effectEvent,
 				(value) => {
 					throw new Error("TransformedEvent transformation failed");
 				},
@@ -300,24 +300,24 @@ describe("AdjustmentEvent", () => {
 		});
 	});
 
-	describe("MergedEvent with AdjustmentEvent", () => {
+	describe("MergedEvent with EffectEvent", () => {
 		let rightSource: Source<string>;
 
 		beforeEach(() => {
 			rightSource = timeline.source<string>();
 		});
 
-		it("should emit left when AdjustmentEvent emits", () => {
+		it("should emit left when EffectEvent emits", () => {
 			const mergedEvent = new MergedEvent(
 				timeline,
-				adjustmentEvent, // left: AdjustmentEvent<number>
+				effectEvent, // left: EffectEvent<number>
 				rightSource, // right: Source<string>
 			);
 
 			const spy = vi.fn();
 			const [, disposeMerged] = mergedEvent.on(spy);
 
-			// Only left (AdjustmentEvent) emits
+			// Only left (EffectEvent) emits
 			source.emit(10); // source(10) -> effect(20) -> merged({type: "left", value: 20})
 			timeline.proceed();
 
@@ -330,11 +330,7 @@ describe("AdjustmentEvent", () => {
 		});
 
 		it("should emit right when right source emits", () => {
-			const mergedEvent = new MergedEvent(
-				timeline,
-				adjustmentEvent,
-				rightSource,
-			);
+			const mergedEvent = new MergedEvent(timeline, effectEvent, rightSource);
 
 			const spy = vi.fn();
 			const [, disposeMerged] = mergedEvent.on(spy);
@@ -352,11 +348,7 @@ describe("AdjustmentEvent", () => {
 		});
 
 		it("should emit both when both events emit simultaneously", () => {
-			const mergedEvent = new MergedEvent(
-				timeline,
-				adjustmentEvent,
-				rightSource,
-			);
+			const mergedEvent = new MergedEvent(timeline, effectEvent, rightSource);
 
 			const spy = vi.fn();
 			const [, disposeMerged] = mergedEvent.on(spy);
@@ -376,11 +368,7 @@ describe("AdjustmentEvent", () => {
 		});
 
 		it("should handle multiple emissions from different events", () => {
-			const mergedEvent = new MergedEvent(
-				timeline,
-				adjustmentEvent,
-				rightSource,
-			);
+			const mergedEvent = new MergedEvent(timeline, effectEvent, rightSource);
 
 			const spy = vi.fn();
 			const [, disposeMerged] = mergedEvent.on(spy);
@@ -416,11 +404,7 @@ describe("AdjustmentEvent", () => {
 		});
 
 		it("should work with chained EffectEvent from MergedEvent", () => {
-			const mergedEvent = new MergedEvent(
-				timeline,
-				adjustmentEvent,
-				rightSource,
-			);
+			const mergedEvent = new MergedEvent(timeline, effectEvent, rightSource);
 
 			// Create another EffectEvent from MergedEvent
 			const [chainedEffect, disposeChain] = mergedEvent.on((merged) => {

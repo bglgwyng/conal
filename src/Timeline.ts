@@ -93,14 +93,14 @@ export class Timeline {
 					}
 				}
 
-				for (const [runAdjustment, adjustmentEvent] of event.adjustments) {
+				for (const [runEffect, effectEvent] of event.effects) {
 					try {
-						const result = runAdjustment(value);
+						const result = runEffect(value);
 
-						if (!adjustmentEvent.isActive) continue;
-						adjustmentEvent.emit(result);
+						if (!effectEvent.isActive) continue;
+						effectEvent.emit(result);
 
-						eventQueue.add(adjustmentEvent);
+						eventQueue.add(effectEvent);
 					} catch (ex) {
 						console.warn("Effect failed", ex);
 					}
