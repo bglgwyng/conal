@@ -1,7 +1,7 @@
 import { ComputedDynamic } from "./core/dynamic/ComputedDynamic";
 import { State } from "./core/dynamic/State";
 import { Source } from "./core/event/Source";
-import { SwitchableEvent } from "./core/event/SwitchableEvent";
+import { SwitchingEvent } from "./core/event/SwitchingEvent";
 import { TransformedEvent } from "./core/event/TransformedEvent";
 import { Dynamic } from "./Dynamic";
 import { Event } from "./Event";
@@ -47,11 +47,11 @@ export function transform<T, U>(
 	return new Event(new TransformedEvent(timeline, event.internalEvent, fn));
 }
 
-export function switchable<T>(dynamic: Dynamic<Event<T>>): Event<T> {
+export function switching<T>(dynamic: Dynamic<Event<T>>): Event<T> {
 	const timeline = getActiveTimeline();
 
 	return new Event(
-		new SwitchableEvent(
+		new SwitchingEvent(
 			timeline,
 			dynamic.internal,
 			(event) => event.internalEvent,

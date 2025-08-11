@@ -6,7 +6,7 @@ import {
 	computed,
 	source,
 	state,
-	switchable,
+	switching,
 	transform,
 } from "../src/factory";
 import { Timeline } from "../src/Timeline";
@@ -260,7 +260,7 @@ describe("Factory Functions", () => {
 		});
 	});
 
-	describe("switchable()", () => {
+	describe("switching()", () => {
 		it("should create an Event that switches between events based on dynamic", () => {
 			const result = build(timeline, () => {
 				const [event1, emit1] = source<string>();
@@ -268,15 +268,15 @@ describe("Factory Functions", () => {
 				const [switchEvent, emitSwitch] = source<Event<string>>();
 
 				const switchDynamic = state(event1, switchEvent);
-				const switchableEvent = switchable(switchDynamic);
+				const switchingEvent = switching(switchDynamic);
 
-				return { switchableEvent, emit1, emit2, emitSwitch, event1, event2 };
+				return { switchingEvent, emit1, emit2, emitSwitch, event1, event2 };
 			});
 
-			expect(result.switchableEvent).toBeInstanceOf(Event);
+			expect(result.switchingEvent).toBeInstanceOf(Event);
 
 			const callback = vi.fn();
-			result.switchableEvent.on(callback);
+			result.switchingEvent.on(callback);
 
 			// Initially should listen to event1
 			result.emit1("from event1");
@@ -306,10 +306,10 @@ describe("Factory Functions", () => {
 				const [switchEvent, emitSwitch] = source<Event<any>>();
 
 				const switchDynamic = state<Event<any>>(numberEvent, switchEvent);
-				const switchableEvent = switchable(switchDynamic);
+				const switchingEvent = switching(switchDynamic);
 
 				return {
-					switchableEvent,
+					switchingEvent,
 					emitNumber,
 					emitString,
 					emitSwitch,
@@ -319,7 +319,7 @@ describe("Factory Functions", () => {
 			});
 
 			const callback = vi.fn();
-			result.switchableEvent.on(callback);
+			result.switchingEvent.on(callback);
 
 			// Start with number event
 			result.emitNumber(42);
@@ -343,10 +343,10 @@ describe("Factory Functions", () => {
 				const [switchEvent, emitSwitch] = source<Event<string>>();
 
 				const switchDynamic = state(event1, switchEvent);
-				const switchableEvent = switchable(switchDynamic);
+				const switchingEvent = switching(switchDynamic);
 
 				return {
-					switchableEvent,
+					switchingEvent,
 					emit1,
 					emit2,
 					emit3,
@@ -358,7 +358,7 @@ describe("Factory Functions", () => {
 			});
 
 			const callback = vi.fn();
-			result.switchableEvent.on(callback);
+			result.switchingEvent.on(callback);
 
 			// Test switching between multiple events
 			result.emit1("first");
@@ -395,10 +395,10 @@ describe("Factory Functions", () => {
 			const eventDynamic = computed(() =>
 				toggleDynamic.read() ? event1 : event2,
 			);
-			const switchableEvent = switchable(eventDynamic);
+			const switchingEvent = switching(eventDynamic);
 
 			const callback = vi.fn();
-			switchableEvent.on(callback);
+			switchingEvent.on(callback);
 
 			// Initially should use event1 (toggle is true)
 			emit1(100);
@@ -428,14 +428,14 @@ describe("Factory Functions", () => {
 			const [event2, emit2] = source<string>();
 			const [switchEvent, emitSwitch] = source<Event<string>>();
 
-			// Emit to event1 before creating switchable
+			// Emit to event1 before creating switching
 			emit1("initial value");
 
 			const switchDynamic = state(event1, switchEvent);
-			const switchableEvent = switchable(switchDynamic);
+			const switchingEvent = switching(switchDynamic);
 
 			const callback = vi.fn();
-			switchableEvent.on(callback);
+			switchingEvent.on(callback);
 
 			// Should get the value that was already emitted
 			timeline.proceed();
