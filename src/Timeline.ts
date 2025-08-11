@@ -20,13 +20,13 @@ export class Timeline {
 	source<T>(): [Event<T>, (value: T) => void] {
 		const source = new Source<T>(this.internal);
 
-		return [new Event(source), source.emit];
+		return [new Event(this, source), source.emit];
 	}
 
 	state<T>(initialValue: T, updated: Event<T>): Dynamic<T> {
 		return new Dynamic(
 			this,
-			this.internal.state(initialValue, updated.internalEvent),
+			this.internal.state(initialValue, updated.internal),
 		);
 	}
 
@@ -36,21 +36,19 @@ export class Timeline {
 
 	switching<T>(dynamic: Dynamic<Event<T>>): Event<T> {
 		return new Event(
+			this,
 			new SwitchingEvent(
 				this.internal,
 				dynamic.internal,
-				(event) => event.internalEvent,
+				(event) => event.internal,
 			),
 		);
 	}
 
 	merge<T1, T2>(event1: Event<T1>, event2: Event<T2>): Event<These<T1, T2>> {
 		return new Event(
-			new MergedEvent(
-				this.internal,
-				event1.internalEvent,
-				event2.internalEvent,
-			),
+			this,
+			new MergedEvent(this.internal, event1.internal, event2.internal),
 		);
 	}
 
@@ -69,7 +67,7 @@ export class Timeline {
 	}
 
 	get never() {
-		return new Event(this.internal.never);
+		return new Event(this, this.internal.never);
 	}
 
 	queueTaskAfterProceed(task: () => void) {

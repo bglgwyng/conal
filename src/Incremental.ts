@@ -17,7 +17,7 @@ export class Incremental<T, D> extends Dynamic<T> {
 			initialValue,
 			new TransformedEvent(
 				timeline.internal,
-				transition.internalEvent,
+				transition.internal,
 				([value, _]) => value,
 			),
 		);

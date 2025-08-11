@@ -17,7 +17,7 @@ export class UnsafeIncremental<T, D> extends Dynamic<T> {
 			readCurrent,
 			new TransformedEvent(
 				timeline.internal,
-				transition.internalEvent,
+				transition.internal,
 				([value, _]) => value,
 			),
 		);
