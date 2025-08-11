@@ -15,44 +15,48 @@ const bounceStyles = `
 `;
 
 // Inject styles into document head
-if (typeof document !== 'undefined' && !document.querySelector('#bounce-styles')) {
-  const styleElement = document.createElement('style');
-  styleElement.id = 'bounce-styles';
-  styleElement.textContent = bounceStyles;
-  document.head.appendChild(styleElement);
+if (
+	typeof document !== "undefined" &&
+	!document.querySelector("#bounce-styles")
+) {
+	const styleElement = document.createElement("style");
+	styleElement.id = "bounce-styles";
+	styleElement.textContent = bounceStyles;
+	document.head.appendChild(styleElement);
 }
 
 export type Props = {
-  event: Event<unknown>
-}
+	event: Event<unknown>;
+	color?: string;
+};
 
 export function BouncingBox(props: Props) {
-  const { event } = props;
-  const boxRef = useRef<HTMLDivElement>(null);
-  
-  useEffect(() => {
-    const [,dispose] = event.on(() => {
-      // Trigger bounce animation
-      if (boxRef.current) {
-        boxRef.current.classList.remove('bounce');
-        // Force reflow to restart animation
-        boxRef.current.offsetHeight;
-        boxRef.current.classList.add('bounce');
-      }
-    })
-    return dispose
-  }, [event])
-  
+	const { event, color } = props;
+	const boxRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		const [, dispose] = event.on(() => {
+			// Trigger bounce animation
+			if (boxRef.current) {
+				boxRef.current.classList.remove("bounce");
+				// Force reflow to restart animation
+				boxRef.current.offsetHeight;
+				boxRef.current.classList.add("bounce");
+			}
+		});
+		return dispose;
+	}, [event]);
+
 	return (
-		<div 
+		<div
 			ref={boxRef}
-			className="box" 
+			className="box"
 			style={{
-				width: '50px',
-				height: '50px',
-				backgroundColor: '#007bff',
-				borderRadius: '4px',
-				margin: '20px auto'
+				width: "50px",
+				height: "50px",
+				backgroundColor: color ?? "#007bff",
+				borderRadius: "4px",
+				margin: "20px auto",
 			}}
 		></div>
 	);

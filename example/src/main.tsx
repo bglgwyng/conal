@@ -1,17 +1,18 @@
 import { MantineProvider } from "@mantine/core";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
+import {
+	createBrowserRouter,
+	Navigate,
+	RouterProvider,
+} from "react-router-dom";
 import "@mantine/core/styles.css";
 import "./index.css";
 import App from "./App.tsx";
-import {
-	CounterPage,
-} from "./pages";
+import { CounterPage } from "./pages";
 import { ComputedPage } from "./pages/ComputedPage.tsx";
 import { EventPage } from "./pages/EventPage.tsx";
-
-
+import { SwitchingPage } from "./pages/SwitchingPage.tsx";
 
 const router = createBrowserRouter([
 	{
@@ -33,7 +34,11 @@ const router = createBrowserRouter([
 			{
 				path: "event",
 				element: <EventPage />,
-			}
+			},
+			{
+				path: "switching",
+				element: <SwitchingPage />,
+			},
 		],
 	},
 ]);

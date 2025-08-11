@@ -17,6 +17,7 @@ function App() {
 		{ path: "/counter", label: "Counter" },
 		{ path: "/computed", label: "Computed" },
 		{ path: "/event", label: "Event" },
+		{ path: "/switching", label: "Switching" },
 	];
 
 	return (

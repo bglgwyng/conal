@@ -1,9 +1,4 @@
-import {
-	Input,
-	Stack,
-	Text,
-	Title,
-} from "@mantine/core";
+import { Input, Stack, Text, Title } from "@mantine/core";
 import { useDynamic } from "../hooks/useDynamic";
 import { useRefFactory } from "../hooks/useRefFactory";
 import { t } from "../timeline";
@@ -35,7 +30,8 @@ export function ComputedPage() {
 					value={y}
 					onChange={(e) => emitY(Number(e.target.value))}
 				/>
-				<Text>=</Text><Text>{z}</Text>
+				<Text>=</Text>
+				<Text>{z}</Text>
 			</div>
 		</Stack>
 	);
