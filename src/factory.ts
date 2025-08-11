@@ -6,7 +6,9 @@ import { TransformedEvent } from "./core/event/TransformedEvent";
 import { Dynamic } from "./Dynamic";
 import { Event } from "./Event";
 import { getActiveTimeline, useTimeline, withTimeline } from "./globalContext";
+import { Incremental } from "./Incremental";
 import type { Timeline } from "./Timeline";
+import { UnsafeIncremental } from "./UnsafeIncremental";
 
 export function build<T>(timeline: Timeline): Disposable;
 export function build<T>(timeline: Timeline, fn: () => T): T;
@@ -25,6 +27,24 @@ export function computed<T>(fn: () => T): Dynamic<T> {
 	const timeline = getActiveTimeline();
 
 	return new Dynamic(new ComputedDynamic(timeline, fn));
+}
+
+export function incremental<T, D>(
+	initialValue: T,
+	transition: Event<readonly [T, D]>,
+): Incremental<T, D> {
+	const timeline = getActiveTimeline();
+
+	return new Incremental(timeline, initialValue, transition);
+}
+
+export function unsafeIncremental<T, D>(
+	read: () => T,
+	transition: Event<readonly [T, D]>,
+): Incremental<T, D> {
+	const timeline = getActiveTimeline();
+
+	return new UnsafeIncremental(timeline, read, transition);
 }
 
 export function source<T>(): readonly [
