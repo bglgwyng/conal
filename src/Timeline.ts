@@ -30,11 +30,6 @@ export class Timeline {
 		return this.#isProceeding;
 	}
 
-	#hasStarted = false;
-	get hasStarted() {
-		return this.#hasStarted;
-	}
-
 	#isRunningEffect = true;
 	get isRunningEffect() {
 		return this.#isRunningEffect;
