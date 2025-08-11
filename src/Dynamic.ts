@@ -1,15 +1,19 @@
 import type { Dynamic as InternalDynamic } from "./core/dynamic/Dynamic";
 import { Event } from "./Event";
 import { withTimeline } from "./globalContext";
+import type { Timeline } from "./Timeline";
 
 export class Dynamic<T> {
 	// @internal
 	internal: InternalDynamic<T>;
 	updated: Event<T>;
 
-	constructor(internalDynamic: InternalDynamic<T>) {
+	constructor(
+		readonly timeline: Timeline,
+		internalDynamic: InternalDynamic<T>,
+	) {
 		this.internal = internalDynamic;
-		this.updated = new Event(internalDynamic.updated);
+		this.updated = new Event(this.timeline, internalDynamic.updated);
 	}
 
 	read = (): T => this.internal.read();
@@ -19,7 +23,7 @@ export class Dynamic<T> {
 			withTimeline(this.internal.timeline, () => fn(value)),
 		);
 
-		return [new Dynamic(effectEvent), dispose];
+		return [new Dynamic(this.timeline, effectEvent), dispose];
 	}
 
 	// @internal

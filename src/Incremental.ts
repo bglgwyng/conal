@@ -1,8 +1,8 @@
 import { State } from "./core/dynamic/State";
 import { TransformedEvent } from "./core/event/TransformedEvent";
-import type { Timeline } from "./core/Timeline";
 import { Dynamic } from "./Dynamic";
 import type { Event } from "./Event";
+import type { Timeline } from "./Timeline";
 
 export class Incremental<T, D> extends Dynamic<T> {
 	// @internal
@@ -13,15 +13,15 @@ export class Incremental<T, D> extends Dynamic<T> {
 		readonly transition: Event<readonly [T, D]>,
 	) {
 		const internal = new State(
-			timeline,
+			timeline.internal,
 			initialValue,
 			new TransformedEvent(
-				timeline,
+				timeline.internal,
 				transition.internalEvent,
 				([value, _]) => value,
 			),
 		);
-		super(internal);
+		super(timeline, internal);
 	}
 
 	// @internal

@@ -25,12 +25,13 @@ export class Timeline {
 
 	state<T>(initialValue: T, updated: Event<T>): Dynamic<T> {
 		return new Dynamic(
+			this,
 			this.internal.state(initialValue, updated.internalEvent),
 		);
 	}
 
 	computed<T>(fn: () => T): Dynamic<T> {
-		return new Dynamic(new ComputedDynamic(this.internal, fn));
+		return new Dynamic(this, new ComputedDynamic(this.internal, fn));
 	}
 
 	switching<T>(dynamic: Dynamic<Event<T>>): Event<T> {
@@ -57,18 +58,22 @@ export class Timeline {
 		initialValue: T,
 		transition: Event<readonly [T, D]>,
 	): Incremental<T, D> {
-		return new Incremental(this.internal, initialValue, transition);
+		return new Incremental(this, initialValue, transition);
 	}
 
 	unsafeIncremental<T, D>(
 		read: () => T,
 		transition: Event<readonly [T, D]>,
 	): Incremental<T, D> {
-		return new UnsafeIncremental(this.internal, read, transition);
+		return new UnsafeIncremental(this, read, transition);
 	}
 
 	get never() {
 		return new Event(this.internal.never);
+	}
+
+	queueTaskAfterProceed(task: () => void) {
+		this.internal.queueTaskAfterProceed(task);
 	}
 }
 
