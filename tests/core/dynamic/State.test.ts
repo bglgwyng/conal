@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { TransformedEvent } from "../../../src/core/event/TransformedEvent";
-import { Timeline } from "../../../src/Timeline";
+import { Timeline } from "../../../src/core/Timeline";
 
 describe("State", () => {
 	let timeline: Timeline;

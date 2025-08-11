@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ComputedDynamic } from "../../../src/core/dynamic/ComputedDynamic";
-import { Timeline } from "../../../src/Timeline";
+import { Timeline } from "../../../src/core/Timeline";
 
 describe("ComputedDynamic - Memoization", () => {
 	let timeline: Timeline;

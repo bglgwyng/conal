@@ -3,7 +3,7 @@ import { State } from "../../../src/core/dynamic/State";
 import type { Event } from "../../../src/core/event/Event";
 import { Source } from "../../../src/core/event/Source";
 import { SwitchingEvent } from "../../../src/core/event/SwitchingEvent";
-import { Timeline } from "../../../src/Timeline";
+import { Timeline } from "../../../src/core/Timeline";
 
 describe("SwitchingEvent", () => {
 	let timeline: Timeline;

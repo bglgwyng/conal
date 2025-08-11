@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { Timeline } from "../src/core/Timeline";
 import { Dynamic } from "../src/Dynamic";
 import { Event } from "../src/Event";
 import {
@@ -9,7 +10,6 @@ import {
 	switching,
 	transform,
 } from "../src/factory";
-import { Timeline } from "../src/Timeline";
 
 describe("Factory Functions", () => {
 	let timeline: Timeline;

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { Timeline } from "../src/core/Timeline";
 import { Dynamic } from "../src/Dynamic";
 import type { Event } from "../src/Event";
 import {
@@ -10,7 +11,6 @@ import {
 	unsafeIncremental,
 } from "../src/factory";
 import { Incremental } from "../src/Incremental";
-import { Timeline } from "../src/Timeline";
 import { UnsafeIncremental } from "../src/UnsafeIncremental";
 
 describe("Incremental", () => {

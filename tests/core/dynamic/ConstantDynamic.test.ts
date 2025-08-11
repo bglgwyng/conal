@@ -1,6 +1,6 @@
 import { describe, expect, it, vitest } from "vitest";
 import { ConstantDynamic } from "../../../src/core/dynamic/ConstantDynamic";
-import { Timeline } from "../../../src/Timeline";
+import { Timeline } from "../../../src/core/Timeline";
 
 describe("ConstantDynamic", () => {
 	it("should always return the initial value", () => {

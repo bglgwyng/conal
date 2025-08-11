@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Source } from "../src/core/event/Source";
+import { Timeline } from "../src/core/Timeline";
 import { Event } from "../src/Event";
-import { Timeline } from "../src/Timeline";
 
 describe("Event", () => {
 	let timeline: Timeline;

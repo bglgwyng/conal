@@ -3,11 +3,11 @@ import { State } from "./core/dynamic/State";
 import { Source } from "./core/event/Source";
 import { SwitchingEvent } from "./core/event/SwitchingEvent";
 import { TransformedEvent } from "./core/event/TransformedEvent";
+import type { Timeline } from "./core/Timeline";
 import { Dynamic } from "./Dynamic";
 import { Event } from "./Event";
 import { getActiveTimeline, useTimeline, withTimeline } from "./globalContext";
 import { Incremental } from "./Incremental";
-import type { Timeline } from "./Timeline";
 import { UnsafeIncremental } from "./UnsafeIncremental";
 
 export function build<T>(timeline: Timeline): Disposable;

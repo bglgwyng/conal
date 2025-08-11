@@ -1,4 +1,4 @@
-import type { Timeline } from "./Timeline";
+import type { Timeline } from "./core/Timeline";
 import { assert } from "./utils/assert";
 
 const globalContext = {

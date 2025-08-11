@@ -4,7 +4,7 @@ import type { Event } from "../../../src/core/event/Event";
 import { MergedEvent } from "../../../src/core/event/MergedEvent";
 import type { Source } from "../../../src/core/event/Source";
 import { TransformedEvent } from "../../../src/core/event/TransformedEvent";
-import { Timeline } from "../../../src/Timeline";
+import { Timeline } from "../../../src/core/Timeline";
 
 describe("EffectEvent", () => {
 	let timeline: Timeline;

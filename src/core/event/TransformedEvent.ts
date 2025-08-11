@@ -1,6 +1,6 @@
-import type { Timeline } from "../../Timeline";
 import { assert } from "../../utils/assert";
 import { just, type Maybe } from "../../utils/Maybe";
+import type { Timeline } from "../Timeline";
 import { Event } from "./Event";
 
 export class TransformedEvent<T, U> extends Event<T> {

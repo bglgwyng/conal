@@ -1,7 +1,7 @@
-import { ReadMode, type Timeline } from "../../Timeline";
 import { assert } from "../../utils/assert";
 import { just } from "../../utils/Maybe";
 import { Event } from "../event/Event";
+import { ReadMode, type Timeline } from "../Timeline";
 import { Dynamic } from "./Dynamic";
 
 export class ComputedDynamic<T> extends Dynamic<T> {

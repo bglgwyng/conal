@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { Timeline } from "../src/Timeline";
+import { Timeline } from "../../src/core/Timeline";
 
 describe("Timeline", () => {
 	test("increment timestamp", () => {

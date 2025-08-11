@@ -1,8 +1,8 @@
 import { State } from "./core/dynamic/State";
 import { TransformedEvent } from "./core/event/TransformedEvent";
+import type { Timeline } from "./core/Timeline";
 import { Dynamic } from "./Dynamic";
 import type { Event } from "./Event";
-import type { Timeline } from "./Timeline";
 
 export class Incremental<T, D> extends Dynamic<T> {
 	// @internal

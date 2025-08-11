@@ -1,13 +1,13 @@
-import type { ComputedDynamic } from "./core/dynamic/ComputedDynamic";
-import type { Dynamic } from "./core/dynamic/Dynamic";
-import { State } from "./core/dynamic/State";
-import type { Event } from "./core/event/Event";
-import { Never } from "./core/event/Never";
-import { Source } from "./core/event/Source";
-import type { Node } from "./core/Node";
-import { assert } from "./utils/assert";
-import { DedupQueue } from "./utils/DedupQueue";
-import type { Maybe } from "./utils/Maybe";
+import { assert } from "../utils/assert";
+import { DedupQueue } from "../utils/DedupQueue";
+import type { Maybe } from "../utils/Maybe";
+import type { ComputedDynamic } from "./dynamic/ComputedDynamic";
+import type { Dynamic } from "./dynamic/Dynamic";
+import { State } from "./dynamic/State";
+import type { Event } from "./event/Event";
+import { Never } from "./event/Never";
+import { Source } from "./event/Source";
+import type { Node } from "./Node";
 
 export class Timeline {
 	constructor(options: TimelineOptions) {

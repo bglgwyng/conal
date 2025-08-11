@@ -1,4 +1,4 @@
-import type { Timeline } from "../Timeline";
+import type { Timeline } from "./Timeline";
 
 export abstract class Node {
 	_tag?: string;

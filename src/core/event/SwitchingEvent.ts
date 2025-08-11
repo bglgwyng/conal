@@ -1,6 +1,6 @@
-import type { Timeline } from "../../Timeline";
 import type { Maybe } from "../../utils/Maybe";
 import type { Dynamic } from "../dynamic/Dynamic";
+import type { Timeline } from "../Timeline";
 import { Event } from "./Event";
 
 export class SwitchingEvent<U, T> extends Event<T> {
