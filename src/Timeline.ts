@@ -97,6 +97,7 @@ export class Timeline {
 					pushEventToQueue(childEvent);
 				}
 
+				// TODO: run `getEmissions`s here
 				for (const state of event.dependenedStates) {
 					state.prepareUpdate();
 
