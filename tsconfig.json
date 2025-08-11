@@ -22,7 +22,6 @@
 		"stripInternal": true
 	},
 	"include": [
-		"src",
-		"tests"
+		"src"
 	]
 }
