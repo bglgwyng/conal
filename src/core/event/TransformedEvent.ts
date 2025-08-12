@@ -4,6 +4,7 @@ import type { Timeline } from "../Timeline";
 import { Event } from "./Event";
 
 export class TransformedEvent<T, U> extends Event<T> {
+	// biome-ignore lint/correctness/noUnusedPrivateClassMembers: it's actually used
 	private maybeEmittedValue: Maybe<Maybe<T>>;
 
 	constructor(

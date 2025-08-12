@@ -3,6 +3,7 @@ import type { Timeline } from "../Timeline";
 import { Event } from "./Event";
 
 export class MergedEvent<L, R> extends Event<These<L, R>> {
+	// biome-ignore lint/correctness/noUnusedPrivateClassMembers: it's actually used
 	private maybeEmittedValue: Maybe<Maybe<These<L, R>>>;
 
 	constructor(
