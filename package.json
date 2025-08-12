@@ -33,8 +33,8 @@
 		"dev": "tsdown --watch",
 		"test": "vitest",
 		"typecheck": "tsc --noEmit",
-		"release": "bumpp && pnpm publish",
-		"prepublishOnly": "pnpm run build"
+		"release": "bumpp && npm publish",
+		"prepublishOnly": "npm run build"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.1.2",
