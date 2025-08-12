@@ -56,7 +56,9 @@ const router = createBrowserRouter([
 			},
 		],
 	},
-]);
+], {
+	basename: "/conal"
+});
 
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>
