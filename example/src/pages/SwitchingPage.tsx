@@ -15,12 +15,11 @@ export function SwitchingPage() {
 	);
 	const activeHeartbitIndex = useDynamic(dActiveHeartbitIndex);
 
-	const [eClick, emitClick] = useRefFactory(() => t.source<number>());
 	const heartbits = useRefFactory(() => {
 		return range(0, 5).map((i) => [200 * (i + 1), t.source<void>()] as const);
 	});
 	useEffect(() => {
-		const timeouts: NodeJS.Timeout[] = [];
+		const timeouts: any[] = [];
 		for (const [period, [, emit]] of heartbits) {
 			timeouts.push(
 				setInterval(() => {

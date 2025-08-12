@@ -1,4 +1,4 @@
-import type { Dynamic } from "conal";
+import type { Dynamic } from "@conaljs/conal";
 import { useEffect, useRef } from "react";
 
 export type Props = {

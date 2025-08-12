@@ -11,10 +11,11 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
+		"@conaljs/conal": "^0.0.1",
 		"@mantine/core": "^8.2.4",
 		"@mantine/hooks": "^8.2.4",
 		"@tabler/icons-react": "^3.34.1",
-		"conal": "file:..",
+		"ramda": "^0.31.3",
 		"react": "^19.1.1",
 		"react-dom": "^19.1.1",
 		"react-router-dom": "^7.8.0",
@@ -22,6 +23,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.1.4",
+		"@types/ramda": "^0.31.0",
 		"@types/react": "^19.1.9",
 		"@types/react-dom": "^19.1.7",
 		"@types/react-router-dom": "^5.3.3",
