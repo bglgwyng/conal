@@ -8,12 +8,14 @@ import {
 } from "react-router-dom";
 import "@mantine/core/styles.css";
 import "./index.css";
+import { Incremental } from "../../dist/index";
 import App from "./App.tsx";
 import { CounterPage } from "./pages";
 import { ComputedPage } from "./pages/ComputedPage.tsx";
 import { DynamicNetworkPage } from "./pages/DynamicNetworkPage.tsx";
 import { EventPage } from "./pages/EventPage.tsx";
 import { GlitchlessExample } from "./pages/GlitchlessExample.tsx";
+import { IncrementalPage } from "./pages/IncrementalPage.tsx";
 import { SwitchingPage } from "./pages/SwitchingPage.tsx";
 
 const router = createBrowserRouter([
@@ -48,6 +50,10 @@ const router = createBrowserRouter([
 			{
 				path: "dynamic-network",
 				element: <DynamicNetworkPage />,
+			},
+			{
+				path: "incremental",
+				element: <IncrementalPage />,
 			},
 		],
 	},

@@ -1,5 +1,6 @@
 import { Button, Group, Stack, Title } from "@mantine/core";
 import type { Dynamic } from "conal";
+import { Counter } from "../components/Counter";
 import { useDynamic } from "../hooks/useDynamic";
 import { t } from "../timeline";
 
@@ -39,9 +40,4 @@ export function DynamicNetworkPage() {
 			</Stack>
 		</Stack>
 	);
-}
-
-function Counter(props: { dynamic: Dynamic<number>; onClick: () => void }) {
-	const counter = useDynamic(props.dynamic);
-	return <Button onClick={props.onClick}>{counter}</Button>;
 }
