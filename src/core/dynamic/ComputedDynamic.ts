@@ -7,11 +7,11 @@ import { Dynamic } from "./Dynamic";
 export class ComputedDynamic<T> extends Dynamic<T> {
 	updated: Event<T> = new UpdatedEvent(this);
 
-	lastRead?: { value: T; at: number; dependencies?: Set<Dynamic<any>> };
+	lastRead?: { value: T; at: number; dependencies?: Set<Dynamic<unknown>> };
 	nextUpdate?: {
 		value: T;
 		isUpdated: boolean;
-		dependencies: Set<Dynamic<any>>;
+		dependencies: Set<Dynamic<unknown>>;
 	};
 
 	constructor(

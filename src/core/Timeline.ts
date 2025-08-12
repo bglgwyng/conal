@@ -155,7 +155,7 @@ export class Timeline {
 		});
 	}
 
-	#readTrackings: Set<Dynamic<any>>[] = [];
+	#readTrackings: Set<Dynamic<unknown>>[] = [];
 
 	read = <T>(dynamic: Dynamic<T>) => {
 		this.#readTrackings.at(-1)?.add(dynamic);
@@ -168,11 +168,11 @@ export class Timeline {
 	// @internal
 	withTrackingRead<T>(
 		fn: () => T,
-	): readonly [value: T, dependencies: Set<Dynamic<any>>] {
+	): readonly [value: T, dependencies: Set<Dynamic<unknown>>] {
 		this.#readTrackings.push(new Set());
 
 		let value: T;
-		let dependencies: Set<Dynamic<any>>;
+		let dependencies: Set<Dynamic<unknown>>;
 		try {
 			value = fn();
 		} finally {

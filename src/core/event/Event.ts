@@ -4,10 +4,11 @@ import type { State } from "../dynamic/State";
 import { Node } from "../Node";
 
 export abstract class Event<T> extends Node {
-	childEvents: Set<Event<any>> = new Set();
+	childEvents: Set<Event<unknown>> = new Set();
 	dependenedStates: Set<State<T>> = new Set();
 
-	effects: (readonly [(value: any) => void, Emmittable<any>])[] = [];
+	// biome-ignore lint/suspicious/noExplicitAny: to satisfy covariance, can't be unknown
+	effects: (readonly [(value: any) => void, Emmittable<unknown>])[] = [];
 
 	get isActive() {
 		return (
@@ -37,7 +38,7 @@ export abstract class Event<T> extends Node {
 	}
 
 	// @internal
-	listen(event: Event<any>): () => void {
+	listen(event: Event<unknown>): () => void {
 		assert(this.isActive, "Event is not active");
 
 		const { isActive } = event;
