@@ -624,7 +624,7 @@ describe("Timeline", () => {
 			const mergedEvent = t.merge(event1, event2);
 
 			// Verify the merged event is properly connected to the timeline
-			expect(mergedEvent.timeline).toBe(t.internal);
+			expect(mergedEvent.timeline).toBe(t);
 
 			const callback = vi.fn();
 			mergedEvent.on(callback);
