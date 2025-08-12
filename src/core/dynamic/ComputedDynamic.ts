@@ -17,6 +17,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 	constructor(
 		public timeline: Timeline,
 		public fn: () => T,
+		public equal: (x: T, y: T) => boolean = (x, y) => Object.is(x, y),
 	) {
 		super(timeline);
 		this.updated = new UpdatedEvent(this);
@@ -73,7 +74,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 
 		const nextUpdate = {
 			value,
-			isUpdated: value !== currentValue,
+			isUpdated: !this.equal(value, currentValue),
 			dependencies,
 		};
 

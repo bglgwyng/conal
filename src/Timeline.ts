@@ -30,8 +30,8 @@ export class Timeline {
 		);
 	}
 
-	computed<T>(fn: () => T): Dynamic<T> {
-		return new Dynamic(this, new ComputedDynamic(this.internal, fn));
+	computed<T>(fn: () => T, equal?: (x: T, y: T) => boolean): Dynamic<T> {
+		return new Dynamic(this, new ComputedDynamic(this.internal, fn, equal));
 	}
 
 	switching<T>(dynamic: Dynamic<Event<T>>): Event<T> {

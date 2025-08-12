@@ -264,6 +264,155 @@ describe("Dynamic", () => {
 		});
 	});
 
+	describe("computed with custom equal function", () => {
+		it("should use default Object.is equality when no equal function provided", () => {
+			const [event, emit] = t.source<number>();
+			const baseDynamic = t.state(1, event);
+			
+			const computedDynamic = t.computed(() => baseDynamic.read());
+			const callback = vi.fn();
+			computedDynamic.updated.on(callback);
+
+			// Same value should not trigger update
+			emit(1);
+			expect(callback).not.toHaveBeenCalled();
+
+			// Different value should trigger update
+			emit(2);
+			expect(callback).toHaveBeenCalledWith(2);
+		});
+
+		it("should use custom equal function to determine updates", () => {
+			type Tuple = [number, number];
+			
+			const [event, emit] = t.source<Tuple>();
+			const baseDynamic = t.state<Tuple>([1, 2], event);
+			
+			// Computed that creates new tuple each time (different JS objects)
+			const computedDynamic = t.computed(
+				() => [...baseDynamic.read()] as Tuple, // Always creates new array
+				(a, b) => a[0] === b[0] && a[1] === b[1] // Deep equality for tuples
+			);
+			
+			const callback = vi.fn();
+			computedDynamic.updated.on(callback);
+
+			// Same tuple values should not trigger update (even though different objects)
+			emit([1, 2]);
+			expect(callback).not.toHaveBeenCalled();
+
+			// Different tuple values should trigger update
+			emit([2, 3]);
+			expect(callback).toHaveBeenCalledWith([2, 3]);
+			
+			// Reset callback
+			callback.mockClear();
+			
+			// Same values again should not trigger update
+			emit([2, 3]);
+			expect(callback).not.toHaveBeenCalled();
+			
+			// Different values should trigger update
+			emit([1, 1]);
+			expect(callback).toHaveBeenCalledWith([1, 1]);
+		});
+
+		it("should work with object equality", () => {
+			interface Point {
+				x: number;
+				y: number;
+			}
+
+			const [event, emit] = t.source<Point>();
+			const baseDynamic = t.state({ x: 1, y: 2 }, event);
+			
+			// Custom equal function for Point objects
+			const computedDynamic = t.computed(
+				() => ({ ...baseDynamic.read() }), // Create new object each time
+				(a, b) => a.x === b.x && a.y === b.y // Deep equality
+			);
+			
+			const callback = vi.fn();
+			computedDynamic.updated.on(callback);
+
+			// Same values should not trigger update
+			emit({ x: 1, y: 2 });
+			expect(callback).not.toHaveBeenCalled();
+
+			// Different values should trigger update
+			emit({ x: 2, y: 3 });
+			expect(callback).toHaveBeenCalledWith({ x: 2, y: 3 });
+		});
+
+		it("should work with string case-insensitive equality", () => {
+			const [event, emit] = t.source<string>();
+			const baseDynamic = t.state("Hello", event);
+			
+			const computedDynamic = t.computed(
+				() => baseDynamic.read().toUpperCase(),
+				(a, b) => a.toLowerCase() === b.toLowerCase()
+			);
+			
+			const callback = vi.fn();
+			computedDynamic.updated.on(callback);
+
+			// Same case-insensitive value should not trigger update
+			emit("hello"); // "HELLO" vs "HELLO" (case-insensitive)
+			expect(callback).not.toHaveBeenCalled();
+
+			// Different value should trigger update
+			emit("world");
+			expect(callback).toHaveBeenCalledWith("WORLD");
+		});
+
+		it("should handle array equality with custom function", () => {
+			const [event, emit] = t.source<number[]>();
+			const baseDynamic = t.state([1, 2, 3], event);
+			
+			// Custom equal function for arrays (shallow equality)
+			const computedDynamic = t.computed(
+				() => [...baseDynamic.read()], // Create new array each time
+				(a, b) => a.length === b.length && a.every((val, i) => val === b[i])
+			);
+			
+			const callback = vi.fn();
+			computedDynamic.updated.on(callback);
+
+			// Same array content should not trigger update
+			emit([1, 2, 3]);
+			expect(callback).not.toHaveBeenCalled();
+
+			// Different array content should trigger update
+			emit([1, 2, 4]);
+			expect(callback).toHaveBeenCalledWith([1, 2, 4]);
+		});
+
+		it("should handle complex nested computations with custom equality", () => {
+			const [event1, emit1] = t.source<number>();
+			const [event2, emit2] = t.source<number>();
+			
+			const dynamic1 = t.state(1, event1);
+			const dynamic2 = t.state(2, event2);
+			
+			// Computed dynamic that rounds to nearest integer
+			const sumDynamic = t.computed(
+				() => Math.round(dynamic1.read() + dynamic2.read()),
+				(a, b) => Math.floor(a) === Math.floor(b) // Only update if integer part changes
+			);
+			
+			const callback = vi.fn();
+			sumDynamic.updated.on(callback);
+
+			// Change that doesn't affect integer part
+			emit1(1.4); // 1.4 + 2 = 3.4, rounds to 3, floor(3) === floor(3)
+			expect(callback).not.toHaveBeenCalled();
+
+			// Change that affects integer part
+			emit1(2.6); // 2.6 + 2 = 4.6, rounds to 5, floor(5) !== floor(3)
+			expect(callback).toHaveBeenCalledWith(5);
+		});
+	});
+
 	describe("integration tests", () => {
 		it("should work with multiple dynamics and transformations", () => {
 			const [event1, emit1] = t.source<number>();
