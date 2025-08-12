@@ -11,7 +11,7 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
-		"@conaljs/conal": "file:..",
+		"@conaljs/conal": "^0.0.1",
 		"@mantine/core": "^8.2.4",
 		"@mantine/hooks": "^8.2.4",
 		"@tabler/icons-react": "^3.34.1",
