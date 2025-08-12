@@ -1,5 +1,5 @@
 import { Button, Group, Stack, Title } from "@mantine/core";
-import type { Dynamic } from "conal";
+import type { Dynamic } from "@conaljs/conal";
 import { Counter } from "../components/Counter";
 import { useDynamic } from "../hooks/useDynamic";
 import { t } from "../timeline";

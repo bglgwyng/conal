@@ -1,4 +1,4 @@
-import type { Dynamic } from "conal";
+import type { Dynamic } from "@conaljs/conal";
 import { useCallback, useSyncExternalStore } from "react";
 
 export function useDynamic<T>(dynamic: Dynamic<T>): T {

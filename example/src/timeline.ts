@@ -1,4 +1,4 @@
-import { proceedImmediately, Timeline } from "conal";
+import { proceedImmediately, Timeline } from "@conaljs/conal";
 
 export const t = new Timeline({
 	onSourceEmission: proceedImmediately,

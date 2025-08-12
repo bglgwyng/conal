@@ -1,5 +1,5 @@
 import { Button } from "@mantine/core";
-import type { Dynamic } from "conal";
+import type { Dynamic } from "@conaljs/conal";
 import { useDynamic } from "../hooks/useDynamic";
 
 export function Counter(props: {

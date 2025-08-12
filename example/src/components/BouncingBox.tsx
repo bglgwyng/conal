@@ -1,4 +1,4 @@
-import type { Event } from "conal";
+import type { Event } from "@conaljs/conal";
 import { useEffect, useRef } from "react";
 
 // Add CSS for bounce animation
