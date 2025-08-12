@@ -1,6 +1,6 @@
 {
-	"name": "conal",
-	"version": "0.0.0",
+	"name": "@conaljs/conal",
+	"version": "0.0.1",
 	"description": "Classic FRP library for TypeScript",
 	"type": "module",
 	"license": "MIT",
