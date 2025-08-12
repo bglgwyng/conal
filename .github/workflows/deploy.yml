@@ -2,9 +2,9 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ main ]
+    branches: [ test-workflow ]
   pull_request:
-    branches: [ main ]
+    branches: [ test-workflow ]
   workflow_dispatch:
 
 permissions:
