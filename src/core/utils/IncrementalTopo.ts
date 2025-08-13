@@ -1,17 +1,11 @@
 import assert from "assert";
+import { Node } from "../Node";
 
 
-export abstract class TopoNode {
+export abstract class TopoNode extends Node {
   rank: number = 0;
   abstract incoming: Iterable<TopoNode>
   abstract outcoming: Iterable<TopoNode>
-
-  _tag?: string;
-
-  tag(name: string) {
-    this._tag = name;
-    return this;
-  }
 }
 
 // Class for managing incremental topological sorting
