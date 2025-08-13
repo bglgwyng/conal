@@ -17,7 +17,7 @@ export class SwitchingEvent<U, T> extends Event<T> {
 		return this.extractEvent(this.dynamic.readCurrent()).getEmission();
 	}
 
-	incoming(): Iterable<TopoNode> {
+	incomings() {
 		return [this.dynamic, this.extractEvent(this.dynamic.readCurrent())];
 	}
 

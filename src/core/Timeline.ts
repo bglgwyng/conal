@@ -1,20 +1,21 @@
 import { assert } from "../utils/assert";
-import { DedupQueue } from "../utils/DedupQueue";
 import type { Maybe } from "../utils/Maybe";
 import type { ComputedDynamic } from "./dynamic/ComputedDynamic";
-import type { Dynamic } from "./dynamic/Dynamic";
+import { Dynamic } from "./dynamic/Dynamic";
 import { State } from "./dynamic/State";
-import type { Event } from "./event/Event";
+import { Event } from "./event/Event";
 import { Never } from "./event/Never";
 import { Source } from "./event/Source";
 import type { Node } from "./Node";
-import type { ReactiveNode } from "./ReactiveNode";
 import { Heap } from "./utils/Heap";
+import { IncrementalTopo } from "./utils/IncrementalTopo";
 
 export class Timeline {
 	constructor(options: TimelineOptions) {
 		this.#onSourceEmission = options.onSourceEmission;
 	}
+
+	topo: IncrementalTopo = new IncrementalTopo();
 
 	#onSourceEmission: (event: Source<unknown>, proceed: () => void) => void;
 
@@ -50,69 +51,94 @@ export class Timeline {
 
 		const nextTimestamp = this.getNextTimestamp();
 
-		const eventQueue = new Heap<Event<unknown>>((x, y) => x.rank < y.rank ? -1 : x.rank > y.rank ? 1 : 0);
-		const queuedEvents: Set<Event<unknown>> = new Set();
-		const processedEvents: Set<Event<unknown>> = new Set();
+		const queue = new Heap<Node>((x, y) =>
+			x.rank < y.rank ? -1 : x.rank > y.rank ? 1 : 0,
+		);
+		const queuedEvents: Set<Node> = new Set();
+		const processedEvents: Set<Node> = new Set();
+		const cleanups: ((nextTimestamp: number) => void)[] = [];
 
 		try {
 			for (const source of this.#emittingSources) {
 				if (!source.isActive) continue;
 
-				eventQueue.push(source);
+				queue.push(source);
 			}
 			this.#emittingSources.clear();
 
-			while (eventQueue.size > 0) {
+			while (queue.size > 0) {
 				// biome-ignore lint/style/noNonNullAssertion: size checked
-				const event = eventQueue.pop()!;
-				queuedEvents.delete(event);
-				
-				assert(event.isActive, "Event is not active");
-				assert(!processedEvents.has(event), "Event is already processed");
+				const node = queue.pop()!;
+				queuedEvents.delete(node);
 
-				processedEvents.add(event);
+				if (node instanceof Event) {
+					assert(node.isActive, "Event is not active");
+					assert(!processedEvents.has(node), "Event is already processed");
 
-				let maybeValue: Maybe<unknown>;
-				try {
-					maybeValue = event.getEmission();
-				} catch (ex) {
-					console.error("Event failed", ex);
-					continue;
-				}
-				if (!maybeValue) continue;
+					processedEvents.add(node);
 
-				const value = maybeValue();
-
-				for (const childEvent of event.childEvents) {
-					pushEventToQueue(childEvent);
-				}
-
-				// TODO: run `getEmissions`s here
-				for (const state of event.dependenedStates) {
-					state.prepareUpdate();
-
-					for (const dynamic of collectDependendedDynamics(
-						state.dependedDynamics,
-					)) {
-						pushEventToQueue(dynamic.updated);
-					}
-				}
-
-				for (const [runEffect, effectEvent] of event.effects) {
+					let maybeValue: Maybe<unknown>;
 					try {
-						const result = runEffect(value);
-
-						if (!effectEvent.isActive) continue;
-						effectEvent.emit(result);
-
-						pushEventToQueue(effectEvent)
-						// eventQueue.push(effectEvent);
+						maybeValue = node.getEmission();
 					} catch (ex) {
-						console.warn("Effect failed", ex);
+						console.error("Event failed", ex);
+						continue;
+					}
+					if (!maybeValue) continue;
+
+					const value = maybeValue();
+
+					for (const childEvent of node.childEvents) {
+						pushToQueue(childEvent);
+					}
+
+					// TODO: run `getEmissions`s here
+					for (const dynamic of node.dependenedStates) {
+						// dynamic.prepareUpdate();
+
+						pushToQueue(dynamic);
+
+						// for (const dynamic of collectDependendedDynamics(
+						// 	dynamic.dependedDynamics,
+						// )) {
+						// 	pushToQueue(dynamic.updated);
+						// }
+					}
+
+					for (const [runEffect, effectEvent] of node.effects) {
+						try {
+							const result = runEffect(value);
+
+							if (!effectEvent.isActive) continue;
+							effectEvent.emit(result);
+
+							pushToQueue(effectEvent);
+							// eventQueue.push(effectEvent);
+						} catch (ex) {
+							console.warn("Effect failed", ex);
+						}
+					}
+				} else if (node instanceof Dynamic) {
+					if (node instanceof State) {
+						const it = node.proceed();
+						while (true) {
+							const child = it.next();
+							if (child.done) {
+								if (child.value) cleanups.push(child.value);
+								break;
+							}
+							pushToQueue(child.value);
+						}
+					}
+					for (const child of node.outcomings()) {
+						pushToQueue(child);
 					}
 				}
 			}
 
+			for (const cleanup of cleanups) {
+				cleanup(nextTimestamp);
+			}
 			for (const node of this.#toCommitNodes) {
 				node.commit(nextTimestamp);
 			}
@@ -128,12 +154,12 @@ export class Timeline {
 		}
 		this.#tasksAfterProceed = [];
 
-		function pushEventToQueue(event: Event<unknown>) {
-			if (queuedEvents.has(event)) return;
-			if (processedEvents.has(event)) return;
+		function pushToQueue(node: Node) {
+			if (queuedEvents.has(node)) return;
+			if (processedEvents.has(node)) return;
 
-			queuedEvents.add(event);
-			eventQueue.push(event);
+			queuedEvents.add(node);
+			queue.push(node);
 		}
 
 		function* collectDependendedDynamics(
@@ -210,10 +236,10 @@ export class Timeline {
 		}
 	}
 
-	#toCommitNodes: Set<ReactiveNode> = new Set();
+	#toCommitNodes: Set<Node> = new Set();
 
 	// @internal
-	needCommit(node: ReactiveNode) {
+	needCommit(node: Node) {
 		this.#toCommitNodes.add(node);
 	}
 

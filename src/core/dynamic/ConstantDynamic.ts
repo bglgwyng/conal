@@ -18,7 +18,7 @@ export class ConstantDynamic<T> extends Dynamic<T> {
 		return this.value;
 	}
 
-	incoming(): Iterable<TopoNode> {
+	incomings() {
 		return [];
 	}
 }

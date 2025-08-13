@@ -16,7 +16,7 @@ export class TransformedEvent<T, U> extends Event<T> {
 		super(timeline);
 	}
 
-	incoming(): Iterable<TopoNode> {
+	incomings() {
 		return [this.parent];
 	}
 

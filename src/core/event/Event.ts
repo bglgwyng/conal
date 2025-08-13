@@ -1,10 +1,10 @@
 import { assert } from "../../utils/assert";
 import { just, type Maybe } from "../../utils/Maybe";
 import type { State } from "../dynamic/State";
-import { ReactiveNode } from "../ReactiveNode";
+import { Node } from "../Node";
 import type { TopoNode } from "../utils/IncrementalTopo";
 
-export abstract class Event<T> extends ReactiveNode {
+export abstract class Event<T> extends Node {
 	childEvents: Set<Event<unknown>> = new Set();
 	dependenedStates: Set<State<T>> = new Set();
 
@@ -38,7 +38,7 @@ export abstract class Event<T> extends ReactiveNode {
 		];
 	}
 
-	*outcoming(): Iterable<TopoNode> {
+	*outcomings() {
 		yield* this.childEvents;
 		yield* this.dependenedStates;
 	}
@@ -94,7 +94,7 @@ export class Emmittable<T> extends Event<T> {
 	}
 
 	// FIXME: true?
-	incoming(): Iterable<TopoNode> {
+	incomings() {
 		return [];
 	}
 
