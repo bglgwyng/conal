@@ -4,16 +4,24 @@ import { IncrementalTopo, TopoNode } from "../../../src/core/utils/IncrementalTo
 // Mock Node class for testing
 class MockNode extends TopoNode {
 	rank: number = 0;
-	incoming: Set<TopoNode> = new Set();
-	outcoming: Set<TopoNode> = new Set();
+	readonly #incoming: Set<TopoNode> = new Set();
+	readonly #outcoming: Set<TopoNode> = new Set();
 
   constructor(readonly topology: IncrementalTopo) {
     super();
   }
 	
+  incoming(): Set<TopoNode> {
+    return this.#incoming;
+  }
+
+  outcoming(): Set<TopoNode> {
+    return this.#outcoming;
+  }
+
   addEdge(v: MockNode) {
-    this.outcoming.add(v);
-    v.incoming.add(this);
+    this.#outcoming.add(v);
+    v.#incoming.add(this);
 
     this.topology.addEdge(this, v);    
   }  
@@ -45,8 +53,8 @@ describe("IncrementalTopo", () => {
       it("should add edge between two nodes", () => {
         nodeA.addEdge(nodeB);
 
-        expect(nodeA.outcoming.has(nodeB)).toBe(true);
-        expect(nodeB.incoming.has(nodeA)).toBe(true);
+        expect(nodeA.outcoming().has(nodeB)).toBe(true);
+        expect(nodeB.incoming().has(nodeA)).toBe(true);
       });
 
       it("should update ranks when adding edge", () => {
@@ -65,10 +73,10 @@ describe("IncrementalTopo", () => {
         nodeA.addEdge(nodeB);
         nodeA.addEdge(nodeC);
 
-        expect(nodeA.outcoming.has(nodeB)).toBe(true);
-        expect(nodeA.outcoming.has(nodeC)).toBe(true);
-        expect(nodeB.incoming.has(nodeA)).toBe(true);
-        expect(nodeC.incoming.has(nodeA)).toBe(true);
+        expect(nodeA.outcoming().has(nodeB)).toBe(true);
+        expect(nodeA.outcoming().has(nodeC)).toBe(true);
+        expect(nodeB.incoming().has(nodeA)).toBe(true);
+        expect(nodeC.incoming().has(nodeA)).toBe(true);
         
         // Both B and C should have rank 1
         expect(nodeB.rank).toBe(1);
@@ -81,9 +89,9 @@ describe("IncrementalTopo", () => {
         nodeC.addEdge(nodeD); // C -> D
 
         // Check edges
-        expect(nodeA.outcoming.has(nodeB)).toBe(true);
-        expect(nodeB.outcoming.has(nodeC)).toBe(true);
-        expect(nodeC.outcoming.has(nodeD)).toBe(true);
+        expect(nodeA.outcoming().has(nodeB)).toBe(true);
+        expect(nodeB.outcoming().has(nodeC)).toBe(true);
+        expect(nodeC.outcoming().has(nodeD)).toBe(true);
 
         // Check ranks: A(0) -> B(1) -> C(2) -> D(3)
         expect(nodeA.rank).toBe(0);
@@ -132,8 +140,8 @@ describe("IncrementalTopo", () => {
         // Adding same edge again should be ignored
         nodeA.addEdge(nodeB);
 
-        expect(nodeA.outcoming.size).toBe(1);
-        expect(nodeB.incoming.size).toBe(1);
+        expect(nodeA.outcoming().size).toBe(1);
+        expect(nodeB.incoming().size).toBe(1);
         expect(nodeB.rank).toBe(initialRankB);
       });
     });
@@ -193,8 +201,8 @@ describe("IncrementalTopo", () => {
         }).not.toThrow();
 
         // Verify edges were added
-        expect(nodeA.outcoming.has(nodeC)).toBe(true);
-        expect(nodeB.outcoming.has(nodeD)).toBe(true);
+        expect(nodeA.outcoming().has(nodeC)).toBe(true);
+        expect(nodeB.outcoming().has(nodeD)).toBe(true);
       });
     });
 
@@ -249,7 +257,7 @@ describe("IncrementalTopo", () => {
 
       // B should keep its higher rank
       expect(nodeB.rank).toBe(5);
-      expect(nodeA.outcoming.has(nodeB)).toBe(true);
+      expect(nodeA.outcoming().has(nodeB)).toBe(true);
     });
 
     it("should handle large graphs efficiently", () => {

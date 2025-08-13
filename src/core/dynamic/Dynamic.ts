@@ -1,5 +1,6 @@
 import type { Event } from "../event/Event";
 import { ReactiveNode } from "../ReactiveNode";
+import type { TopoNode } from "../utils/IncrementalTopo";
 import type { ComputedDynamic } from "./ComputedDynamic";
 import type { State } from "./State";
 
@@ -17,6 +18,7 @@ export abstract class Dynamic<T> extends ReactiveNode {
 			dispose,
 		];
 	}
+
 	read() {
 		return this.timeline.read(this);
 	}
@@ -27,5 +29,13 @@ export abstract class Dynamic<T> extends ReactiveNode {
 		return maybeEmission
 			? { value: maybeEmission(), isUpdated: true }
 			: { value: this.readCurrent(), isUpdated: false };
+	}
+
+
+	*outcoming(): Iterable<TopoNode> {
+		const { updated, dependedDynamics } = this;
+		if(updated.isActive) yield updated;
+		
+		yield* dependedDynamics
 	}
 }

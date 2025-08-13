@@ -4,8 +4,8 @@ import { Node } from "../Node";
 
 export abstract class TopoNode extends Node {
   rank: number = 0;
-  abstract incoming: Iterable<TopoNode>
-  abstract outcoming: Iterable<TopoNode>
+  abstract incoming(): Iterable<TopoNode>
+  abstract outcoming(): Iterable<TopoNode>
 }
 
 // Class for managing incremental topological sorting
@@ -33,7 +33,7 @@ export class IncrementalTopo {
         // Rollback would happen here in a transactional implementation
         throw new Error(`Cycle detected during rank update at ${v._tag}`);
       }
-      for (const neighbor of current.outcoming) {
+      for (const neighbor of current.outcoming()) {
         if (!affected.has(neighbor)) {
           affected.add(neighbor);
           queue.push(neighbor);
@@ -47,7 +47,7 @@ export class IncrementalTopo {
     
     for (const node of sortedAffected) {
       let maxIncomingRank = -1;
-      for (const incoming of node.incoming) {
+      for (const incoming of node.incoming()) {
         maxIncomingRank = Math.max(maxIncomingRank, incoming.rank);
       }
       node.rank = Math.max(node.rank, maxIncomingRank + 1);

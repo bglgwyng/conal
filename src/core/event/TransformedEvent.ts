@@ -1,6 +1,7 @@
 import { assert } from "../../utils/assert";
 import { just, type Maybe } from "../../utils/Maybe";
 import type { Timeline } from "../Timeline";
+import type { TopoNode } from "../utils/IncrementalTopo";
 import { Event } from "./Event";
 
 export class TransformedEvent<T, U> extends Event<T> {
@@ -13,6 +14,10 @@ export class TransformedEvent<T, U> extends Event<T> {
 		public readonly fn: (value: U) => T,
 	) {
 		super(timeline);
+	}
+
+	incoming(): Iterable<TopoNode> {
+		return [this.parent];
 	}
 
 	getEmission() {

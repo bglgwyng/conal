@@ -2,6 +2,7 @@ import { assert } from "../../utils/assert";
 import { just } from "../../utils/Maybe";
 import { Event } from "../event/Event";
 import { ReadMode, type Timeline } from "../Timeline";
+import type { TopoNode } from "../utils/IncrementalTopo";
 import { Dynamic } from "./Dynamic";
 
 export class ComputedDynamic<T> extends Dynamic<T> {
@@ -84,6 +85,10 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		return nextUpdate;
 	};
 
+	incoming(): Iterable<TopoNode> {
+		return this.lastRead?.dependencies ?? [];
+	}
+
 	updateDependencies(newDependencies: Set<Dynamic<any>>) {
 		assert(this.lastRead, "lastRead is not set");
 
@@ -149,6 +154,10 @@ class UpdatedEvent<T> extends Event<T> {
 		return just(value);
 	}
 
+	incoming(): Iterable<TopoNode> {
+		return [this.computed];
+	}
+	
 	activate(): void {
 		this.computed.activate();
 	}
