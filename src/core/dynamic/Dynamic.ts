@@ -4,7 +4,7 @@ import type { ComputedDynamic } from "./ComputedDynamic";
 import type { State } from "./State";
 
 export abstract class Dynamic<T> extends Node {
-	dependedDynamics: Set<ComputedDynamic<unknown>> = new Set();
+	dependedDynamics: Set<ComputedDynamic<any>> = new Set();
 	abstract updated: Event<T>;
 
 	abstract readCurrent(): T;
