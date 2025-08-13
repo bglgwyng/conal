@@ -7,7 +7,9 @@ import { State } from "./dynamic/State";
 import type { Event } from "./event/Event";
 import { Never } from "./event/Never";
 import { Source } from "./event/Source";
+import type { Node } from "./Node";
 import type { ReactiveNode } from "./ReactiveNode";
+import { Heap } from "./utils/Heap";
 
 export class Timeline {
 	constructor(options: TimelineOptions) {
@@ -48,20 +50,23 @@ export class Timeline {
 
 		const nextTimestamp = this.getNextTimestamp();
 
-		const eventQueue = new DedupQueue<Event<unknown>>();
+		const eventQueue = new Heap<Event<unknown>>((x, y) => x.rank < y.rank ? -1 : x.rank > y.rank ? 1 : 0);
+		const queuedEvents: Set<Event<unknown>> = new Set();
 		const processedEvents: Set<Event<unknown>> = new Set();
 
 		try {
 			for (const source of this.#emittingSources) {
 				if (!source.isActive) continue;
 
-				eventQueue.add(source);
+				eventQueue.push(source);
 			}
 			this.#emittingSources.clear();
 
 			while (eventQueue.size > 0) {
 				// biome-ignore lint/style/noNonNullAssertion: size checked
-				const event = eventQueue.take()!;
+				const event = eventQueue.pop()!;
+				queuedEvents.delete(event);
+				
 				assert(event.isActive, "Event is not active");
 				assert(!processedEvents.has(event), "Event is already processed");
 
@@ -100,7 +105,8 @@ export class Timeline {
 						if (!effectEvent.isActive) continue;
 						effectEvent.emit(result);
 
-						eventQueue.add(effectEvent);
+						pushEventToQueue(effectEvent)
+						// eventQueue.push(effectEvent);
 					} catch (ex) {
 						console.warn("Effect failed", ex);
 					}
@@ -123,10 +129,11 @@ export class Timeline {
 		this.#tasksAfterProceed = [];
 
 		function pushEventToQueue(event: Event<unknown>) {
-			if (eventQueue.has(event)) return;
+			if (queuedEvents.has(event)) return;
 			if (processedEvents.has(event)) return;
 
-			eventQueue.add(event);
+			queuedEvents.add(event);
+			eventQueue.push(event);
 		}
 
 		function* collectDependendedDynamics(
