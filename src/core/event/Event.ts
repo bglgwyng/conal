@@ -1,9 +1,9 @@
 import { assert } from "../../utils/assert";
 import { just, type Maybe } from "../../utils/Maybe";
 import type { State } from "../dynamic/State";
-import { Node } from "../Node";
+import { ReactiveNode } from "../ReactiveNode";
 
-export abstract class Event<T> extends Node {
+export abstract class Event<T> extends ReactiveNode {
 	childEvents: Set<Event<unknown>> = new Set();
 	dependenedStates: Set<State<T>> = new Set();
 

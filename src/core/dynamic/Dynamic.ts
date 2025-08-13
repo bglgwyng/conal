@@ -1,9 +1,9 @@
 import type { Event } from "../event/Event";
-import { Node } from "../Node";
+import { ReactiveNode } from "../ReactiveNode";
 import type { ComputedDynamic } from "./ComputedDynamic";
 import type { State } from "./State";
 
-export abstract class Dynamic<T> extends Node {
+export abstract class Dynamic<T> extends ReactiveNode {
 	dependedDynamics: Set<ComputedDynamic<any>> = new Set();
 	abstract updated: Event<T>;
 

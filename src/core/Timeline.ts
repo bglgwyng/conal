@@ -7,7 +7,7 @@ import { State } from "./dynamic/State";
 import type { Event } from "./event/Event";
 import { Never } from "./event/Never";
 import { Source } from "./event/Source";
-import type { Node } from "./Node";
+import type { ReactiveNode } from "./ReactiveNode";
 
 export class Timeline {
 	constructor(options: TimelineOptions) {
@@ -203,10 +203,10 @@ export class Timeline {
 		}
 	}
 
-	#toCommitNodes: Set<Node> = new Set();
+	#toCommitNodes: Set<ReactiveNode> = new Set();
 
 	// @internal
-	needCommit(node: Node) {
+	needCommit(node: ReactiveNode) {
 		this.#toCommitNodes.add(node);
 	}
 
