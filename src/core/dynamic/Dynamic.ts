@@ -1,10 +1,9 @@
 import type { Event } from "../event/Event";
-import { ReactiveNode } from "../ReactiveNode";
-import type { TopoNode } from "../utils/IncrementalTopo";
+import { Node } from "../Node";
 import type { ComputedDynamic } from "./ComputedDynamic";
 import type { State } from "./State";
 
-export abstract class Dynamic<T> extends ReactiveNode {
+export abstract class Dynamic<T> extends Node {
 	dependedDynamics: Set<ComputedDynamic<any>> = new Set();
 	abstract updated: Event<T>;
 
@@ -31,11 +30,10 @@ export abstract class Dynamic<T> extends ReactiveNode {
 			: { value: this.readCurrent(), isUpdated: false };
 	}
 
-
-	*outcoming(): Iterable<TopoNode> {
+	*outcomings() {
 		const { updated, dependedDynamics } = this;
-		if(updated.isActive) yield updated;
-		
-		yield* dependedDynamics
+		if (updated.isActive) yield updated;
+
+		yield* dependedDynamics;
 	}
 }

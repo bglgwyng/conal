@@ -6,7 +6,7 @@ export class Never<T> extends Event<T> {
 		return;
 	}
 
-	incoming() {
+	incomings() {
 		return [];
 	}
 }

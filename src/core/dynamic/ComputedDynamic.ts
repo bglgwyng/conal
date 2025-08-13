@@ -85,7 +85,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		return nextUpdate;
 	};
 
-	incoming(): Iterable<TopoNode> {
+	incomings() {
 		return this.lastRead?.dependencies ?? [];
 	}
 
@@ -154,10 +154,10 @@ class UpdatedEvent<T> extends Event<T> {
 		return just(value);
 	}
 
-	incoming(): Iterable<TopoNode> {
+	incomings() {
 		return [this.computed];
 	}
-	
+
 	activate(): void {
 		this.computed.activate();
 	}

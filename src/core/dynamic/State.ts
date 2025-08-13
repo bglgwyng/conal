@@ -1,3 +1,4 @@
+import assert from "assert";
 import type { Maybe } from "../../utils/Maybe";
 import type { Event } from "../event/Event";
 import type { Timeline } from "../Timeline";
@@ -19,12 +20,26 @@ export class State<T> extends Dynamic<T> {
 		this.updated.writeOn(this);
 	}
 
-	incoming(): Iterable<TopoNode> {
+	incomings() {
 		return [this.updated];
 	}
 
 	readCurrent(): T {
 		return this.value;
+	}
+
+	*proceed() {
+		this.maybeNextValue = this.updated.getEmission();
+
+		yield* this.dependedDynamics;
+
+		return () => {
+			const maybeNextValue = this.maybeNextValue;
+			if (!maybeNextValue) return;
+
+			this.value = maybeNextValue();
+			this.maybeNextValue = undefined;
+		};
 	}
 
 	prepareUpdate() {
@@ -33,10 +48,6 @@ export class State<T> extends Dynamic<T> {
 	}
 
 	commit(): void {
-		const { maybeNextValue } = this;
-		if (!maybeNextValue) return;
-
-		this.value = maybeNextValue();
-		this.maybeNextValue = undefined;
+		assert.fail();
 	}
 }

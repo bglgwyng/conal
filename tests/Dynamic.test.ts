@@ -268,7 +268,7 @@ describe("Dynamic", () => {
 		it("should use default Object.is equality when no equal function provided", () => {
 			const [event, emit] = t.source<number>();
 			const baseDynamic = t.state(1, event);
-			
+
 			const computedDynamic = t.computed(() => baseDynamic.read());
 			const callback = vi.fn();
 			computedDynamic.updated.on(callback);
@@ -284,16 +284,16 @@ describe("Dynamic", () => {
 
 		it("should use custom equal function to determine updates", () => {
 			type Tuple = [number, number];
-			
+
 			const [event, emit] = t.source<Tuple>();
 			const baseDynamic = t.state<Tuple>([1, 2], event);
-			
+
 			// Computed that creates new tuple each time (different JS objects)
 			const computedDynamic = t.computed(
 				() => [...baseDynamic.read()] as Tuple, // Always creates new array
-				(a, b) => a[0] === b[0] && a[1] === b[1] // Deep equality for tuples
+				(a, b) => a[0] === b[0] && a[1] === b[1], // Deep equality for tuples
 			);
-			
+
 			const callback = vi.fn();
 			computedDynamic.updated.on(callback);
 
@@ -304,14 +304,14 @@ describe("Dynamic", () => {
 			// Different tuple values should trigger update
 			emit([2, 3]);
 			expect(callback).toHaveBeenCalledWith([2, 3]);
-			
+
 			// Reset callback
 			callback.mockClear();
-			
+
 			// Same values again should not trigger update
 			emit([2, 3]);
 			expect(callback).not.toHaveBeenCalled();
-			
+
 			// Different values should trigger update
 			emit([1, 1]);
 			expect(callback).toHaveBeenCalledWith([1, 1]);
@@ -325,13 +325,13 @@ describe("Dynamic", () => {
 
 			const [event, emit] = t.source<Point>();
 			const baseDynamic = t.state({ x: 1, y: 2 }, event);
-			
+
 			// Custom equal function for Point objects
 			const computedDynamic = t.computed(
 				() => ({ ...baseDynamic.read() }), // Create new object each time
-				(a, b) => a.x === b.x && a.y === b.y // Deep equality
+				(a, b) => a.x === b.x && a.y === b.y, // Deep equality
 			);
-			
+
 			const callback = vi.fn();
 			computedDynamic.updated.on(callback);
 
@@ -347,12 +347,12 @@ describe("Dynamic", () => {
 		it("should work with string case-insensitive equality", () => {
 			const [event, emit] = t.source<string>();
 			const baseDynamic = t.state("Hello", event);
-			
+
 			const computedDynamic = t.computed(
 				() => baseDynamic.read().toUpperCase(),
-				(a, b) => a.toLowerCase() === b.toLowerCase()
+				(a, b) => a.toLowerCase() === b.toLowerCase(),
 			);
-			
+
 			const callback = vi.fn();
 			computedDynamic.updated.on(callback);
 
@@ -368,13 +368,13 @@ describe("Dynamic", () => {
 		it("should handle array equality with custom function", () => {
 			const [event, emit] = t.source<number[]>();
 			const baseDynamic = t.state([1, 2, 3], event);
-			
+
 			// Custom equal function for arrays (shallow equality)
 			const computedDynamic = t.computed(
 				() => [...baseDynamic.read()], // Create new array each time
-				(a, b) => a.length === b.length && a.every((val, i) => val === b[i])
+				(a, b) => a.length === b.length && a.every((val, i) => val === b[i]),
 			);
-			
+
 			const callback = vi.fn();
 			computedDynamic.updated.on(callback);
 
@@ -390,16 +390,16 @@ describe("Dynamic", () => {
 		it("should handle complex nested computations with custom equality", () => {
 			const [event1, emit1] = t.source<number>();
 			const [event2, emit2] = t.source<number>();
-			
+
 			const dynamic1 = t.state(1, event1);
 			const dynamic2 = t.state(2, event2);
-			
+
 			// Computed dynamic that rounds to nearest integer
 			const sumDynamic = t.computed(
 				() => Math.round(dynamic1.read() + dynamic2.read()),
-				(a, b) => Math.floor(a) === Math.floor(b) // Only update if integer part changes
+				(a, b) => Math.floor(a) === Math.floor(b), // Only update if integer part changes
 			);
-			
+
 			const callback = vi.fn();
 			sumDynamic.updated.on(callback);
 

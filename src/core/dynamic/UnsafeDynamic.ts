@@ -17,7 +17,7 @@ export class UnsafeDynamic<T> extends Dynamic<T> {
 		this.#read = read;
 	}
 
-	incoming(): Iterable<TopoNode> {
+	incomings() {
 		return [];
 	}
 
