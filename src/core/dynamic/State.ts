@@ -1,6 +1,7 @@
 import type { Maybe } from "../../utils/Maybe";
 import type { Event } from "../event/Event";
 import type { Timeline } from "../Timeline";
+import type { TopoNode } from "../utils/IncrementalTopo";
 import { Dynamic } from "./Dynamic";
 
 export class State<T> extends Dynamic<T> {
@@ -16,6 +17,10 @@ export class State<T> extends Dynamic<T> {
 
 		this.value = initialValue;
 		this.updated.writeOn(this);
+	}
+
+	incoming(): Iterable<TopoNode> {
+		return [this.updated];
 	}
 
 	readCurrent(): T {

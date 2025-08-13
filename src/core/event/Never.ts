@@ -5,4 +5,8 @@ export class Never<T> extends Event<T> {
 	getEmission(): Maybe<T> {
 		return;
 	}
+
+	incoming() {
+		return [];
+	}
 }

@@ -42,6 +42,10 @@ export class MergedEvent<L, R> extends Event<These<L, R>> {
 		return result;
 	}
 
+	incoming() {
+		return [this.left, this.right]
+	}
+
 	commit(): void {
 		this.maybeEmittedValue = undefined;
 	}

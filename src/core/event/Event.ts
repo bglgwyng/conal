@@ -2,6 +2,7 @@ import { assert } from "../../utils/assert";
 import { just, type Maybe } from "../../utils/Maybe";
 import type { State } from "../dynamic/State";
 import { ReactiveNode } from "../ReactiveNode";
+import type { TopoNode } from "../utils/IncrementalTopo";
 
 export abstract class Event<T> extends ReactiveNode {
 	childEvents: Set<Event<unknown>> = new Set();
@@ -35,6 +36,11 @@ export abstract class Event<T> extends ReactiveNode {
 				if (!this.isActive) this.deactivate();
 			},
 		];
+	}
+
+	*outcoming(): Iterable<TopoNode> {
+		yield* this.childEvents;
+		yield* this.dependenedStates;
 	}
 
 	// @internal
@@ -85,6 +91,11 @@ export class Emmittable<T> extends Event<T> {
 
 	getEmission() {
 		return this.maybeLastEmission;
+	}
+
+	// FIXME: true?
+	incoming(): Iterable<TopoNode> {
+		return [];
 	}
 
 	commit() {

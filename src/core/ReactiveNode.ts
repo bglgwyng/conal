@@ -1,6 +1,7 @@
-import { Node } from "./Node";
 import type { Timeline } from "./Timeline";
-export abstract class ReactiveNode extends Node {
+import { TopoNode } from "./utils/IncrementalTopo";
+
+export abstract class ReactiveNode extends TopoNode {
 	constructor(public readonly timeline: Timeline) {
     super();
   }

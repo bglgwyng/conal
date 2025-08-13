@@ -1,6 +1,7 @@
 import type { Maybe } from "../../utils/Maybe";
 import type { Dynamic } from "../dynamic/Dynamic";
 import type { Timeline } from "../Timeline";
+import type { TopoNode } from "../utils/IncrementalTopo";
 import { Event } from "./Event";
 
 export class SwitchingEvent<U, T> extends Event<T> {
@@ -14,6 +15,10 @@ export class SwitchingEvent<U, T> extends Event<T> {
 
 	getEmission(): Maybe<T> {
 		return this.extractEvent(this.dynamic.readCurrent()).getEmission();
+	}
+
+	incoming(): Iterable<TopoNode> {
+		return [this.dynamic, this.extractEvent(this.dynamic.readCurrent())];
 	}
 
 	activate(): void {
