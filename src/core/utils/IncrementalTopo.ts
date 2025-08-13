@@ -15,7 +15,7 @@ export class IncrementalTopo {
    * @param u - Source node
    * @param v - Target node
    */
-  addEdge(u: TopoNode, v: TopoNode) {
+  reorder(u: TopoNode, v: TopoNode) {
     assert(u !== v, "Self-loop not allowed");
 
     if (u.rank < v.rank) return;

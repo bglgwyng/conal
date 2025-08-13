@@ -23,7 +23,7 @@ class MockNode extends TopoNode {
     this.#outcoming.add(v);
     v.#incoming.add(this);
 
-    this.topology.addEdge(this, v);    
+    this.topology.reorder(this, v);    
   }  
 }
 
