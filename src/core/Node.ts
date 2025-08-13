@@ -6,7 +6,8 @@ export abstract class Node {
 
 	commit(nextTimestamp: number) {}
 
-	tag(tag: string) {
+	tag(tag: string): this {
 		this._tag = tag;
+		return this;
 	}
 }
