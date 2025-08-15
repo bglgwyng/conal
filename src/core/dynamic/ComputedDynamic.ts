@@ -2,7 +2,6 @@ import { assert } from "../../utils/assert";
 import { just } from "../../utils/Maybe";
 import { Event } from "../event/Event";
 import { ReadMode, type Timeline } from "../Timeline";
-import type { TopoNode } from "../utils/IncrementalTopo";
 import { Dynamic } from "./Dynamic";
 
 export class ComputedDynamic<T> extends Dynamic<T> {
@@ -25,6 +24,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 	}
 
 	readCurrent = (): T => {
+		console.info("READ", this._tag);
 		assert(
 			this.timeline.readMode === ReadMode.Current,
 			"Timeline is reading next value",
@@ -57,6 +57,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 	};
 
 	readNext = () => {
+		// assert(this.nextUpdate, "nextUpdate is not set");
 		const { timeline, isActive } = this;
 		assert(timeline.isProceeding, "Timeline is not proceeding");
 		assert(
@@ -64,7 +65,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 			"Timeline is not reading next value",
 		);
 		assert(isActive, "ComputedDynamic is not active");
-
+		// assert(this.nextUpdate, "nextUpdate is not set");
 		if (this.nextUpdate) return this.nextUpdate;
 
 		const currentValue = this.timeline.withReadMode(
@@ -80,19 +81,28 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		};
 
 		this.nextUpdate = nextUpdate;
-		this.timeline.needCommit(this);
 
 		return nextUpdate;
 	};
 
-	incomings() {
-		return this.lastRead?.dependencies ?? [];
+	*incomings() {
+		const dependencies = this.lastRead?.dependencies;
+		if (!dependencies) return;
+
+		yield* dependencies;
+	}
+
+	*outcomings() {
+		yield this.updated;
+		yield* this.dependedDynamics;
 	}
 
 	updateDependencies(newDependencies: Set<Dynamic<any>>) {
+		// assert(!this.timeline.isProceeding, "FFF");
 		assert(this.lastRead, "lastRead is not set");
 
 		for (const dependency of newDependencies) {
+			// this.timeline.topo.reorder(dependency, this);
 			dependency.dependedDynamics.add(this);
 		}
 		this.lastRead.dependencies = newDependencies;
@@ -102,23 +112,55 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		return this.lastRead?.dependencies;
 	}
 
-	commit(nextTimestamp: number) {
-		assert(this.nextUpdate);
+	*proceed() {
+		const currentValue = this.timeline.withReadMode(
+			ReadMode.Current,
+			this.readCurrent,
+		);
+		const [value, dependencies] = this.timeline.withReadMode(
+			ReadMode.Next,
+			() => this.timeline.withTrackingRead(this.fn),
+		);
 
-		const { value, isUpdated, dependencies } = this.nextUpdate;
-		this.nextUpdate = undefined;
-
-		if (!isUpdated) return;
-
-		this.lastRead = {
+		const nextUpdate = {
 			value,
-			at: nextTimestamp,
+			isUpdated: !this.equal(value, currentValue),
 			dependencies,
+		};
+		this.nextUpdate = nextUpdate;
+
+		yield this.updated;
+		yield* this.dependedDynamics;
+
+		return (nextTimestamp: number) => {
+			const { value, isUpdated, dependencies } = nextUpdate;
+			this.nextUpdate = undefined;
+
+			for (const dependency of dependencies) {
+				dependency.dependedDynamics.add(this);
+			}
+
+			// this.updateDependencies(dependencies);
+
+			if (!isUpdated) return;
+
+			this.lastRead = {
+				value,
+				at: nextTimestamp,
+				dependencies,
+			};
 		};
 	}
 
+	commit(nextTimestamp: number) {
+		assert(false);
+	}
+
 	activate() {
+		console.info("ACTIVATE", this._tag);
 		this.readCurrent();
+
+		this.timeline.topo.reorder(this, this.updated);
 	}
 
 	deactivate() {
@@ -142,6 +184,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 class UpdatedEvent<T> extends Event<T> {
 	constructor(public computed: ComputedDynamic<T>) {
 		super(computed.timeline);
+		this.tag(`UpdatedEvent(${computed._tag})`);
 	}
 
 	getEmission() {
@@ -154,8 +197,13 @@ class UpdatedEvent<T> extends Event<T> {
 		return just(value);
 	}
 
-	incomings() {
-		return [this.computed];
+	*incomings() {
+		yield this.computed;
+	}
+
+	*outcomings() {
+		console.info("OUTCOMING", this._tag, this.dependenedStates);
+		yield* this.dependenedStates;
 	}
 
 	activate(): void {

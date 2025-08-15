@@ -10,6 +10,11 @@ export interface TopoNode {
 
 // Class for managing incremental topological sorting
 export class IncrementalTopo {
+	nodes = new Set<TopoNode>();
+
+	addNode(node: TopoNode) {
+		this.nodes.add(node);
+	}
 	/**
 	 * Adds an edge (u -> v) between two nodes and updates the topological sort.
 	 * @param u - Source node
@@ -51,6 +56,25 @@ export class IncrementalTopo {
 				maxIncomingRank = Math.max(maxIncomingRank, incoming.rank);
 			}
 			node.rank = Math.max(node.rank, maxIncomingRank + 1);
+		}
+	}
+
+	checkWellOrdered() {
+		for (const node of this.nodes) {
+			for (const incoming of node.incomings()) {
+				if (incoming.rank > node.rank) {
+					throw new Error(
+						`Node ${incoming._tag}(rank: ${incoming.rank}) and ${node._tag}(rank: ${node.rank}) is not well-ordered`,
+					);
+				}
+			}
+			for (const outcoming of node.outcomings()) {
+				if (outcoming.rank < node.rank) {
+					throw new Error(
+						`Node ${outcoming._tag}(rank: ${outcoming.rank}) and ${node._tag}(rank: ${node.rank}) is not well-ordered`,
+					);
+				}
+			}
 		}
 	}
 }

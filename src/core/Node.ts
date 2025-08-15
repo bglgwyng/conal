@@ -2,7 +2,9 @@ import type { Timeline } from "./Timeline";
 import type { TopoNode } from "./utils/IncrementalTopo";
 
 export abstract class Node implements TopoNode {
-	constructor(public readonly timeline: Timeline) {}
+	constructor(public readonly timeline: Timeline) {
+		this.timeline.topo.addNode(this);
+	}
 
 	rank = 0;
 

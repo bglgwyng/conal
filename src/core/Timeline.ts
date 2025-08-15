@@ -1,6 +1,6 @@
 import { assert } from "../utils/assert";
 import type { Maybe } from "../utils/Maybe";
-import type { ComputedDynamic } from "./dynamic/ComputedDynamic";
+import { ComputedDynamic } from "./dynamic/ComputedDynamic";
 import { Dynamic } from "./dynamic/Dynamic";
 import { State } from "./dynamic/State";
 import { Event } from "./event/Event";
@@ -54,8 +54,8 @@ export class Timeline {
 		const queue = new Heap<Node>((x, y) =>
 			x.rank < y.rank ? -1 : x.rank > y.rank ? 1 : 0,
 		);
-		const queuedEvents: Set<Node> = new Set();
-		const processedEvents: Set<Node> = new Set();
+		const queuedNodes: Set<Node> = new Set();
+		const processedNodes: Set<Node> = new Set();
 		const cleanups: ((nextTimestamp: number) => void)[] = [];
 
 		try {
@@ -64,19 +64,20 @@ export class Timeline {
 
 				queue.push(source);
 			}
+
 			this.#emittingSources.clear();
 
 			while (queue.size > 0) {
 				// biome-ignore lint/style/noNonNullAssertion: size checked
 				const node = queue.pop()!;
-				queuedEvents.delete(node);
+				queuedNodes.delete(node);
+
+				assert(!processedNodes.has(node), "Event is already processed");
+
+				processedNodes.add(node);
 
 				if (node instanceof Event) {
 					assert(node.isActive, "Event is not active");
-					assert(!processedEvents.has(node), "Event is already processed");
-
-					processedEvents.add(node);
-
 					let maybeValue: Maybe<unknown>;
 					try {
 						maybeValue = node.getEmission();
@@ -93,16 +94,8 @@ export class Timeline {
 					}
 
 					// TODO: run `getEmissions`s here
-					for (const dynamic of node.dependenedStates) {
-						// dynamic.prepareUpdate();
-
-						pushToQueue(dynamic);
-
-						// for (const dynamic of collectDependendedDynamics(
-						// 	dynamic.dependedDynamics,
-						// )) {
-						// 	pushToQueue(dynamic.updated);
-						// }
+					for (const state of node.dependenedStates) {
+						pushToQueue(state);
 					}
 
 					for (const [runEffect, effectEvent] of node.effects) {
@@ -119,19 +112,14 @@ export class Timeline {
 						}
 					}
 				} else if (node instanceof Dynamic) {
-					if (node instanceof State) {
-						const it = node.proceed();
-						while (true) {
-							const child = it.next();
-							if (child.done) {
-								if (child.value) cleanups.push(child.value);
-								break;
-							}
-							pushToQueue(child.value);
+					const it = node.proceed();
+					while (true) {
+						const child = it.next();
+						if (child.done) {
+							if (child.value) cleanups.push(child.value);
+							break;
 						}
-					}
-					for (const child of node.outcomings()) {
-						pushToQueue(child);
+						pushToQueue(child.value);
 					}
 				}
 			}
@@ -155,22 +143,11 @@ export class Timeline {
 		this.#tasksAfterProceed = [];
 
 		function pushToQueue(node: Node) {
-			if (queuedEvents.has(node)) return;
-			if (processedEvents.has(node)) return;
+			if (queuedNodes.has(node)) return;
+			if (processedNodes.has(node)) return;
 
-			queuedEvents.add(node);
+			queuedNodes.add(node);
 			queue.push(node);
-		}
-
-		function* collectDependendedDynamics(
-			dynamics: Iterable<ComputedDynamic<unknown>>,
-		): IterableIterator<ComputedDynamic<unknown>> {
-			for (const dynamic of dynamics) {
-				assert(dynamic.updated.isActive, "Dynamic is not active");
-
-				yield dynamic;
-				yield* collectDependendedDynamics(dynamic.dependedDynamics);
-			}
 		}
 	}
 
@@ -248,6 +225,12 @@ export class Timeline {
 	queueTaskAfterProceed(fn: () => void) {
 		assert(this.#isProceeding, "Timeline is not proceeding");
 		this.#tasksAfterProceed.push(fn);
+	}
+
+	getNodeByTag(tag: string) {
+		for (const node of this.topo.nodes) {
+			if (node._tag === tag) return node;
+		}
 	}
 }
 
