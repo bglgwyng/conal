@@ -19,11 +19,12 @@ export class Dynamic<T> {
 	read = (): T => this.internal.read();
 
 	on<U>(fn: (value: T) => U): readonly [Dynamic<U>, () => void] {
-		const [effectEvent, dispose] = this.internal.on((value) =>
-			withTimeline(this.internal.timeline, () => fn(value)),
-		);
+		const [effectDynamic, dispose] = this.internal.on((value) => {
+			console.info("ON", this.internal._tag);
+			return withTimeline(this.internal.timeline, () => fn(value));
+		});
 
-		return [new Dynamic(this.timeline, effectEvent), dispose];
+		return [new Dynamic(this.timeline, effectDynamic), dispose];
 	}
 
 	// @internal

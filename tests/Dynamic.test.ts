@@ -247,19 +247,25 @@ describe("Dynamic", () => {
 			expect(errorDynamic.read()).toBe(10);
 		});
 
-		it("should work with computed dynamics", () => {
+		it("hello", () => {
 			const [event, emit] = t.source<number>();
-			const baseDynamic = t.state(3, event);
-			const computedDynamic = t.computed(() => baseDynamic.read() + 1);
+			event.tag("source");
+			const baseDynamic = t.state(3, event).tag("base");
+			const computedDynamic = t
+				.computed(() => baseDynamic.read() + 1)
+				.tag("computed");
 
 			const [doubledComputed, _dispose] = computedDynamic.on(
 				(value) => value * 2,
 			);
+			doubledComputed.tag("doubledComputed");
 
+			expect(computedDynamic.read()).toBe(4); // (3 + 1)
 			expect(doubledComputed.read()).toBe(8); // (3 + 1) * 2
 
 			emit(4);
 
+			expect(computedDynamic.read()).toBe(5); // (4 + 1)
 			expect(doubledComputed.read()).toBe(10); // (4 + 1) * 2
 		});
 	});
@@ -346,12 +352,15 @@ describe("Dynamic", () => {
 
 		it("should work with string case-insensitive equality", () => {
 			const [event, emit] = t.source<string>();
-			const baseDynamic = t.state("Hello", event);
+			event.tag("event");
+			const baseDynamic = t.state("Hello", event).tag("base");
 
-			const computedDynamic = t.computed(
-				() => baseDynamic.read().toUpperCase(),
-				(a, b) => a.toLowerCase() === b.toLowerCase(),
-			);
+			const computedDynamic = t
+				.computed(
+					() => baseDynamic.read().toUpperCase(),
+					(a, b) => a.toLowerCase() === b.toLowerCase(),
+				)
+				.tag("computed");
 
 			const callback = vi.fn();
 			computedDynamic.updated.on(callback);

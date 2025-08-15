@@ -23,10 +23,13 @@ export abstract class Event<T> extends Node {
 		const { isActive } = this;
 
 		const effectEvent = new Emmittable<U>(this.timeline);
+		effectEvent.tag(`Effect(${this._tag})`);
 
 		const effect = [fn, effectEvent] as const;
 		this.effects.push(effect);
 		if (!isActive) this.activate();
+
+		this.timeline.topo.reorder(this, effectEvent);
 
 		return [
 			effectEvent,
@@ -64,10 +67,13 @@ export abstract class Event<T> extends Node {
 
 	// @internal
 	writeOn(state: State<T>) {
+		console.info("writeon", this._tag, state._tag);
 		const { isActive } = this;
 		this.dependenedStates.add(state);
 
 		if (!isActive) this.activate();
+
+		this.timeline.topo.reorder(this, state);
 
 		return () => {
 			this.dependenedStates.delete(state);

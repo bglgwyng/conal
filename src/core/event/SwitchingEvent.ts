@@ -1,7 +1,6 @@
 import type { Maybe } from "../../utils/Maybe";
 import type { Dynamic } from "../dynamic/Dynamic";
 import type { Timeline } from "../Timeline";
-import type { TopoNode } from "../utils/IncrementalTopo";
 import { Event } from "./Event";
 
 export class SwitchingEvent<U, T> extends Event<T> {
@@ -22,12 +21,18 @@ export class SwitchingEvent<U, T> extends Event<T> {
 	}
 
 	activate(): void {
-		this.dispose = this.listen(this.extractEvent(this.dynamic.readCurrent()));
 		[, this.disposeDynamicUpdated] = this.dynamic.updated.on((event) => {
 			// biome-ignore lint/style/noNonNullAssertion: `dispose` is set in activate
 			this.dispose!();
-			this.dispose = this.listen(this.extractEvent(event));
+
+			const activeEvent = this.extractEvent(event);
+			this.dispose = this.listen(activeEvent);
+			this.timeline.topo.reorder(activeEvent, this);
 		});
+
+		const activeEvent = this.extractEvent(this.dynamic.readCurrent());
+		this.dispose = this.listen(activeEvent);
+		this.timeline.topo.reorder(activeEvent, this);
 	}
 
 	deactivate(): void {

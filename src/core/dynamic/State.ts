@@ -2,7 +2,6 @@ import assert from "assert";
 import type { Maybe } from "../../utils/Maybe";
 import type { Event } from "../event/Event";
 import type { Timeline } from "../Timeline";
-import type { TopoNode } from "../utils/IncrementalTopo";
 import { Dynamic } from "./Dynamic";
 
 export class State<T> extends Dynamic<T> {
@@ -15,13 +14,16 @@ export class State<T> extends Dynamic<T> {
 		public updated: Event<T>,
 	) {
 		super(timeline);
-
 		this.value = initialValue;
 		this.updated.writeOn(this);
 	}
 
-	incomings() {
-		return [this.updated];
+	*incomings() {
+		yield this.updated;
+	}
+
+	*outcomings() {
+		yield* this.dependedDynamics;
 	}
 
 	readCurrent(): T {
