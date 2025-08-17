@@ -232,6 +232,12 @@ export class Timeline {
 			if (node._tag === tag) return node;
 		}
 	}
+
+	reorder(u: Node, v: Node) {
+		if (u instanceof Event) assert(u.isActive, "Event is not active");
+		if (v instanceof Event) assert(v.isActive, "Event is not active");
+		this.topo.reorder(u, v);
+	}
 }
 
 export type TimelineOptions = {

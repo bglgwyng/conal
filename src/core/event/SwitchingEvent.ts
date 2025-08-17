@@ -27,12 +27,12 @@ export class SwitchingEvent<U, T> extends Event<T> {
 
 			const activeEvent = this.extractEvent(event);
 			this.dispose = this.listen(activeEvent);
-			this.timeline.topo.reorder(activeEvent, this);
+			this.timeline.reorder(activeEvent, this);
 		});
 
 		const activeEvent = this.extractEvent(this.dynamic.readCurrent());
 		this.dispose = this.listen(activeEvent);
-		this.timeline.topo.reorder(activeEvent, this);
+		this.timeline.reorder(activeEvent, this);
 	}
 
 	deactivate(): void {
