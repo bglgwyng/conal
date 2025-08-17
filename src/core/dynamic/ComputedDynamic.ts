@@ -182,7 +182,6 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 class UpdatedEvent<T> extends Event<T> {
 	constructor(public computed: ComputedDynamic<T>) {
 		super(computed.timeline);
-		this.setTag(`UpdatedEvent(${computed._tag})`);
 	}
 
 	getEmission() {
@@ -209,5 +208,9 @@ class UpdatedEvent<T> extends Event<T> {
 
 	deactivate(): void {
 		this.computed.deactivate();
+	}
+
+	getTag(): string | undefined {
+		return this._tag ?? `UpdatedEvent(${this.computed.getTag()})`;
 	}
 }
