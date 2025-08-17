@@ -1,11 +1,9 @@
 import { just, type Maybe } from "../../utils/Maybe";
 import type { Timeline } from "../Timeline";
-import { Event } from "./Event";
+import { DerivedEvent } from "./DerivedEvent";
+import type { Event } from "./Event";
 
-export class MergedEvent<L, R> extends Event<These<L, R>> {
-	// biome-ignore lint/correctness/noUnusedPrivateClassMembers: it's actually used
-	private maybeEmittedValue: Maybe<Maybe<These<L, R>>>;
-
+export class MergedEvent<L, R> extends DerivedEvent<These<L, R>> {
 	constructor(
 		timeline: Timeline,
 		public readonly left: Event<L>,
@@ -14,40 +12,26 @@ export class MergedEvent<L, R> extends Event<These<L, R>> {
 		super(timeline);
 	}
 
-	getEmission() {
-		const { maybeEmittedValue } = this;
-		if (maybeEmittedValue) return maybeEmittedValue();
-
+	deriveEmission() {
 		const { left, right } = this;
 		const maybeLeft = left.safeGetEmission(this);
 		const maybeRight = right.safeGetEmission(this);
 
-		let result: Maybe<These<L, R>>;
-
-		if (maybeLeft && maybeRight) {
-			result = just({
-				type: "both" as const,
-				left: maybeLeft(),
-				right: maybeRight(),
-			});
-		} else if (maybeLeft) {
-			result = just({ type: "left" as const, value: maybeLeft() });
-		} else if (maybeRight) {
-			result = just({ type: "right" as const, value: maybeRight() });
-		}
-
-		this.maybeEmittedValue = just(result);
-		this.timeline.needCommit(this);
-
-		return result;
+		return maybeLeft && maybeRight
+			? just({
+					type: "both" as const,
+					left: maybeLeft(),
+					right: maybeRight(),
+				})
+			: maybeLeft
+				? just({ type: "left" as const, value: maybeLeft() })
+				: maybeRight
+					? just({ type: "right" as const, value: maybeRight() })
+					: undefined;
 	}
 
 	incomings() {
 		return [this.left, this.right];
-	}
-
-	commit(): void {
-		this.maybeEmittedValue = undefined;
 	}
 
 	activate(): void {
