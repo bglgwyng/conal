@@ -20,7 +20,6 @@ export class Dynamic<T> {
 
 	on<U>(fn: (value: T) => U): readonly [Dynamic<U>, () => void] {
 		const [effectDynamic, dispose] = this.internal.on((value) => {
-			console.info("ON", this.internal._tag);
 			return withTimeline(this.internal.timeline, () => fn(value));
 		});
 

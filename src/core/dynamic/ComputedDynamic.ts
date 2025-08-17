@@ -24,7 +24,6 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 	}
 
 	readCurrent = (): T => {
-		console.info("READ", this._tag);
 		assert(
 			this.timeline.readMode === ReadMode.Current,
 			"Timeline is reading next value",
@@ -157,7 +156,6 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 	}
 
 	activate() {
-		console.info("ACTIVATE", this._tag);
 		this.readCurrent();
 
 		this.timeline.topo.reorder(this, this.updated);
@@ -202,7 +200,6 @@ class UpdatedEvent<T> extends Event<T> {
 	}
 
 	*outcomings() {
-		console.info("OUTCOMING", this._tag, this.dependenedStates);
 		yield* this.dependenedStates;
 	}
 
