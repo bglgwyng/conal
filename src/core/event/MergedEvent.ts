@@ -52,8 +52,6 @@ export class MergedEvent<L, R> extends DerivedEvent<These<L, R>> {
 	disposeRight?: () => void;
 }
 
-export const Discard = Symbol("Discard");
-
 export type These<L, R> =
 	| {
 			type: "both";
