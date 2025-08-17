@@ -45,8 +45,7 @@ export class State<T> extends Dynamic<T> {
 	}
 
 	prepareUpdate() {
-		this.maybeNextValue = this.updated.getEmission();
-		this.timeline.needCommit(this);
+		assert.fail();
 	}
 
 	commit(): void {
