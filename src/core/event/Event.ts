@@ -52,6 +52,7 @@ export abstract class Event<T> extends Node {
 
 		const { isActive } = event;
 		event.childEvents.add(this);
+		this.timeline.topo.reorder(event, this);
 
 		if (!isActive) event.activate();
 
@@ -70,10 +71,10 @@ export abstract class Event<T> extends Node {
 		console.info("writeon", this._tag, state._tag);
 		const { isActive } = this;
 		this.dependenedStates.add(state);
+		// TODO: the next line should be mandatory, but it's not for now
+		// this.timeline.topo.reorder(this, state);
 
 		if (!isActive) this.activate();
-
-		this.timeline.topo.reorder(this, state);
 
 		return () => {
 			this.dependenedStates.delete(state);
