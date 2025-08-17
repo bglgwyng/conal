@@ -19,8 +19,8 @@ export class MergedEvent<L, R> extends Event<These<L, R>> {
 		if (maybeEmittedValue) return maybeEmittedValue();
 
 		const { left, right } = this;
-		const maybeLeft = left.getEmission();
-		const maybeRight = right.getEmission();
+		const maybeLeft = left.safeGetEmission(this);
+		const maybeRight = right.safeGetEmission(this);
 
 		let result: Maybe<These<L, R>>;
 

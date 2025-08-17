@@ -2,7 +2,6 @@ import { assert } from "../../utils/assert";
 import { just, type Maybe } from "../../utils/Maybe";
 import type { State } from "../dynamic/State";
 import { Node } from "../Node";
-import type { TopoNode } from "../utils/IncrementalTopo";
 
 export abstract class Event<T> extends Node {
 	childEvents: Set<Event<unknown>> = new Set();
@@ -41,7 +40,7 @@ export abstract class Event<T> extends Node {
 		];
 	}
 
-	*outcomings() {
+	*outcomings(): Iterable<Node> {
 		yield* this.childEvents;
 		yield* this.dependenedStates;
 	}
@@ -52,9 +51,9 @@ export abstract class Event<T> extends Node {
 
 		const { isActive } = event;
 		event.childEvents.add(this);
-		this.timeline.topo.reorder(event, this);
 
 		if (!isActive) event.activate();
+		this.timeline.topo.reorder(event, this);
 
 		return () => {
 			event.childEvents.delete(this);
@@ -66,12 +65,25 @@ export abstract class Event<T> extends Node {
 	// @internal
 	abstract getEmission(): Maybe<T>;
 
+	safeGetEmission(from: Node): Maybe<T> {
+		assert(
+			new Set(from.incomings()).has(this),
+			`Node(${from.getTag()}) does not have Event(${this.getTag()}) as incoming`,
+		);
+		assert(
+			new Set(this.outcomings()).has(from),
+			`Event(${this.getTag()}) does not have Node(${from.getTag()}) as outgoing`,
+		);
+		assert(this.rank < from.rank, "Event ordering is incorrect");
+
+		return this.getEmission();
+	}
+
 	// @internal
 	writeOn(state: State<T>) {
 		const { isActive } = this;
 		this.dependenedStates.add(state);
-		// TODO: the next line should be mandatory, but it's not for now
-		// this.timeline.topo.reorder(this, state);
+		this.timeline.topo.reorder(this, state);
 
 		if (!isActive) this.activate();
 

@@ -31,7 +31,7 @@ export class State<T> extends Dynamic<T> {
 	}
 
 	*proceed() {
-		this.maybeNextValue = this.updated.getEmission();
+		this.maybeNextValue = this.updated.safeGetEmission(this);
 
 		yield* this.dependedDynamics;
 
