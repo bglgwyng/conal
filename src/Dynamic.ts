@@ -28,7 +28,7 @@ export class Dynamic<T> {
 
 	// @internal
 	tag(tag: string): Dynamic<T> {
-		this.internal.tag(tag);
+		this.internal.setTag(tag);
 		return this;
 	}
 }

@@ -182,7 +182,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 class UpdatedEvent<T> extends Event<T> {
 	constructor(public computed: ComputedDynamic<T>) {
 		super(computed.timeline);
-		this.tag(`UpdatedEvent(${computed._tag})`);
+		this.setTag(`UpdatedEvent(${computed._tag})`);
 	}
 
 	getEmission() {

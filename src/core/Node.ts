@@ -22,7 +22,11 @@ export abstract class Node implements TopoNode {
 	abstract outcomings(): Iterable<TopoNode>;
 
 	_tag?: string;
-	tag(tag: string): this {
+	getTag(): string | undefined {
+		return this._tag;
+	}
+
+	setTag(tag: string): this {
 		this._tag = tag;
 		return this;
 	}
