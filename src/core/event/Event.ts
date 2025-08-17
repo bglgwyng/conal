@@ -23,7 +23,7 @@ export abstract class Event<T> extends Node {
 		const { isActive } = this;
 
 		const effectEvent = new Emmittable<U>(this.timeline);
-		effectEvent.tag(`Effect(${this._tag})`);
+		effectEvent.setTag(`Effect(${this._tag})`);
 
 		const effect = [fn, effectEvent] as const;
 		this.effects.push(effect);

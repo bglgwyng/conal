@@ -40,7 +40,7 @@ export class Event<T> {
 
 	// @internal
 	tag(tag: string): Event<T> {
-		this.internal.tag(tag);
+		this.internal.setTag(tag);
 		return this;
 	}
 }

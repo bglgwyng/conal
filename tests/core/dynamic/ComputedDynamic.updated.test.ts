@@ -298,12 +298,13 @@ describe("ComputedDynamic - updated event", () => {
 	});
 
 	it("should read the current value of the computed dynamic in the update event", () => {
-		const source = timeline.source<number>().tag("source");
-		const state = timeline.state(10, source).tag("state");
+		const source = timeline.source<number>();
+		const state = timeline.state(10, source);
 
-		const computed = new ComputedDynamic(timeline, () => state.read() + 5).tag(
-			"computed",
-		);
+		const computed = new ComputedDynamic(
+			timeline,
+			() => state.read() + 5,
+		).setTag("computed");
 
 		const updateSpy = vi.fn();
 
