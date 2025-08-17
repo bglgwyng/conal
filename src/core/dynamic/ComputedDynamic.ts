@@ -198,10 +198,6 @@ class UpdatedEvent<T> extends Event<T> {
 		yield this.computed;
 	}
 
-	*outcomings() {
-		yield* this.dependenedStates;
-	}
-
 	activate(): void {
 		this.computed.activate();
 	}

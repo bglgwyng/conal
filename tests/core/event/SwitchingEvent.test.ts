@@ -25,9 +25,11 @@ describe("SwitchingEvent", () => {
 
 		// Create a State dynamic that holds the current source
 		dynamic = new State<Event<number>>(timeline, source1, switchEvent);
+		dynamic.setTag("dynamic");
 
 		// Create the SwitchingEvent that will switch between sources
 		switchingEvent = new SwitchingEvent(timeline, dynamic, (x) => x);
+		switchingEvent.setTag("switching");
 	});
 
 	it("should forward events from the current source", () => {
@@ -76,10 +78,15 @@ describe("SwitchingEvent", () => {
 
 	it("should emit the last value from the current source when switching", () => {
 		const callback = vi.fn();
+		switchEvent.setTag("switch");
 		switchingEvent.on(callback);
+
+		source1.setTag("source1");
+		source2.setTag("source2");
 
 		// Switch to second source
 		source1.emit(1);
+
 		switchEvent.emit(source2);
 		timeline.proceed();
 
