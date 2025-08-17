@@ -68,7 +68,6 @@ export abstract class Event<T> extends Node {
 
 	// @internal
 	writeOn(state: State<T>) {
-		console.info("writeon", this._tag, state._tag);
 		const { isActive } = this;
 		this.dependenedStates.add(state);
 		// TODO: the next line should be mandatory, but it's not for now
