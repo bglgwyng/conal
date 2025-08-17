@@ -1,13 +1,10 @@
 import { assert } from "../../utils/assert";
 import { just, type Maybe } from "../../utils/Maybe";
 import type { Timeline } from "../Timeline";
-import type { TopoNode } from "../utils/IncrementalTopo";
-import { Event } from "./Event";
+import { DerivedEvent } from "./DerivedEvent";
+import type { Event } from "./Event";
 
-export class TransformedEvent<T, U> extends Event<T> {
-	// biome-ignore lint/correctness/noUnusedPrivateClassMembers: it's actually used
-	private maybeEmittedValue: Maybe<Maybe<T>>;
-
+export class TransformedEvent<T, U> extends DerivedEvent<T> {
 	constructor(
 		timeline: Timeline,
 		public readonly parent: Event<U>,
@@ -20,16 +17,12 @@ export class TransformedEvent<T, U> extends Event<T> {
 		return [this.parent];
 	}
 
-	getEmission() {
-		const { maybeEmittedValue } = this;
-		if (maybeEmittedValue) return maybeEmittedValue();
-
-		const maybeParentEmittedValue = this.parent.getEmission();
-		if (!maybeParentEmittedValue) return;
+	deriveEmission() {
+		const parentEmission = this.parent.getEmission();
+		if (!parentEmission) return;
 
 		try {
-			const maybeValue = just(this.fn(maybeParentEmittedValue()));
-			this.maybeEmittedValue = just(maybeValue);
+			const maybeValue = just(this.fn(parentEmission()));
 
 			this.timeline.needCommit(this);
 
@@ -39,10 +32,6 @@ export class TransformedEvent<T, U> extends Event<T> {
 
 			throw error;
 		}
-	}
-
-	commit(): void {
-		this.maybeEmittedValue = undefined;
 	}
 
 	activate() {
