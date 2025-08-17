@@ -53,7 +53,7 @@ export abstract class Event<T> extends Node {
 		event.childEvents.add(this);
 
 		if (!isActive) event.activate();
-		this.timeline.topo.reorder(event, this);
+		this.timeline.reorder(event, this);
 
 		return () => {
 			event.childEvents.delete(this);
@@ -83,7 +83,7 @@ export abstract class Event<T> extends Node {
 	writeOn(state: State<T>) {
 		const { isActive } = this;
 		this.dependenedStates.add(state);
-		this.timeline.topo.reorder(this, state);
+		this.timeline.reorder(this, state);
 
 		if (!isActive) this.activate();
 

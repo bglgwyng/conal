@@ -158,7 +158,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 	activate() {
 		this.readCurrent();
 
-		this.timeline.topo.reorder(this, this.updated);
+		this.timeline.reorder(this, this.updated);
 	}
 
 	deactivate() {
