@@ -11,11 +11,19 @@ export class State<T> extends Dynamic<T> {
 	constructor(
 		timeline: Timeline,
 		initialValue: T,
-		public updated: Event<T>,
+		public readonly updated: Event<T>,
 	) {
 		super(timeline);
 		this.value = initialValue;
-		this.updated.writeOn(this);
+
+		updated.withActivation(() => {
+			updated.dependenedStates.add(this);
+			this.timeline.reorder(updated, this);
+
+			return () => {
+				updated.dependenedStates.delete(this);
+			};
+		});
 	}
 
 	*incomings() {

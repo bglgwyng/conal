@@ -75,18 +75,6 @@ export abstract class Event<T> extends Node {
 		return this.getEmission();
 	}
 
-	// @internal
-	writeOn(state: State<T>) {
-		return this.withActivation(() => {
-			this.dependenedStates.add(state);
-			this.timeline.reorder(this, state);
-
-			return () => {
-				this.dependenedStates.delete(state);
-			};
-		});
-	}
-
 	protected activate(): void {}
 	protected deactivate(): void {}
 
