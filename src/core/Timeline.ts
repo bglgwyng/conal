@@ -236,6 +236,17 @@ export class Timeline {
 	reorder(u: Node, v: Node) {
 		if (u instanceof Event) assert(u.isActive, "Event is not active");
 		if (v instanceof Event) assert(v.isActive, "Event is not active");
+
+		// TODO: remove this
+		assert(
+			new Set(u.outgoings()).has(v),
+			`Node(${u.getTag()}) is not Node(${v.getTag()})'s outgoing node`,
+		);
+		assert(
+			new Set(v.incomings()).has(u),
+			`Node(${u.getTag()}) is not Node(${v.getTag()})'s incoming node`,
+		);
+
 		this.topo.reorder(u, v);
 	}
 }
