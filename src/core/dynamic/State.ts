@@ -22,7 +22,7 @@ export class State<T> extends Dynamic<T> {
 		yield this.updated;
 	}
 
-	*outcomings() {
+	*outgoings() {
 		yield* this.dependedDynamics;
 	}
 

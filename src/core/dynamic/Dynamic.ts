@@ -30,7 +30,7 @@ export abstract class Dynamic<T> extends Node {
 			: { value: this.readCurrent(), isUpdated: false };
 	}
 
-	*outcomings() {
+	*outgoings() {
 		const { updated, dependedDynamics } = this;
 		if (updated.isActive) yield updated;
 

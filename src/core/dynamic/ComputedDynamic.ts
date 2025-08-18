@@ -91,7 +91,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		yield* dependencies;
 	}
 
-	*outcomings() {
+	*outgoings() {
 		yield this.updated;
 		yield* this.dependedDynamics;
 	}

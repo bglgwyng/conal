@@ -3,7 +3,7 @@ import assert from "assert";
 export interface TopoNode {
 	rank: number;
 	incomings(): Iterable<TopoNode>;
-	outcomings(): Iterable<TopoNode>;
+	outgoings(): Iterable<TopoNode>;
 
 	_tag?: string;
 }
@@ -38,7 +38,7 @@ export class IncrementalTopo {
 				// Rollback would happen here in a transactional implementation
 				throw new Error(`Cycle detected during rank update at ${v._tag}`);
 			}
-			for (const neighbor of current.outcomings()) {
+			for (const neighbor of current.outgoings()) {
 				if (!affected.has(neighbor)) {
 					affected.add(neighbor);
 					queue.push(neighbor);
@@ -68,10 +68,10 @@ export class IncrementalTopo {
 					);
 				}
 			}
-			for (const outcoming of node.outcomings()) {
-				if (outcoming.rank < node.rank) {
+			for (const outgoing of node.outgoings()) {
+				if (outgoing.rank < node.rank) {
 					throw new Error(
-						`Node ${outcoming._tag}(rank: ${outcoming.rank}) and ${node._tag}(rank: ${node.rank}) is not well-ordered`,
+						`Node ${outgoing._tag}(rank: ${outgoing.rank}) and ${node._tag}(rank: ${node.rank}) is not well-ordered`,
 					);
 				}
 			}
