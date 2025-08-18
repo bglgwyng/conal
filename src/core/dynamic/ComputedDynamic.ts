@@ -97,14 +97,16 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 	}
 
 	updateDependencies(newDependencies: Set<Dynamic<any>>) {
-		// assert(!this.timeline.isProceeding, "FFF");
-		assert(this.lastRead, "lastRead is not set");
+		this.safeEstablishEdge(() => {
+			assert(this.lastRead, "lastRead is not set");
 
-		for (const dependency of newDependencies) {
-			// this.timeline.topo.reorder(dependency, this);
-			dependency.dependedDynamics.add(this);
-		}
-		this.lastRead.dependencies = newDependencies;
+			this.lastRead.dependencies = newDependencies;
+			for (const dependency of newDependencies) {
+				dependency.dependedDynamics.add(this);
+
+				this.timeline.topo.reorder(dependency, this);
+			}
+		}, newDependencies);
 	}
 
 	get dependencies(): Set<Dynamic<any>> | undefined {
@@ -135,11 +137,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 			const { value, isUpdated, dependencies } = nextUpdate;
 			this.nextUpdate = undefined;
 
-			for (const dependency of dependencies) {
-				dependency.dependedDynamics.add(this);
-			}
-
-			// this.updateDependencies(dependencies);
+			this.updateDependencies(dependencies);
 
 			if (!isUpdated) return;
 

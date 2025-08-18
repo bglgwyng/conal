@@ -1,3 +1,4 @@
+import assert from "assert";
 import type { Timeline } from "./Timeline";
 import type { TopoNode } from "./utils/IncrementalTopo";
 
@@ -29,5 +30,20 @@ export abstract class Node implements TopoNode {
 	setTag(tag: string): this {
 		this._tag = tag;
 		return this;
+	}
+
+	safeEstablishEdge(fn: () => void, newIncomings: Iterable<Node>) {
+		fn();
+
+		const updatedIncomings = new Set(this.incomings());
+		for (const incoming of newIncomings) {
+			assert(updatedIncomings.has(incoming), "Incoming node is not added");
+			assert(incoming.rank < this.rank, "Incoming node is not well-ordered");
+
+			assert(
+				new Set(incoming.outgoings()).has(this),
+				"Outgoing node is not added",
+			);
+		}
 	}
 }

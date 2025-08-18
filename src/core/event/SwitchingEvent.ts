@@ -30,6 +30,7 @@ export class SwitchingEvent<U, T> extends Event<T> {
 			this.timeline.reorder(activeEvent, this);
 		});
 
+		// TODO: use `safeEstablishEdge`
 		const activeEvent = this.extractEvent(this.dynamic.readCurrent());
 		this.dispose = this.listen(activeEvent);
 		this.timeline.reorder(activeEvent, this);

@@ -36,7 +36,10 @@ export class TransformedEvent<T, U> extends DerivedEvent<T> {
 
 	activate() {
 		assert(this.isActive, "Event is not active");
-		this.dispose = this.listen(this.parent);
+
+		this.safeEstablishEdge(() => {
+			this.dispose = this.listen(this.parent);
+		}, [this.parent]);
 	}
 
 	deactivate() {
