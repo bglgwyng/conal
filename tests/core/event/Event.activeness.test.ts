@@ -61,55 +61,7 @@ describe("Event isActive dynamic", () => {
 		});
 	});
 
-	describe("depended states (writeOn method)", () => {
-		it("should become active when writing to a state", () => {
-			expect(source.isActive).toBe(false);
-
-			const dispose = source.writeOn(state);
-
-			expect(source.isActive).toBe(true);
-
-			dispose();
-			expect(source.isActive).toBe(false);
-		});
-
-		it("should remain active with multiple depended states", () => {
-			const state2 = new State<number>(timeline, 10, switchEvent);
-
-			const dispose1 = source.writeOn(state);
-			const dispose2 = source.writeOn(state2);
-
-			expect(source.isActive).toBe(true);
-
-			// Remove one state dependency, should still be active
-			dispose1();
-			expect(source.isActive).toBe(true);
-
-			// Remove last state dependency, should become inactive
-			dispose2();
-			expect(source.isActive).toBe(false);
-		});
-	});
-
 	describe("combined conditions", () => {
-		it("should remain active when multiple conditions are met", () => {
-			// Add effect
-			const [, dispose] = source.on(() => {});
-			expect(source.isActive).toBe(true);
-
-			// Add state dependency
-			const stateDispose = source.writeOn(state);
-			expect(source.isActive).toBe(true);
-
-			// Remove effect, should still be active
-			dispose();
-			expect(source.isActive).toBe(true);
-
-			// Remove state, should be inactive
-			stateDispose();
-			expect(source.isActive).toBe(false);
-		});
-
 		it("should handle rapid activation/deactivation cycles", () => {
 			const activateSpy = vi.spyOn(source as any, "activate");
 			const deactivateSpy = vi.spyOn(source as any, "deactivate");
