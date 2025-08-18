@@ -19,7 +19,7 @@ export abstract class Node implements TopoNode {
 	}
 
 	abstract incomings(): Iterable<TopoNode>;
-	abstract outcomings(): Iterable<TopoNode>;
+	abstract outgoings(): Iterable<TopoNode>;
 
 	_tag?: string;
 	getTag(): string | undefined {

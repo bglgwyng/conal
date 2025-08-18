@@ -40,7 +40,7 @@ export abstract class Event<T> extends Node {
 		];
 	}
 
-	*outcomings(): Iterable<Node> {
+	*outgoings(): Iterable<Node> {
 		yield* this.childEvents;
 		yield* this.dependenedStates;
 	}
@@ -71,7 +71,7 @@ export abstract class Event<T> extends Node {
 			`Node(${from.getTag()}) does not have Event(${this.getTag()}) as incoming`,
 		);
 		assert(
-			new Set(this.outcomings()).has(from),
+			new Set(this.outgoings()).has(from),
 			`Event(${this.getTag()}) does not have Node(${from.getTag()}) as outgoing`,
 		);
 		assert(this.rank < from.rank, "Event ordering is incorrect");
