@@ -1,3 +1,4 @@
+import assert from "assert";
 import { just, type Maybe } from "../../utils/Maybe";
 import type { Timeline } from "../Timeline";
 import { DerivedEvent } from "./DerivedEvent";
@@ -35,8 +36,10 @@ export class MergedEvent<L, R> extends DerivedEvent<These<L, R>> {
 	}
 
 	activate(): void {
-		this.disposeLeft = this.listen(this.left);
-		this.disposeRight = this.listen(this.right);
+		this.safeEstablishEdge(() => {
+			this.disposeLeft = this.listen(this.left);
+			this.disposeRight = this.listen(this.right);
+		}, [this.left, this.right]);
 	}
 
 	deactivate(): void {
