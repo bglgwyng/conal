@@ -47,19 +47,15 @@ export abstract class Event<T> extends Node {
 
 	// @internal
 	listen(event: Event<unknown>): () => void {
-		assert(this.isActive, "Event is not active");
+		return event.withActivation(() => {
+			event.childEvents.add(this);
 
-		const { isActive } = event;
-		event.childEvents.add(this);
+			this.timeline.reorder(event, this);
 
-		if (!isActive) event.activate();
-		this.timeline.reorder(event, this);
-
-		return () => {
-			event.childEvents.delete(this);
-
-			if (event.isActive) event.deactivate();
-		};
+			return () => {
+				event.childEvents.delete(this);
+			};
+		});
 	}
 
 	// @internal
@@ -81,21 +77,31 @@ export abstract class Event<T> extends Node {
 
 	// @internal
 	writeOn(state: State<T>) {
-		const { isActive } = this;
-		this.dependenedStates.add(state);
-		this.timeline.reorder(this, state);
+		return this.withActivation(() => {
+			this.dependenedStates.add(state);
+			this.timeline.reorder(this, state);
 
-		if (!isActive) this.activate();
-
-		return () => {
-			this.dependenedStates.delete(state);
-
-			if (!this.isActive) this.deactivate();
-		};
+			return () => {
+				this.dependenedStates.delete(state);
+			};
+		});
 	}
 
 	protected activate(): void {}
 	protected deactivate(): void {}
+
+	withActivation(fn: () => () => void) {
+		const wasActive = this.isActive;
+		const dispose = fn();
+
+		if (!wasActive && this.isActive) this.activate();
+
+		return () => {
+			dispose();
+
+			if (!this.isActive) this.deactivate();
+		};
+	}
 }
 
 export class Emmittable<T> extends Event<T> {
