@@ -76,16 +76,10 @@ export class Timeline {
 
 				if (node instanceof Event) {
 					assert(node.isActive, "Event is not active");
-					let maybeValue: Maybe<unknown>;
-					try {
-						maybeValue = node.getEmission();
-					} catch (ex) {
-						console.error("Event failed", ex);
-						continue;
-					}
-					if (!maybeValue) continue;
+					const emission = node.getEmission();
+					if (!emission) continue;
 
-					const value = maybeValue();
+					const value = emission();
 
 					for (const [childEvent, propagate] of node.listeners) {
 						pushToQueue(childEvent);
