@@ -284,7 +284,7 @@ describe("EffectEvent", () => {
 			const derivedEvent = new TransformedEvent(
 				timeline,
 				effectEvent,
-				(value) => {
+				(_value) => {
 					throw new Error("TransformedEvent transformation failed");
 				},
 			);

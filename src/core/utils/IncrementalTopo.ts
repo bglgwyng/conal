@@ -1,4 +1,4 @@
-import assert from "assert";
+import assert from "node:assert";
 
 export interface TopoNode {
 	rank: number;
@@ -32,6 +32,7 @@ export class IncrementalTopo {
 		affected.add(v);
 
 		while (queue.length > 0) {
+			// biome-ignore lint/style/noNonNullAssertion: `queue.length > 0` ensures this
 			const current = queue.shift()!;
 			// Cycle detection: if u is found among v's descendants, a cycle would be created
 			if (current === u) {

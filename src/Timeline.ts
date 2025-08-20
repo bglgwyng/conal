@@ -13,7 +13,7 @@ export class Timeline {
 
 	constructor(options: TimelineOptions) {
 		this.internal = new InternalTimeline({
-			onSourceEmission: (event, proceed) => options.onSourceEmission(proceed),
+			onSourceEmission: (_event, proceed) => options.onSourceEmission(proceed),
 		});
 	}
 

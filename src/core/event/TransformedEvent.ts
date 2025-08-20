@@ -1,5 +1,5 @@
 import { assert } from "../../utils/assert";
-import { just, type Maybe } from "../../utils/Maybe";
+import { just } from "../../utils/Maybe";
 import type { Timeline } from "../Timeline";
 import { DerivedEvent } from "./DerivedEvent";
 import type { Event } from "./Event";

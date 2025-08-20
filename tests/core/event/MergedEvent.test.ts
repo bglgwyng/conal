@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vitest } from "vitest";
-import { MergedEvent } from "../../../src/core/event/MergedEvent";
+import { MergedEvent, type These } from "../../../src/core/event/MergedEvent";
 import { Source } from "../../../src/core/event/Source";
 import { Timeline } from "../../../src/core/Timeline";
 
@@ -85,7 +85,7 @@ describe("MergedEvent", () => {
 	it("should handle interleaved emissions correctly", () => {
 		mergedEvent = new MergedEvent(timeline, leftSource, rightSource);
 
-		const results: any[] = [];
+		const results: These<string, number>[] = [];
 		mergedEvent.on((value) => results.push(value));
 
 		// Emit in interleaved order

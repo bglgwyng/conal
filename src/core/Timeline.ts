@@ -1,6 +1,5 @@
 import { assert } from "../utils/assert";
 import type { Maybe } from "../utils/Maybe";
-import { ComputedDynamic } from "./dynamic/ComputedDynamic";
 import { Dynamic } from "./dynamic/Dynamic";
 import { State } from "./dynamic/State";
 import { Event } from "./event/Event";
@@ -41,7 +40,7 @@ export class Timeline {
 		return new Source(this);
 	}
 
-	never = new Never<any>(this);
+	never = new Never<unknown>(this);
 
 	// @internal
 	proceed() {

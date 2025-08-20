@@ -229,9 +229,9 @@ describe("Timeline", () => {
 			it("should work with different event types", () => {
 				const [numberEvent, emitNumber] = t.source<number>();
 				const [stringEvent, emitString] = t.source<string>();
-				const [switchEvent, emitSwitch] = t.source<Event<any>>();
+				const [switchEvent, emitSwitch] = t.source<Event<unknown>>();
 
-				const switchDynamic = t.state<Event<any>>(numberEvent, switchEvent);
+				const switchDynamic = t.state<Event<unknown>>(numberEvent, switchEvent);
 				const switchingEvent = t.switching(switchDynamic);
 
 				const callback = vi.fn();

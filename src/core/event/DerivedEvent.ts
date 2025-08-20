@@ -16,7 +16,7 @@ export abstract class DerivedEvent<T> extends Event<T> {
 		return emission;
 	}
 
-	commit(nextTimestamp: number): void {
+	commit(_nextTimestamp: number): void {
 		this.#lastEmission = undefined;
 	}
 }
