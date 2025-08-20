@@ -133,25 +133,23 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 
 		yield this.updated;
 		yield* this.dependedDynamics;
-
-		return (nextTimestamp: number) => {
-			const { value, isUpdated, dependencies } = nextUpdate;
-			this.nextUpdate = undefined;
-
-			this.updateDependencies(dependencies);
-
-			if (!isUpdated) return;
-
-			this.lastRead = {
-				value,
-				at: nextTimestamp,
-				dependencies,
-			};
-		};
 	}
 
-	commit(_nextTimestamp: number) {
+	commit(nextTimestamp: number) {
+		assert(this.nextUpdate, "nextUpdate is not set");
+
+		const { value, isUpdated, dependencies } = this.nextUpdate;
 		this.nextUpdate = undefined;
+
+		this.updateDependencies(dependencies);
+
+		if (!isUpdated) return;
+
+		this.lastRead = {
+			value,
+			at: nextTimestamp,
+			dependencies,
+		};
 	}
 
 	activate() {

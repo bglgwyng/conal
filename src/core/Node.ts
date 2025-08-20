@@ -12,12 +12,7 @@ export abstract class Node implements TopoNode {
 	commit(_nextTimestamp: number) {}
 
 	// biome-ignore lint/correctness/useYield: will be overriden
-	*proceed(): Generator<
-		Node,
-		((nextTimestamp: number) => unknown) | undefined
-	> {
-		return;
-	}
+	abstract proceed(): Iterable<Node>;
 
 	abstract incomings(): Iterable<TopoNode>;
 	abstract outgoings(): Iterable<TopoNode>;

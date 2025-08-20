@@ -49,18 +49,55 @@ export abstract class Event<T> extends Node {
 
 	// @internal
 	listen<U>(event: Event<U>, fn: (value: U) => void): () => void {
-		return event.withActivation(() => {
-			const listener = [this, fn as (value: unknown) => void] as const;
-			event.listeners.add(listener);
+		const wasActive = event.isActive;
 
-			this.timeline.reorder(event, this);
+		const listener = [this, fn as (value: unknown) => void] as const;
+		event.listeners.add(listener);
 
-			return () => {
-				event.listeners.delete(listener);
-			};
-		});
+		if (!wasActive && event.isActive) event.activate();
+
+		this.timeline.reorder(event, this);
+
+		return () => {
+			event.listeners.delete(listener);
+
+			if (!event.isActive) event.deactivate();
+		};
 	}
 
+	*proceed(): Iterable<Node> {
+		assert(this.isActive, "Event is not active");
+
+		const emission = this.getEmission();
+		if (!emission) return;
+
+		const value = emission();
+
+		for (const [childEvent, emit] of this.listeners) {
+			if (!childEvent.isActive) continue;
+
+			yield childEvent;
+			emit(value);
+		}
+
+		// TODO: run `getEmissions`s here
+		for (const state of this.dependedDynamics) {
+			yield state;
+		}
+
+		for (const [runEffect, effectEvent] of this.effects) {
+			try {
+				const result = runEffect(value);
+				if (!effectEvent.isActive) continue;
+
+				effectEvent.emit(result);
+
+				yield effectEvent;
+			} catch (ex) {
+				console.warn("Effect failed", ex);
+			}
+		}
+	}
 	// @internal
 	abstract getEmission(): Maybe<T>;
 

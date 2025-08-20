@@ -1,6 +1,5 @@
 import { assert } from "../utils/assert";
-import type { Maybe } from "../utils/Maybe";
-import { Dynamic } from "./dynamic/Dynamic";
+import type { Dynamic } from "./dynamic/Dynamic";
 import { State } from "./dynamic/State";
 import { Event } from "./event/Event";
 import { Never } from "./event/Never";
@@ -66,64 +65,25 @@ export class Timeline {
 
 			this.#emittingSources.clear();
 
+			const processedNodes = [];
+
 			while (queue.size > 0) {
 				// biome-ignore lint/style/noNonNullAssertion: size checked
 				const node = queue.pop()!;
+				processedNodes.push(node);
 
 				assert(
 					!nodeStates.has(node) || nodeStates.get(node) === false,
-					"Event is already processed",
+					"Node is already processed",
 				);
 				nodeStates.set(node, true);
 
-				if (node instanceof Event) {
-					assert(node.isActive, "Event is not active");
-					const emission = node.getEmission();
-					if (!emission) continue;
-
-					const value = emission();
-
-					for (const [childEvent, propagate] of node.listeners) {
-						pushToQueue(childEvent);
-						propagate(value);
-					}
-
-					// TODO: run `getEmissions`s here
-					for (const state of node.dependedDynamics) {
-						pushToQueue(state);
-					}
-
-					for (const [runEffect, effectEvent] of node.effects) {
-						try {
-							const result = runEffect(value);
-
-							if (!effectEvent.isActive) continue;
-							effectEvent.emit(result);
-
-							pushToQueue(effectEvent);
-							// eventQueue.push(effectEvent);
-						} catch (ex) {
-							console.warn("Effect failed", ex);
-						}
-					}
-				} else if (node instanceof Dynamic) {
-					const it = node.proceed();
-					while (true) {
-						const child = it.next();
-						if (child.done) {
-							if (child.value) cleanups.push(child.value);
-							break;
-						}
-						pushToQueue(child.value);
-					}
+				for (const childNode of node.proceed()) {
+					pushToQueue(childNode);
 				}
 			}
 
-			for (const cleanup of cleanups) {
-				cleanup(nextTimestamp);
-			}
-			for (const [node, isProcessed] of nodeStates) {
-				assert(isProcessed);
+			for (const node of processedNodes) {
 				node.commit(nextTimestamp);
 			}
 		} finally {

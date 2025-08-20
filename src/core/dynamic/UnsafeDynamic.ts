@@ -1,5 +1,6 @@
 import { just, type Maybe } from "../../utils/Maybe";
 import type { Event } from "../event/Event";
+import type { Node } from "../Node";
 import type { Timeline } from "../Timeline";
 import { Dynamic } from "./Dynamic";
 
@@ -41,6 +42,8 @@ export class UnsafeDynamic<T> extends Dynamic<T> {
 
 		return current;
 	}
+
+	*proceed(): Iterable<Node> {}
 
 	commit() {
 		this.memoized = undefined;

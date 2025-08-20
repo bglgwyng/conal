@@ -42,19 +42,13 @@ export class State<T> extends Dynamic<T> {
 		this.maybeNextValue = this.updated.safeGetEmission(this);
 
 		yield* this.dependedDynamics;
-
-		return () => {
-			const maybeNextValue = this.maybeNextValue;
-			if (!maybeNextValue) return;
-
-			this.value = maybeNextValue();
-			this.maybeNextValue = undefined;
-		};
 	}
 
-	prepareUpdate() {
-		assert.fail();
-	}
+	commit(): void {
+		const maybeNextValue = this.maybeNextValue;
+		if (!maybeNextValue) return;
 
-	commit(): void {}
+		this.value = maybeNextValue();
+		this.maybeNextValue = undefined;
+	}
 }
