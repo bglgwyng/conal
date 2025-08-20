@@ -28,7 +28,10 @@ export class TransformedEvent<T, U> extends DerivedEvent<T> {
 		} catch (error) {
 			if (error === Discard) return;
 
-			throw error;
+			console.warn(
+				"Error from transform function. Discarding emission.",
+				error,
+			);
 		}
 	}
 
