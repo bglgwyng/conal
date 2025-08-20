@@ -1,4 +1,4 @@
-import assert from "assert";
+import assert from "node:assert";
 import type { Timeline } from "./Timeline";
 import type { TopoNode } from "./utils/IncrementalTopo";
 
@@ -9,7 +9,7 @@ export abstract class Node implements TopoNode {
 
 	rank = 0;
 
-	commit(nextTimestamp: number) {}
+	commit(_nextTimestamp: number) {}
 
 	// biome-ignore lint/correctness/useYield: will be overriden
 	*proceed(): Generator<

@@ -1,11 +1,7 @@
 export class Heap<T> {
 	private items: T[] = [];
-	private compare: (a: T, b: T) => number;
 
-	constructor(compareFunction?: (a: T, b: T) => number) {
-		// Default to min heap (smaller values have higher priority)
-		this.compare = compareFunction || ((a, b) => (a as any) - (b as any));
-	}
+	constructor(public readonly compare: (a: T, b: T) => number) {}
 
 	/**
 	 * Get the number of items in the heap
@@ -49,6 +45,7 @@ export class Heap<T> {
 		}
 
 		const min = this.items[0];
+		// biome-ignore lint/style/noNonNullAssertion: `items.length > 1` ensures this
 		this.items[0] = this.items.pop()!;
 		this.heapifyDown(0);
 		return min;
@@ -57,11 +54,8 @@ export class Heap<T> {
 	/**
 	 * Convert array to heap in-place
 	 */
-	static heapify<T>(
-		array: T[],
-		compareFunction?: (a: T, b: T) => number,
-	): Heap<T> {
-		const heap = new Heap<T>(compareFunction);
+	static heapify<T>(array: T[], compare: (a: T, b: T) => number): Heap<T> {
+		const heap = new Heap<T>(compare);
 		heap.items = [...array];
 
 		// Start from the last non-leaf node and heapify down

@@ -96,6 +96,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		yield* this.dependedDynamics;
 	}
 
+	// biome-ignore lint/suspicious/noExplicitAny: to satisfy covariance
 	updateDependencies(newDependencies: Set<Dynamic<any>>) {
 		this.safeEstablishEdge(() => {
 			assert(this.lastRead, "lastRead is not set");
@@ -109,6 +110,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		}, newDependencies);
 	}
 
+	// biome-ignore lint/suspicious/noExplicitAny: to satisfy covariance
 	get dependencies(): Set<Dynamic<any>> | undefined {
 		return this.lastRead?.dependencies;
 	}
@@ -149,7 +151,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		};
 	}
 
-	commit(nextTimestamp: number) {
+	commit(_nextTimestamp: number) {
 		assert(false);
 	}
 

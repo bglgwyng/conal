@@ -1,19 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { State } from "../../../src/core/dynamic/State";
 import { Source } from "../../../src/core/event/Source";
 import { Timeline } from "../../../src/core/Timeline";
 
 describe("Event isActive dynamic", () => {
 	let timeline: Timeline;
 	let source: Source<number>;
-	let state: State<number>;
-	let switchEvent: Source<number>;
 
 	beforeEach(() => {
 		timeline = new Timeline({ onSourceEmission() {} });
 		source = new Source<number>(timeline);
-		switchEvent = new Source<number>(timeline);
-		state = new State<number>(timeline, 0, switchEvent);
 	});
 
 	describe("initial state", () => {
@@ -50,7 +45,9 @@ describe("Event isActive dynamic", () => {
 		});
 
 		it("should call activate/deactivate hooks correctly with effects", () => {
+			// biome-ignore lint/suspicious/noExplicitAny: `activate` and `deactivate` are protected
 			const activateSpy = vi.spyOn(source as any, "activate");
+			// biome-ignore lint/suspicious/noExplicitAny: `activate` and `deactivate` are protected
 			const deactivateSpy = vi.spyOn(source as any, "deactivate");
 
 			const [, dispose] = source.on(() => {});
@@ -63,7 +60,9 @@ describe("Event isActive dynamic", () => {
 
 	describe("combined conditions", () => {
 		it("should handle rapid activation/deactivation cycles", () => {
+			// biome-ignore lint/suspicious/noExplicitAny: `activate` and `deactivate` are protected
 			const activateSpy = vi.spyOn(source as any, "activate");
+			// biome-ignore lint/suspicious/noExplicitAny: `activate` and `deactivate` are protected
 			const deactivateSpy = vi.spyOn(source as any, "deactivate");
 
 			// Multiple rapid activations

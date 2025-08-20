@@ -1,6 +1,5 @@
 import type { Event } from "../event/Event";
 import type { Timeline } from "../Timeline";
-import type { TopoNode } from "../utils/IncrementalTopo";
 import { Dynamic } from "./Dynamic";
 
 export class ConstantDynamic<T> extends Dynamic<T> {

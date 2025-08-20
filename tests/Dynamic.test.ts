@@ -398,7 +398,7 @@ describe("Dynamic", () => {
 
 		it("should handle complex nested computations with custom equality", () => {
 			const [event1, emit1] = t.source<number>();
-			const [event2, emit2] = t.source<number>();
+			const [event2, _emit2] = t.source<number>();
 
 			const dynamic1 = t.state(1, event1);
 			const dynamic2 = t.state(2, event2);
