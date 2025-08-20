@@ -40,7 +40,7 @@ export class Timeline {
 		return new Source(this);
 	}
 
-	never = new Never<unknown>(this);
+	never = new Never<never>(this);
 
 	// @internal
 	proceed() {
