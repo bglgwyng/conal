@@ -9,4 +9,6 @@ export class Never<T> extends Event<T> {
 	incomings() {
 		return [];
 	}
+
+	commit(_nextTimestamp: number): void {}
 }

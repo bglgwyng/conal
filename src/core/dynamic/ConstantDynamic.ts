@@ -20,4 +20,6 @@ export class ConstantDynamic<T> extends Dynamic<T> {
 	incomings() {
 		return [];
 	}
+
+	commit(_nextTimestamp: number): void {}
 }

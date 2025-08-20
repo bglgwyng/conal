@@ -17,11 +17,11 @@ export class State<T> extends Dynamic<T> {
 		this.value = initialValue;
 
 		updated.withActivation(() => {
-			updated.dependenedStates.add(this);
+			updated.dependedDynamics.add(this);
 			this.timeline.reorder(updated, this);
 
 			return () => {
-				updated.dependenedStates.delete(this);
+				updated.dependedDynamics.delete(this);
 			};
 		});
 	}
@@ -56,7 +56,5 @@ export class State<T> extends Dynamic<T> {
 		assert.fail();
 	}
 
-	commit(): void {
-		assert.fail();
-	}
+	commit(): void {}
 }
