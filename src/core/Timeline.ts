@@ -53,8 +53,8 @@ export class Timeline {
 		const queue = new Heap<Node>((x, y) =>
 			x.rank < y.rank ? -1 : x.rank > y.rank ? 1 : 0,
 		);
-		const queuedNodes: Set<Node> = new Set();
-		const processedNodes: Set<Node> = new Set();
+
+		const nodeStates: Map<Node, boolean> = new Map(); // false: queued, true: processed
 		const cleanups: ((nextTimestamp: number) => void)[] = [];
 
 		try {
@@ -69,10 +69,12 @@ export class Timeline {
 			while (queue.size > 0) {
 				// biome-ignore lint/style/noNonNullAssertion: size checked
 				const node = queue.pop()!;
-				queuedNodes.delete(node);
 
-				assert(!processedNodes.has(node), "Event is already processed");
-				processedNodes.add(node);
+				assert(
+					!nodeStates.has(node) || nodeStates.get(node) === false,
+					"Event is already processed",
+				);
+				nodeStates.set(node, true);
 
 				if (node instanceof Event) {
 					assert(node.isActive, "Event is not active");
@@ -120,7 +122,8 @@ export class Timeline {
 			for (const cleanup of cleanups) {
 				cleanup(nextTimestamp);
 			}
-			for (const node of processedNodes) {
+			for (const [node, isProcessed] of nodeStates) {
+				assert(isProcessed);
 				node.commit(nextTimestamp);
 			}
 		} finally {
@@ -135,10 +138,9 @@ export class Timeline {
 		this.#tasksAfterProceed = [];
 
 		function pushToQueue(node: Node) {
-			if (queuedNodes.has(node)) return;
-			if (processedNodes.has(node)) return;
+			if (nodeStates.has(node)) return;
 
-			queuedNodes.add(node);
+			nodeStates.set(node, false);
 			queue.push(node);
 		}
 	}
