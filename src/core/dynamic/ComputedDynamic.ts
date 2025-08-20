@@ -56,7 +56,6 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 	};
 
 	readNext = () => {
-		// assert(this.nextUpdate, "nextUpdate is not set");
 		const { timeline, isActive } = this;
 		assert(timeline.isProceeding, "Timeline is not proceeding");
 		assert(
@@ -152,7 +151,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 	}
 
 	commit(_nextTimestamp: number) {
-		assert(false);
+		this.nextUpdate = undefined;
 	}
 
 	activate() {

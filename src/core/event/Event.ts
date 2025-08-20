@@ -1,11 +1,13 @@
 import { assert } from "../../utils/assert";
 import { just, type Maybe } from "../../utils/Maybe";
-import type { State } from "../dynamic/State";
+import type { Dynamic } from "../dynamic/Dynamic";
 import { Node } from "../Node";
 
 export abstract class Event<T> extends Node {
-	childEvents: Set<Event<unknown>> = new Set();
-	dependenedStates: Set<State<T>> = new Set();
+	listeners: Set<
+		readonly [event: Event<unknown>, fn: (value: unknown) => void]
+	> = new Set();
+	dependedDynamics: Set<Dynamic<T>> = new Set();
 
 	// biome-ignore lint/suspicious/noExplicitAny: to satisfy covariance, can't be unknown
 	effects: (readonly [(value: any) => void, Emmittable<unknown>])[] = [];
@@ -13,8 +15,8 @@ export abstract class Event<T> extends Node {
 	get isActive() {
 		return (
 			this.effects.length > 0 ||
-			this.dependenedStates.size > 0 ||
-			this.childEvents.size > 0
+			this.dependedDynamics.size > 0 ||
+			this.listeners.size > 0
 		);
 	}
 
@@ -41,19 +43,20 @@ export abstract class Event<T> extends Node {
 	}
 
 	*outgoings(): Iterable<Node> {
-		yield* this.childEvents;
-		yield* this.dependenedStates;
+		for (const [event] of this.listeners) yield event;
+		yield* this.dependedDynamics;
 	}
 
 	// @internal
-	listen(event: Event<unknown>): () => void {
+	listen<U>(event: Event<U>, fn: (value: U) => void): () => void {
 		return event.withActivation(() => {
-			event.childEvents.add(this);
+			const listener = [this, fn as (value: unknown) => void] as const;
+			event.listeners.add(listener);
 
 			this.timeline.reorder(event, this);
 
 			return () => {
-				event.childEvents.delete(this);
+				event.listeners.delete(listener);
 			};
 		});
 	}

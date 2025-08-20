@@ -1,9 +1,12 @@
-import { just } from "../../utils/Maybe";
+import { just, type Maybe } from "../../utils/Maybe";
 import type { Timeline } from "../Timeline";
 import { DerivedEvent } from "./DerivedEvent";
 import type { Event } from "./Event";
 
 export class MergedEvent<L, R> extends DerivedEvent<These<L, R>> {
+	#leftEmission: Maybe<L>;
+	#rightEmission: Maybe<R>;
+
 	constructor(
 		timeline: Timeline,
 		public readonly left: Event<L>,
@@ -13,20 +16,19 @@ export class MergedEvent<L, R> extends DerivedEvent<These<L, R>> {
 	}
 
 	deriveEmission() {
-		const { left, right } = this;
-		const maybeLeft = left.safeGetEmission(this);
-		const maybeRight = right.safeGetEmission(this);
+		const leftEmission = this.#leftEmission;
+		const rightEmission = this.#rightEmission;
 
-		return maybeLeft && maybeRight
+		return leftEmission && rightEmission
 			? just({
 					type: "both" as const,
-					left: maybeLeft(),
-					right: maybeRight(),
+					left: leftEmission(),
+					right: rightEmission(),
 				})
-			: maybeLeft
-				? just({ type: "left" as const, value: maybeLeft() })
-				: maybeRight
-					? just({ type: "right" as const, value: maybeRight() })
+			: leftEmission
+				? just({ type: "left" as const, value: leftEmission() })
+				: rightEmission
+					? just({ type: "right" as const, value: rightEmission() })
 					: undefined;
 	}
 
@@ -36,9 +38,20 @@ export class MergedEvent<L, R> extends DerivedEvent<These<L, R>> {
 
 	activate(): void {
 		this.safeEstablishEdge(() => {
-			this.disposeLeft = this.listen(this.left);
-			this.disposeRight = this.listen(this.right);
+			this.disposeLeft = this.listen(this.left, (value) => {
+				this.#leftEmission = just(value);
+			});
+			this.disposeRight = this.listen(this.right, (value) => {
+				this.#rightEmission = just(value);
+			});
 		}, [this.left, this.right]);
+	}
+
+	commit(_nextTimestamp: number): void {
+		super.commit(_nextTimestamp);
+
+		this.#leftEmission = undefined;
+		this.#rightEmission = undefined;
 	}
 
 	deactivate(): void {

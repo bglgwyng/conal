@@ -141,7 +141,7 @@ describe("ComputedDynamic - updated event", () => {
 		expect(state2.dependedDynamics.has(computed)).toBe(true);
 
 		// Verify that the updated event has the targetState in its dependenedStates
-		expect(computed.updated.dependenedStates.has(targetState)).toBe(true);
+		expect(computed.updated.dependedDynamics.has(targetState)).toBe(true);
 
 		// Update one of the sources
 		source1.emit(25);
@@ -179,7 +179,7 @@ describe("ComputedDynamic - updated event", () => {
 
 		// Both effect and writeOn should be registered
 		expect(computed.updated.effects.length).toBe(1);
-		expect(computed.updated.dependenedStates.has(targetState)).toBe(true);
+		expect(computed.updated.dependedDynamics.has(targetState)).toBe(true);
 
 		// Update source
 		source.emit(10);

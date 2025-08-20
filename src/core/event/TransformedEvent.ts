@@ -1,10 +1,12 @@
 import { assert } from "../../utils/assert";
-import { just } from "../../utils/Maybe";
+import { just, type Maybe } from "../../utils/Maybe";
 import type { Timeline } from "../Timeline";
 import { DerivedEvent } from "./DerivedEvent";
 import type { Event } from "./Event";
 
 export class TransformedEvent<T, U> extends DerivedEvent<T> {
+	#parentEmission: Maybe<U>;
+
 	constructor(
 		timeline: Timeline,
 		public readonly parent: Event<U>,
@@ -18,7 +20,7 @@ export class TransformedEvent<T, U> extends DerivedEvent<T> {
 	}
 
 	deriveEmission() {
-		const parentEmission = this.parent.getEmission();
+		const parentEmission = this.#parentEmission;
 		if (!parentEmission) return;
 
 		try {
@@ -38,7 +40,9 @@ export class TransformedEvent<T, U> extends DerivedEvent<T> {
 		assert(this.isActive, "Event is not active");
 
 		this.safeEstablishEdge(() => {
-			this.dispose = this.listen(this.parent);
+			this.dispose = this.listen(this.parent, (value) => {
+				this.#parentEmission = just(value);
+			});
 		}, [this.parent]);
 	}
 
@@ -49,6 +53,12 @@ export class TransformedEvent<T, U> extends DerivedEvent<T> {
 	}
 
 	dispose?: () => void;
+
+	commit(_nextTimestamp: number): void {
+		super.commit(_nextTimestamp);
+
+		this.#parentEmission = undefined;
+	}
 }
 
 export const Discard = Symbol("Discard");

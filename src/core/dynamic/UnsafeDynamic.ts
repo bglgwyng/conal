@@ -14,10 +14,23 @@ export class UnsafeDynamic<T> extends Dynamic<T> {
 	) {
 		super(timline);
 		this.#read = read;
+
+		updated.withActivation(() => {
+			updated.dependedDynamics.add(this);
+			this.timeline.reorder(updated, this);
+
+			return () => {
+				updated.dependedDynamics.delete(this);
+			};
+		});
 	}
 
-	incomings() {
-		return [];
+	*incomings() {
+		yield this.updated;
+	}
+
+	*outgoings() {
+		yield* this.dependedDynamics;
 	}
 
 	readCurrent(): T {

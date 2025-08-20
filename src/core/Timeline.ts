@@ -74,6 +74,7 @@ export class Timeline {
 				assert(!processedNodes.has(node), "Event is already processed");
 
 				processedNodes.add(node);
+				this.#toCommitNodes.add(node);
 
 				if (node instanceof Event) {
 					assert(node.isActive, "Event is not active");
@@ -88,12 +89,13 @@ export class Timeline {
 
 					const value = maybeValue();
 
-					for (const childEvent of node.childEvents) {
+					for (const [childEvent, propagate] of node.listeners) {
 						pushToQueue(childEvent);
+						propagate(value);
 					}
 
 					// TODO: run `getEmissions`s here
-					for (const state of node.dependenedStates) {
+					for (const state of node.dependedDynamics) {
 						pushToQueue(state);
 					}
 
