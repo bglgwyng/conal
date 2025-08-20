@@ -103,7 +103,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 
 			this.lastRead.dependencies = newDependencies;
 			for (const dependency of newDependencies) {
-				dependency.dependedDynamics.add(this);
+				dependency.dependedDynamics.add(this as ComputedDynamic<unknown>);
 
 				this.timeline.topo.reorder(dependency, this);
 			}
@@ -169,7 +169,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		if (!dependencies) return;
 
 		for (const dependency of dependencies) {
-			dependency.dependedDynamics.delete(this);
+			dependency.dependedDynamics.delete(this as ComputedDynamic<unknown>);
 		}
 		lastRead.dependencies = undefined;
 	}
