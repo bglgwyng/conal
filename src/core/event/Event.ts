@@ -100,8 +100,6 @@ export class Emmittable<T> extends Event<T> {
 
 	emit(value: T) {
 		this.maybeLastEmission = just(value);
-
-		this.timeline.needCommit(this);
 	}
 
 	getEmission() {

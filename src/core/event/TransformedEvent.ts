@@ -24,11 +24,7 @@ export class TransformedEvent<T, U> extends DerivedEvent<T> {
 		if (!parentEmission) return;
 
 		try {
-			const maybeValue = just(this.fn(parentEmission()));
-
-			this.timeline.needCommit(this);
-
-			return maybeValue;
+			return just(this.fn(parentEmission()));
 		} catch (error) {
 			if (error === Discard) return;
 

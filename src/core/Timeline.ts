@@ -72,9 +72,7 @@ export class Timeline {
 				queuedNodes.delete(node);
 
 				assert(!processedNodes.has(node), "Event is already processed");
-
 				processedNodes.add(node);
-				this.#toCommitNodes.add(node);
 
 				if (node instanceof Event) {
 					assert(node.isActive, "Event is not active");
@@ -128,10 +126,9 @@ export class Timeline {
 			for (const cleanup of cleanups) {
 				cleanup(nextTimestamp);
 			}
-			for (const node of this.#toCommitNodes) {
+			for (const node of processedNodes) {
 				node.commit(nextTimestamp);
 			}
-			this.#toCommitNodes.clear();
 		} finally {
 			this.#isProceeding = false;
 		}
@@ -212,13 +209,6 @@ export class Timeline {
 		} finally {
 			this.#readMode = previousReadingNextValue;
 		}
-	}
-
-	#toCommitNodes: Set<Node> = new Set();
-
-	// @internal
-	needCommit(node: Node) {
-		this.#toCommitNodes.add(node);
 	}
 
 	#tasksAfterProceed: (() => void)[] = [];

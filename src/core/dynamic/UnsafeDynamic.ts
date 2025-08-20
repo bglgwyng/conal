@@ -39,8 +39,6 @@ export class UnsafeDynamic<T> extends Dynamic<T> {
 		const current = this.#read();
 		this.memoized = just(current);
 
-		this.timeline.needCommit(this);
-
 		return current;
 	}
 
