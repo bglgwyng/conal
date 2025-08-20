@@ -11,7 +11,6 @@ export abstract class DerivedEvent<T> extends Event<T> {
 
 		const emission = this.deriveEmission();
 		this.#lastEmission = just(emission);
-		this.timeline.needCommit(this);
 
 		return emission;
 	}

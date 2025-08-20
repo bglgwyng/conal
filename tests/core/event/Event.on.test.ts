@@ -45,19 +45,6 @@ describe("EffectEvent", () => {
 			expect(spy).toHaveBeenCalledTimes(2);
 			disposeEffect();
 		});
-
-		it("should call timeline.needCommit when effect emits", () => {
-			const needCommitSpy = vi.spyOn(timeline, "needCommit");
-			const spy = vi.fn();
-			const [, disposeEffect] = effectEvent.on(spy);
-
-			source.emit(21);
-			timeline.proceed();
-
-			expect(needCommitSpy).toHaveBeenCalledWith(effectEvent);
-			expect(spy).toHaveBeenCalledWith(42);
-			disposeEffect();
-		});
 	});
 
 	describe("commit", () => {
