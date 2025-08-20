@@ -1,4 +1,5 @@
 import type { Event } from "../event/Event";
+import type { Node } from "../Node";
 import type { Timeline } from "../Timeline";
 import type { TopoNode } from "../utils/IncrementalTopo";
 import { Dynamic } from "./Dynamic";
@@ -25,6 +26,8 @@ export class ConstantDynamic<T> extends Dynamic<T> {
 	outgoings() {
 		return this.dependedDynamics;
 	}
+
+	*proceed(): Iterable<Node> {}
 
 	commit(_nextTimestamp: number): void {}
 }
