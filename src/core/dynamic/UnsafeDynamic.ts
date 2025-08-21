@@ -43,6 +43,14 @@ export class UnsafeDynamic<T> extends Dynamic<T> {
 		return current;
 	}
 
+	readNext(): { value: T; isUpdated: boolean } {
+		const emission = this.updated.getEmission();
+
+		return emission
+			? { value: emission(), isUpdated: true }
+			: { value: this.readCurrent(), isUpdated: false };
+	}
+
 	*proceed(): Iterable<Node> {}
 
 	commit() {

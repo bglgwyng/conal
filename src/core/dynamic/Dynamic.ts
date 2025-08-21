@@ -8,6 +8,7 @@ export abstract class Dynamic<T> extends Node {
 	abstract updated: Event<T>;
 
 	abstract readCurrent(): T;
+	abstract readNext(): { value: T; isUpdated: boolean };
 
 	on<U>(fn: (value: T) => U): readonly [state: State<U>, dispose: () => void] {
 		const [effectfulUpdateEvent, dispose] = this.updated.on(fn);
@@ -20,13 +21,5 @@ export abstract class Dynamic<T> extends Node {
 
 	read() {
 		return this.timeline.read(this);
-	}
-
-	readNext(): { value: T; isUpdated: boolean } {
-		const maybeEmission = this.updated.getEmission();
-
-		return maybeEmission
-			? { value: maybeEmission(), isUpdated: true }
-			: { value: this.readCurrent(), isUpdated: false };
 	}
 }

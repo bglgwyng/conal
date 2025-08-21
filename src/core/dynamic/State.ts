@@ -38,6 +38,14 @@ export class State<T> extends Dynamic<T> {
 		return this.value;
 	}
 
+	readNext(): { value: T; isUpdated: boolean } {
+		const emission = this.updated.getEmission();
+
+		return emission
+			? { value: emission(), isUpdated: true }
+			: { value: this.readCurrent(), isUpdated: false };
+	}
+
 	*proceed() {
 		this.maybeNextValue = this.updated.safeGetEmission(this);
 
@@ -45,10 +53,10 @@ export class State<T> extends Dynamic<T> {
 	}
 
 	commit(): void {
-		const maybeNextValue = this.maybeNextValue;
+		const { maybeNextValue } = this;
 		if (!maybeNextValue) return;
+		this.maybeNextValue = undefined;
 
 		this.value = maybeNextValue();
-		this.maybeNextValue = undefined;
 	}
 }
