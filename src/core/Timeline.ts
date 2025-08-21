@@ -4,7 +4,7 @@ import { State } from "./dynamic/State";
 import { Event } from "./event/Event";
 import { Never } from "./event/Never";
 import { Source } from "./event/Source";
-import type { Node } from "./Node";
+import { type Node, ProceedState } from "./Node";
 import { Heap } from "./utils/Heap";
 import { IncrementalTopo } from "./utils/IncrementalTopo";
 
@@ -53,14 +53,12 @@ export class Timeline {
 			x.rank < y.rank ? -1 : x.rank > y.rank ? 1 : 0,
 		);
 
-		const nodeStates: Map<Node, boolean> = new Map(); // false: queued, true: processed
-		const cleanups: ((nextTimestamp: number) => void)[] = [];
-
 		try {
 			for (const source of this.#emittingSources) {
 				if (!source.isActive) continue;
 
 				queue.push(source);
+				source.proceedState = ProceedState.Queued;
 			}
 
 			this.#emittingSources.clear();
@@ -73,18 +71,19 @@ export class Timeline {
 				processedNodes.push(node);
 
 				assert(
-					!nodeStates.has(node) || nodeStates.get(node) === false,
-					"Node is already processed",
+					node.proceedState === ProceedState.Queued,
+					`Node(${node.getTag()}) is in wrong proceed state ${node.proceedState}`,
 				);
-				nodeStates.set(node, true);
 
 				for (const childNode of node.proceed()) {
 					pushToQueue(childNode);
 				}
+				node.proceedState = ProceedState.Done;
 			}
 
 			for (const node of processedNodes) {
 				node.commit(nextTimestamp);
+				node.proceedState = ProceedState.Idle;
 			}
 		} finally {
 			this.#isProceeding = false;
@@ -98,10 +97,12 @@ export class Timeline {
 		this.#tasksAfterProceed = [];
 
 		function pushToQueue(node: Node) {
-			if (nodeStates.has(node)) return;
+			if (node.proceedState === ProceedState.Queued) return;
 
-			nodeStates.set(node, false);
+			assert(node.proceedState === ProceedState.Idle, "Node is not idle");
+
 			queue.push(node);
+			node.proceedState = ProceedState.Queued;
 		}
 	}
 
