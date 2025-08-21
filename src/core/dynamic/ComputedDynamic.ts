@@ -63,7 +63,6 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 			"Timeline is not reading next value",
 		);
 		assert(isActive, "ComputedDynamic is not active");
-		// assert(this.nextUpdate, "nextUpdate is not set");
 		if (this.nextUpdate) return this.nextUpdate;
 
 		const currentValue = this.timeline.withReadMode(
