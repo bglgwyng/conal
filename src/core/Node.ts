@@ -11,7 +11,6 @@ export abstract class Node implements TopoNode {
 
 	commit(_nextTimestamp: number) {}
 
-	// biome-ignore lint/correctness/useYield: will be overriden
 	abstract proceed(): Iterable<Node>;
 
 	abstract incomings(): Iterable<TopoNode>;
