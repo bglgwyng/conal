@@ -11,6 +11,7 @@ export abstract class Node implements TopoNode {
 
 	commit(_nextTimestamp: number) {}
 
+	proceedState = ProceedState.Idle;
 	abstract proceed(): Iterable<Node>;
 
 	abstract incomings(): Iterable<TopoNode>;
@@ -40,4 +41,10 @@ export abstract class Node implements TopoNode {
 			);
 		}
 	}
+}
+
+export enum ProceedState {
+	Idle,
+	Queued,
+	Done,
 }
