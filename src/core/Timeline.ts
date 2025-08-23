@@ -126,7 +126,18 @@ export class Timeline {
 			: dynamic.readNext().value;
 	};
 
-	withTrackingRead<T>(
+	pull<T>(fn: () => Generator<Dynamic<unknown>, T>): T {
+		const it = fn();
+		let value: unknown;
+		while (true) {
+			const next = it.next(value);
+			if (next.done) return next.value;
+
+			value = next.value.read();
+		}
+	}
+
+	pullWithTracking<T>(
 		fn: () => Generator<Dynamic<unknown>, T>,
 	): readonly [value: T, dependencies: Dynamic<unknown>[]] {
 		const reads: Dynamic<unknown>[] = [];
