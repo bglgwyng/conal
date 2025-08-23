@@ -28,32 +28,33 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 			this.timeline.readMode === ReadMode.Current,
 			"Timeline is reading next value",
 		);
+
+		return this.computeCurrent().value;
+	};
+
+	computeCurrent = (): { value: T; dependencies?: Dynamic<unknown>[] } => {
 		const { lastRead, timeline, isActive } = this;
 
 		if (lastRead?.at === timeline.timestamp) {
 			if (isActive && !lastRead.dependencies) {
-				const [value, dependencies] = this.timeline.withTrackingRead<T>(
-					this.fn,
-				);
-				assert(value === lastRead.value, "Value should be the same");
+				const [, dependencies] = this.timeline.withTrackingRead<T>(this.fn);
 
-				this.updateDependencies(dependencies);
+				return { value: lastRead.value, dependencies };
 			}
-			return lastRead.value;
+			return lastRead;
 		}
 
 		if (isActive) {
 			const [value, dependencies] = this.timeline.withTrackingRead<T>(this.fn);
 
 			this.lastRead = { value, at: timeline.timestamp };
-			this.updateDependencies(dependencies);
 
-			return value;
+			return { value, dependencies };
 		} else {
 			const [value] = this.timeline.withTrackingRead<T>(this.fn);
 			this.lastRead = { value, at: timeline.timestamp };
 
-			return value;
+			return { value };
 		}
 	};
 
@@ -154,7 +155,9 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 	}
 
 	activate() {
-		this.readCurrent();
+		const { dependencies } = this.computeCurrent();
+		// biome-ignore lint/style/noNonNullAssertion: `isActive` is true, so
+		this.updateDependencies(dependencies!);
 
 		this.timeline.reorder(this, this.updated);
 	}
