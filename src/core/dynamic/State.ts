@@ -1,4 +1,3 @@
-import assert from "node:assert";
 import type { Maybe } from "../../utils/Maybe";
 import type { Event } from "../event/Event";
 import type { Timeline } from "../Timeline";

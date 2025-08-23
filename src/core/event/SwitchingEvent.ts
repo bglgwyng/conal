@@ -1,4 +1,3 @@
-import assert from "assert";
 import { just, type Maybe } from "../../utils/Maybe";
 import type { Dynamic } from "../dynamic/Dynamic";
 import type { Timeline } from "../Timeline";
