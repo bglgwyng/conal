@@ -66,14 +66,14 @@ describe("ComputedDynamic - updated event", () => {
 		});
 
 		// Initially, no dependencies should be tracked
-		expect(computed.dependencies).toBeUndefined();
+		expect(computed.lastRead?.dependencies).toBeUndefined();
 
 		// Add an effect to the updated event - this should trigger activate()
 		const updateSpy = vi.fn();
 		const [, dispose] = computed.updated.on(updateSpy);
 
 		// After adding the effect, dependencies should be tracked due to activate() call
-		expect(computed.dependencies).toEqual([state1, state2]);
+		expect(computed.lastRead?.dependencies).toEqual([state1, state2]);
 
 		// Verify that the computed dynamic is registered as a dependent
 		expect(state1.dependedDynamics.has(computed)).toBe(true);
@@ -100,7 +100,7 @@ describe("ComputedDynamic - updated event", () => {
 		});
 
 		// No effect added, so no dependencies should be tracked
-		expect(computed.dependencies).toBeUndefined();
+		expect(computed.lastRead?.dependencies).toBeUndefined();
 		expect(state1.dependedDynamics.has(computed)).toBe(false);
 
 		// Update the source
@@ -108,7 +108,7 @@ describe("ComputedDynamic - updated event", () => {
 		timeline.proceed();
 
 		// Still no dependencies tracked since no effect was added
-		expect(computed.dependencies).toBeUndefined();
+		expect(computed.lastRead?.dependencies).toBeUndefined();
 		expect(state1.dependedDynamics.has(computed)).toBe(false);
 	});
 
@@ -127,7 +127,7 @@ describe("ComputedDynamic - updated event", () => {
 		const targetState = timeline.state(0, computed.updated);
 
 		// After writeOn, dependencies should be tracked due to activate() call
-		expect(computed.dependencies).toEqual([state1, state2]);
+		expect(computed.lastRead?.dependencies).toEqual([state1, state2]);
 
 		// Verify that the computed dynamic is registered as a dependent
 		expect(state1.dependedDynamics.has(computed)).toBe(true);
@@ -167,7 +167,7 @@ describe("ComputedDynamic - updated event", () => {
 		const [, unsubscribe] = computed.updated.on(updateSpy);
 
 		// Dependencies should be tracked
-		expect(computed.dependencies).toEqual([state]);
+		expect(computed.lastRead?.dependencies).toEqual([state]);
 
 		// Both effect and writeOn should be registered
 		expect(computed.updated.effects.length).toBe(1);
@@ -201,7 +201,7 @@ describe("ComputedDynamic - updated event", () => {
 		const deactivateSpy = vi.spyOn(computed, "deactivate");
 
 		// Initially no dependencies should be tracked
-		expect(computed.dependencies).toBeUndefined();
+		expect(computed.lastRead?.dependencies).toBeUndefined();
 		expect(state1.dependedDynamics.has(computed)).toBe(false);
 		expect(state2.dependedDynamics.has(computed)).toBe(false);
 
@@ -213,7 +213,7 @@ describe("ComputedDynamic - updated event", () => {
 		expect(activateSpy).toHaveBeenCalledTimes(1);
 
 		// Dependencies should now be tracked
-		expect(computed.dependencies).toEqual([state1, state2]);
+		expect(computed.lastRead?.dependencies).toEqual([state1, state2]);
 
 		// Remove the effect - this should trigger deactivate()
 		dispose();
@@ -222,7 +222,7 @@ describe("ComputedDynamic - updated event", () => {
 		expect(deactivateSpy).toHaveBeenCalledTimes(1);
 
 		// Dependencies should be cleaned up
-		expect(computed.dependencies).toBeUndefined();
+		expect(computed.lastRead?.dependencies).toBeUndefined();
 		expect(state1.dependedDynamics.has(computed)).toBe(false);
 		expect(state2.dependedDynamics.has(computed)).toBe(false);
 	});
@@ -280,7 +280,7 @@ describe("ComputedDynamic - updated event", () => {
 		expect(deactivateSpy).toHaveBeenCalledTimes(0);
 
 		// Dependencies should be tracked
-		expect(computed.dependencies).toBeDefined();
+		expect(computed.lastRead?.dependencies).toBeDefined();
 		expect(state.dependedDynamics.has(computed)).toBe(true);
 
 		// Update source to verify the connection works

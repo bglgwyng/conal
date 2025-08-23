@@ -110,11 +110,6 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		}, newDependencies);
 	}
 
-	// biome-ignore lint/suspicious/noExplicitAny: to satisfy covariance
-	get dependencies(): Dynamic<any>[] | undefined {
-		return this.lastRead?.dependencies;
-	}
-
 	*proceed() {
 		const currentValue = this.timeline.withReadMode(
 			ReadMode.Current,
