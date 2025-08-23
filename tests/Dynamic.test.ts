@@ -301,9 +301,12 @@ describe("Dynamic", () => {
 			const baseDynamic = t.state<Tuple>([1, 2], event);
 
 			// Computed that creates new tuple each time (different JS objects)
-			const computedDynamic = t.computed(function* () {
-				return [...(yield* baseDynamic)] as Tuple; // Always creates new array
-			});
+			const computedDynamic = t.computed(
+				function* () {
+					return [...(yield* baseDynamic)] as Tuple; // Always creates new array
+				},
+				(a, b) => a[0] === b[0] && a[1] === b[1],
+			);
 
 			const callback = vi.fn();
 			computedDynamic.updated.on(callback);
@@ -338,9 +341,12 @@ describe("Dynamic", () => {
 			const baseDynamic = t.state({ x: 1, y: 2 }, event);
 
 			// Custom equal function for Point objects
-			const computedDynamic = t.computed(function* () {
-				return { ...(yield* baseDynamic) };
-			});
+			const computedDynamic = t.computed(
+				function* () {
+					return { ...(yield* baseDynamic) };
+				},
+				(a, b) => a.x === b.x && a.y === b.y, // Deep equality
+			);
 
 			const callback = vi.fn();
 			computedDynamic.updated.on(callback);
