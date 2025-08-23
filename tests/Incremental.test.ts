@@ -171,9 +171,9 @@ describe("Incremental", () => {
 				() => accumulator.read() * 2,
 				event.transform(([v, d]) => [v * 2, d * 2]),
 			);
-			const twiceDoubledAccumulator = t.computed(
-				() => doubledAccumulator.read() * 2,
-			);
+			const twiceDoubledAccumulator = t.computed(function* () {
+				return (yield* doubledAccumulator) * 2;
+			});
 
 			const doubledAccumulatorTransitionOnSpy = vi.fn();
 			doubledAccumulator.transition.on(doubledAccumulatorTransitionOnSpy);

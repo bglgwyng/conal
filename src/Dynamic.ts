@@ -31,4 +31,8 @@ export class Dynamic<T> {
 		this.internal.setTag(tag);
 		return this;
 	}
+
+	*[Symbol.iterator](): Generator<Dynamic<T>, T, T> {
+		return yield this;
+	}
 }

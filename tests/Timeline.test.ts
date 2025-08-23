@@ -76,8 +76,12 @@ describe("Timeline", () => {
 			const [updateEvent1, emit1] = t.source<number>();
 			const [updateEvent2, emit2] = t.source<number>();
 			const state1 = t.state(5, updateEvent1);
+			state1.tag("state1");
 			const state2 = t.state(10, updateEvent2);
-			const computedDynamic = t.computed(() => state1.read() + state2.read());
+			state2.tag("state2");
+			const computedDynamic = t.computed(function* () {
+				return (yield* state1) + (yield* state2);
+			});
 
 			expect(computedDynamic).toBeInstanceOf(Dynamic);
 			expect(computedDynamic.read()).toBe(15); // 5 + 10
@@ -93,7 +97,10 @@ describe("Timeline", () => {
 		});
 
 		it("should work with constant values", () => {
-			const result = t.computed(() => 42);
+			// biome-ignore lint/correctness/useYield: just for test
+			const result = t.computed(function* () {
+				return 42;
+			});
 
 			expect(result).toBeInstanceOf(Dynamic);
 			expect(result.read()).toBe(42);
@@ -102,8 +109,8 @@ describe("Timeline", () => {
 		it("should work with complex computations", () => {
 			const [updateEvent, emit] = t.source<number>();
 			const numberState = t.state(3, updateEvent);
-			const computedDynamic = t.computed(() => {
-				const value = numberState.read();
+			const computedDynamic = t.computed(function* () {
+				const value = yield* numberState;
 				return value * value + 1; // x^2 + 1
 			});
 
@@ -292,9 +299,9 @@ describe("Timeline", () => {
 				const [toggleEvent, emitToggle] = t.source<boolean>();
 
 				const toggleDynamic = t.state(true, toggleEvent);
-				const eventDynamic = t.computed(() =>
-					toggleDynamic.read() ? event1 : event2,
-				);
+				const eventDynamic = t.computed(function* () {
+					return (yield* toggleDynamic) ? event1 : event2;
+				});
 				const switchingEvent = t.switching(eventDynamic);
 
 				const callback = vi.fn();
@@ -522,8 +529,12 @@ describe("Timeline", () => {
 			const numberState = t.state(0, sourceEvent);
 
 			// Create computed dynamics that emit events
-			const evenComputed = t.computed(() => numberState.read() % 2 === 0);
-			const doubledComputed = t.computed(() => numberState.read() * 2);
+			const evenComputed = t.computed(function* () {
+				return (yield* numberState) % 2 === 0;
+			});
+			const doubledComputed = t.computed(function* () {
+				return (yield* numberState) * 2;
+			});
 
 			// Use updated events from computed dynamics
 			const mergedEvent = t.merge(

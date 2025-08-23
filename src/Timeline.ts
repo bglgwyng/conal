@@ -30,8 +30,26 @@ export class Timeline {
 		);
 	}
 
-	computed<T>(fn: () => T, equal?: (x: T, y: T) => boolean): Dynamic<T> {
-		return new Dynamic(this, new ComputedDynamic(this.internal, fn, equal));
+	computed<T>(
+		fn: () => Generator<Dynamic<any>, T, unknown>,
+		equal?: (x: T, y: T) => boolean,
+	): Dynamic<T> {
+		return new Dynamic(
+			this,
+			new ComputedDynamic(
+				this.internal,
+				function* () {
+					const it = fn();
+					let resolved: unknown;
+					while (true) {
+						const { value, done } = it.next(resolved);
+						if (done) return value as T;
+						resolved = yield value.internal;
+					}
+				},
+				equal,
+			),
+		);
 	}
 
 	switching<T>(dynamic: Dynamic<Event<T>>): Event<T> {

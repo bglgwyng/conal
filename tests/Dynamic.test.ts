@@ -85,7 +85,9 @@ describe("Dynamic", () => {
 		it("should work with computed dynamics", () => {
 			const [event, emit] = t.source<number>();
 			const baseDynamic = t.state(5, event);
-			const computedDynamic = t.computed(() => baseDynamic.read() * 2);
+			const computedDynamic = t.computed(function* () {
+				return (yield* baseDynamic) * 2;
+			});
 
 			expect(computedDynamic.read()).toBe(10);
 
@@ -252,7 +254,9 @@ describe("Dynamic", () => {
 			event.tag("source");
 			const baseDynamic = t.state(3, event).tag("base");
 			const computedDynamic = t
-				.computed(() => baseDynamic.read() + 1)
+				.computed(function* () {
+					return (yield* baseDynamic) + 1;
+				})
 				.tag("computed");
 
 			const [doubledComputed, _dispose] = computedDynamic.on(
@@ -275,7 +279,9 @@ describe("Dynamic", () => {
 			const [event, emit] = t.source<number>();
 			const baseDynamic = t.state(1, event);
 
-			const computedDynamic = t.computed(() => baseDynamic.read());
+			const computedDynamic = t.computed(function* () {
+				return yield* baseDynamic;
+			});
 			const callback = vi.fn();
 			computedDynamic.updated.on(callback);
 
@@ -295,10 +301,9 @@ describe("Dynamic", () => {
 			const baseDynamic = t.state<Tuple>([1, 2], event);
 
 			// Computed that creates new tuple each time (different JS objects)
-			const computedDynamic = t.computed(
-				() => [...baseDynamic.read()] as Tuple, // Always creates new array
-				(a, b) => a[0] === b[0] && a[1] === b[1], // Deep equality for tuples
-			);
+			const computedDynamic = t.computed(function* () {
+				return [...(yield* baseDynamic)] as Tuple; // Always creates new array
+			});
 
 			const callback = vi.fn();
 			computedDynamic.updated.on(callback);
@@ -333,10 +338,9 @@ describe("Dynamic", () => {
 			const baseDynamic = t.state({ x: 1, y: 2 }, event);
 
 			// Custom equal function for Point objects
-			const computedDynamic = t.computed(
-				() => ({ ...baseDynamic.read() }), // Create new object each time
-				(a, b) => a.x === b.x && a.y === b.y, // Deep equality
-			);
+			const computedDynamic = t.computed(function* () {
+				return { ...(yield* baseDynamic) };
+			});
 
 			const callback = vi.fn();
 			computedDynamic.updated.on(callback);
@@ -357,7 +361,9 @@ describe("Dynamic", () => {
 
 			const computedDynamic = t
 				.computed(
-					() => baseDynamic.read().toUpperCase(),
+					function* () {
+						return (yield* baseDynamic).toUpperCase();
+					},
 					(a, b) => a.toLowerCase() === b.toLowerCase(),
 				)
 				.tag("computed");
@@ -380,7 +386,9 @@ describe("Dynamic", () => {
 
 			// Custom equal function for arrays (shallow equality)
 			const computedDynamic = t.computed(
-				() => [...baseDynamic.read()], // Create new array each time
+				function* () {
+					return [...(yield* baseDynamic)]; // Create new array each time
+				},
 				(a, b) => a.length === b.length && a.every((val, i) => val === b[i]),
 			);
 
@@ -405,7 +413,9 @@ describe("Dynamic", () => {
 
 			// Computed dynamic that rounds to nearest integer
 			const sumDynamic = t.computed(
-				() => Math.round(dynamic1.read() + dynamic2.read()),
+				function* () {
+					return Math.round((yield* dynamic1) + (yield* dynamic2));
+				},
 				(a, b) => Math.floor(a) === Math.floor(b), // Only update if integer part changes
 			);
 
@@ -430,7 +440,9 @@ describe("Dynamic", () => {
 			const dynamic1 = t.state(10, event1);
 			const dynamic2 = t.state(20, event2);
 
-			const sumDynamic = t.computed(() => dynamic1.read() + dynamic2.read());
+			const sumDynamic = t.computed(function* () {
+				return (yield* dynamic1) + (yield* dynamic2);
+			});
 			const [doubledSum, _dispose] = sumDynamic.on((value) => value * 2);
 
 			expect(doubledSum.read()).toBe(60); // (10 + 20) * 2

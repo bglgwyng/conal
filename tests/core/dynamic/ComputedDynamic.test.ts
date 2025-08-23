@@ -15,10 +15,9 @@ describe("ComputedDynamic", () => {
 		const state1 = timeline.state(0, source1);
 		const state2 = timeline.state(0, source2);
 		// Create a computed dynamic that doubles the state value
-		const computed = new ComputedDynamic(
-			timeline,
-			() => state1.read() + state2.read(),
-		);
+		const computed = new ComputedDynamic(timeline, function* () {
+			return (yield* state1) + (yield* state2);
+		});
 
 		expect(computed.readCurrent()).toBe(0);
 
@@ -37,10 +36,9 @@ describe("ComputedDynamic", () => {
 		const state1 = timeline.state(0, source1);
 		const state2 = timeline.state(0, source2);
 		// Create a computed dynamic that depends on two states
-		const computed = new ComputedDynamic(
-			timeline,
-			() => state1.read() + state2.read(),
-		);
+		const computed = new ComputedDynamic(timeline, function* () {
+			return (yield* state1) + (yield* state2);
+		});
 
 		// Initially inactive, so no dependencies should be tracked
 		expect(computed.isActive).toBe(false);
@@ -62,10 +60,9 @@ describe("ComputedDynamic", () => {
 		const state1 = timeline.state(0, source1);
 		const state2 = timeline.state(0, source2);
 		// Create a computed dynamic that depends on two states
-		const computed = new ComputedDynamic(
-			timeline,
-			() => state1.read() + state2.read(),
-		);
+		const computed = new ComputedDynamic(timeline, function* () {
+			return (yield* state1) + (yield* state2);
+		});
 
 		// Make it active by adding an effect
 		const [, dispose] = computed.updated.on(() => {});
@@ -93,17 +90,15 @@ describe("ComputedDynamic", () => {
 		const state2 = timeline.state(0, source2);
 
 		// Create a computed dynamic that will be used inside another computed dynamic
-		const innerComputed = new ComputedDynamic(
-			timeline,
-			() => state1.read() * 2, // Double the value of state1
-		);
+		const innerComputed = new ComputedDynamic(timeline, function* () {
+			return (yield* state1) * 2; // Double the value of state1
+		});
 		innerComputed.updated.on(() => {});
 
 		// Create an outer computed dynamic that uses the inner computed dynamic
-		const outerComputed = new ComputedDynamic(
-			timeline,
-			() => innerComputed.read() + state2.read(), // Use innerComputed + state2
-		);
+		const outerComputed = new ComputedDynamic(timeline, function* () {
+			return (yield* innerComputed) + (yield* state2); // Use innerComputed + state2
+		});
 		outerComputed.updated.on(() => {});
 
 		// Initial read - should track all dependencies
@@ -140,22 +135,19 @@ describe("ComputedDynamic", () => {
 			const state2 = timeline.state(0, source2);
 
 			// Create inner computed (level 1)
-			const innerComputed = new ComputedDynamic(
-				timeline,
-				() => state1.read() * 2,
-			);
+			const innerComputed = new ComputedDynamic(timeline, function* () {
+				return (yield* state1) * 2;
+			});
 
 			// Create middle computed (level 2)
-			const middleComputed = new ComputedDynamic(
-				timeline,
-				() => innerComputed.read() + state2.read(),
-			);
+			const middleComputed = new ComputedDynamic(timeline, function* () {
+				return (yield* innerComputed) + (yield* state2);
+			});
 
 			// Create outer computed (level 3)
-			const outerComputed = new ComputedDynamic(
-				timeline,
-				() => middleComputed.read() * 3,
-			);
+			const outerComputed = new ComputedDynamic(timeline, function* () {
+				return (yield* middleComputed) * 3;
+			});
 
 			const innerUpdates: number[] = [];
 			const middleUpdates: number[] = [];
@@ -221,21 +213,18 @@ describe("ComputedDynamic", () => {
 			const stateC = timeline.state(3, sourceC);
 
 			// First level computeds
-			const computed1 = new ComputedDynamic(
-				timeline,
-				() => stateA.read() + stateB.read(), // A + B
-			);
+			const computed1 = new ComputedDynamic(timeline, function* () {
+				return (yield* stateA) + (yield* stateB);
+			});
 
-			const computed2 = new ComputedDynamic(
-				timeline,
-				() => stateB.read() * stateC.read(), // B * C
-			);
+			const computed2 = new ComputedDynamic(timeline, function* () {
+				return (yield* stateB) * (yield* stateC);
+			});
 
 			// Second level computed (depends on both first level computeds)
-			const finalComputed = new ComputedDynamic(
-				timeline,
-				() => computed1.read() + computed2.read(), // (A + B) + (B * C)
-			);
+			const finalComputed = new ComputedDynamic(timeline, function* () {
+				return (yield* computed1) + (yield* computed2);
+			});
 
 			const computed1Updates: number[] = [];
 			const computed2Updates: number[] = [];
@@ -295,15 +284,13 @@ describe("ComputedDynamic", () => {
 			const state = timeline.state(10, source);
 
 			// Create nested computeds that might not change
-			const computed1 = new ComputedDynamic(
-				timeline,
-				() => Math.floor(state.read() / 5), // Integer division by 5
-			);
+			const computed1 = new ComputedDynamic(timeline, function* () {
+				return Math.floor((yield* state) / 5); // Integer division by 5
+			});
 
-			const computed2 = new ComputedDynamic(
-				timeline,
-				() => computed1.read() * 10, // Multiply by 10
-			);
+			const computed2 = new ComputedDynamic(timeline, function* () {
+				return (yield* computed1) * 10; // Multiply by 10
+			});
 
 			const computed1Updates: number[] = [];
 			const computed2Updates: number[] = [];
@@ -340,16 +327,24 @@ describe("ComputedDynamic", () => {
 			const state = timeline.state(1, source);
 
 			// Level 1
-			const level1 = new ComputedDynamic(timeline, () => state.read() * 2);
+			const level1 = new ComputedDynamic(timeline, function* () {
+				return (yield* state) * 2;
+			});
 
 			// Level 2
-			const level2 = new ComputedDynamic(timeline, () => level1.read() + 1);
+			const level2 = new ComputedDynamic(timeline, function* () {
+				return (yield* level1) + 1;
+			});
 
 			// Level 3
-			const level3 = new ComputedDynamic(timeline, () => level2.read() * 3);
+			const level3 = new ComputedDynamic(timeline, function* () {
+				return (yield* level2) * 3;
+			});
 
 			// Level 4
-			const level4 = new ComputedDynamic(timeline, () => level3.read() - 5);
+			const level4 = new ComputedDynamic(timeline, function* () {
+				return (yield* level3) - 5;
+			});
 
 			const level1Updates: number[] = [];
 			const level2Updates: number[] = [];

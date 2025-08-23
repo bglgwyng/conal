@@ -12,8 +12,8 @@ describe("ComputedDynamic - Memoization", () => {
 	it("should memoize computed values within the same timestamp", () => {
 		const source = timeline.source<number>();
 		const state = timeline.state(0, source);
-		const computeFn = vi.fn().mockImplementation(() => {
-			return state.read() * 2;
+		const computeFn = vi.fn().mockImplementation(function* () {
+			return (yield* state) * 2;
 		});
 
 		const computed = new ComputedDynamic(timeline, computeFn);
@@ -44,8 +44,8 @@ describe("ComputedDynamic - Memoization", () => {
 		const state = timeline.state(1, source);
 		const mockFn = vi.fn(() => 42);
 
-		const computed = new ComputedDynamic(timeline, () => {
-			const stateValue = state.read();
+		const computed = new ComputedDynamic(timeline, function* () {
+			const stateValue = yield* state;
 			return mockFn() + stateValue; // Mock function + state value
 		});
 

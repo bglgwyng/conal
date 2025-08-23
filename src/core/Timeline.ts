@@ -148,6 +148,22 @@ export class Timeline {
 		return [value, dependencies] as const;
 	}
 
+	withTrackingRead2<T>(
+		fn: () => Generator<Dynamic<unknown>, T>,
+	): readonly [value: T, dependencies: Set<Dynamic<unknown>>] {
+		const reads: Dynamic<unknown>[] = [];
+		const it = fn();
+		let value: unknown;
+		while (true) {
+			const next = it.next(value);
+			if (next.done) return [next.value, new Set(reads)];
+
+			reads.push(next.value);
+
+			value = next.value.read();
+		}
+	}
+
 	get isTracking() {
 		return this.#readTrackings.length > 0;
 	}
