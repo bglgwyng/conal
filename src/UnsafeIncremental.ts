@@ -23,10 +23,4 @@ export class UnsafeIncremental<T, D> extends Dynamic<T> {
 		);
 		super(timeline, internal);
 	}
-
-	// @internal
-	tag(tag: string): Dynamic<T> {
-		this.internal.setTag(tag);
-		return this;
-	}
 }
