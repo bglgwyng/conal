@@ -51,7 +51,9 @@ export class UnsafeDynamic<T> extends Dynamic<T> {
 			: { value: this.readCurrent(), isUpdated: false };
 	}
 
-	*proceed(): Iterable<Node> {}
+	*proceed(): Iterable<Node> {
+		yield* this.dependedDynamics;
+	}
 
 	commit() {
 		this.memoized = undefined;
