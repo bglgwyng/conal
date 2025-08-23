@@ -73,10 +73,7 @@ describe("ComputedDynamic - updated event", () => {
 		const [, dispose] = computed.updated.on(updateSpy);
 
 		// After adding the effect, dependencies should be tracked due to activate() call
-		expect(computed.dependencies).toBeDefined();
-		expect(computed.dependencies?.size).toBe(2);
-		expect(computed.dependencies?.has(state1)).toBe(true);
-		expect(computed.dependencies?.has(state2)).toBe(true);
+		expect(computed.dependencies).toEqual([state1, state2]);
 
 		// Verify that the computed dynamic is registered as a dependent
 		expect(state1.dependedDynamics.has(computed)).toBe(true);
@@ -130,10 +127,7 @@ describe("ComputedDynamic - updated event", () => {
 		const targetState = timeline.state(0, computed.updated);
 
 		// After writeOn, dependencies should be tracked due to activate() call
-		expect(computed.dependencies).toBeDefined();
-		expect(computed.dependencies?.size).toBe(2);
-		expect(computed.dependencies?.has(state1)).toBe(true);
-		expect(computed.dependencies?.has(state2)).toBe(true);
+		expect(computed.dependencies).toEqual([state1, state2]);
 
 		// Verify that the computed dynamic is registered as a dependent
 		expect(state1.dependedDynamics.has(computed)).toBe(true);
@@ -173,10 +167,7 @@ describe("ComputedDynamic - updated event", () => {
 		const [, unsubscribe] = computed.updated.on(updateSpy);
 
 		// Dependencies should be tracked
-		expect(computed.dependencies).toBeDefined();
-		expect(computed.dependencies?.size).toBe(1);
-		expect(computed.dependencies?.has(state)).toBe(true);
-		expect(state.dependedDynamics.has(computed)).toBe(true);
+		expect(computed.dependencies).toEqual([state]);
 
 		// Both effect and writeOn should be registered
 		expect(computed.updated.effects.length).toBe(1);
@@ -222,10 +213,7 @@ describe("ComputedDynamic - updated event", () => {
 		expect(activateSpy).toHaveBeenCalledTimes(1);
 
 		// Dependencies should now be tracked
-		expect(computed.dependencies).toBeDefined();
-		expect(computed.dependencies?.size).toBe(2);
-		expect(state1.dependedDynamics.has(computed)).toBe(true);
-		expect(state2.dependedDynamics.has(computed)).toBe(true);
+		expect(computed.dependencies).toEqual([state1, state2]);
 
 		// Remove the effect - this should trigger deactivate()
 		dispose();

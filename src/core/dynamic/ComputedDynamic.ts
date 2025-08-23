@@ -7,11 +7,11 @@ import { Dynamic } from "./Dynamic";
 export class ComputedDynamic<T> extends Dynamic<T> {
 	updated: Event<T> = new UpdatedEvent(this);
 
-	lastRead?: { value: T; at: number; dependencies?: Set<Dynamic<unknown>> };
+	lastRead?: { value: T; at: number; dependencies?: Dynamic<unknown>[] };
 	nextUpdate?: {
 		value: T;
 		isUpdated: boolean;
-		dependencies: Set<Dynamic<unknown>>;
+		dependencies: Dynamic<unknown>[];
 	};
 
 	constructor(
@@ -97,7 +97,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 	}
 
 	// biome-ignore lint/suspicious/noExplicitAny: to satisfy covariance
-	updateDependencies(newDependencies: Set<Dynamic<any>>) {
+	updateDependencies(newDependencies: Dynamic<any>[]) {
 		this.safeEstablishEdge(() => {
 			assert(this.lastRead, "lastRead is not set");
 
@@ -111,7 +111,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 	}
 
 	// biome-ignore lint/suspicious/noExplicitAny: to satisfy covariance
-	get dependencies(): Set<Dynamic<any>> | undefined {
+	get dependencies(): Dynamic<any>[] | undefined {
 		return this.lastRead?.dependencies;
 	}
 
