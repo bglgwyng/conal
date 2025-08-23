@@ -39,7 +39,7 @@ export class Event<T> {
 	}
 
 	// @internal
-	tag(tag: string): Event<T> {
+	tag(tag: string): this {
 		this.internal.setTag(tag);
 		return this;
 	}
