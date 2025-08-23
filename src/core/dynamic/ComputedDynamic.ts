@@ -32,7 +32,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 
 		if (lastRead?.at === timeline.timestamp) {
 			if (isActive && !lastRead.dependencies) {
-				const [value, dependencies] = this.timeline.withTrackingRead2<T>(
+				const [value, dependencies] = this.timeline.withTrackingRead<T>(
 					this.fn,
 				);
 				assert(value === lastRead.value, "Value should be the same");
@@ -43,14 +43,14 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		}
 
 		if (isActive) {
-			const [value, dependencies] = this.timeline.withTrackingRead2<T>(this.fn);
+			const [value, dependencies] = this.timeline.withTrackingRead<T>(this.fn);
 
 			this.lastRead = { value, at: timeline.timestamp };
 			this.updateDependencies(dependencies);
 
 			return value;
 		} else {
-			const [value] = this.timeline.withTrackingRead2<T>(this.fn);
+			const [value] = this.timeline.withTrackingRead<T>(this.fn);
 			this.lastRead = { value, at: timeline.timestamp };
 
 			return value;
@@ -71,7 +71,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 			ReadMode.Current,
 			this.readCurrent,
 		);
-		const [value, dependencies] = this.timeline.withTrackingRead2(this.fn);
+		const [value, dependencies] = this.timeline.withTrackingRead(this.fn);
 
 		const nextUpdate = {
 			value,
@@ -122,7 +122,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		);
 		const [value, dependencies] = this.timeline.withReadMode(
 			ReadMode.Next,
-			() => this.timeline.withTrackingRead2(this.fn),
+			() => this.timeline.withTrackingRead(this.fn),
 		);
 
 		const nextUpdate = {
