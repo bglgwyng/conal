@@ -16,6 +16,7 @@ import { EventPage } from "./pages/EventPage.tsx";
 import { GlitchlessExample } from "./pages/GlitchlessExample.tsx";
 import { IncrementalPage } from "./pages/IncrementalPage.tsx";
 import { SwitchingPage } from "./pages/SwitchingPage.tsx";
+import { TodoListPage } from "./pages/TodoListPage.tsx";
 
 const router = createBrowserRouter([
 	{
@@ -53,6 +54,10 @@ const router = createBrowserRouter([
 			{
 				path: "incremental",
 				element: <IncrementalPage />,
+			},
+			{
+				path: "todo",
+				element: <TodoListPage />,
 			},
 		],
 	},

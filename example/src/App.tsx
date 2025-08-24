@@ -20,7 +20,8 @@ function App() {
 		{ path: "/switching", label: "Switching" },
 		{ path: "/glitch", label: "Glitch" },
 		{ path: "/dynamic-network", label: "Dynamic Network" },
-		{ path: "incremental", label:"Incremetnal"}
+		{ path: "/incremental", label: "Incremental" },
+		{ path: "/todo", label: "Todo List" }
 	];
 
 	return (
