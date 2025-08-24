@@ -20,7 +20,7 @@ export abstract class Dynamic<T> extends Node {
 	}
 
 	read() {
-		return this.timeline.read(this);
+		return this.readCurrent();
 	}
 
 	*[Symbol.iterator](): Generator<Dynamic<T>, T, T> {

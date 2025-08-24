@@ -120,60 +120,6 @@ export class Timeline {
 		});
 	}
 
-	read = <T>(dynamic: Dynamic<T>) => {
-		return this.readMode === ReadMode.Current
-			? dynamic.readCurrent()
-			: dynamic.readNext().value;
-	};
-
-	pull<T>(fn: () => Generator<Dynamic<unknown>, T>): T {
-		const it = fn();
-		let value: unknown;
-		while (true) {
-			const next = it.next(value);
-			if (next.done) return next.value;
-
-			value = next.value.read();
-		}
-	}
-
-	pullWithTracking<T>(
-		fn: () => Generator<Dynamic<unknown>, T>,
-	): readonly [value: T, dependencies: Dynamic<unknown>[]] {
-		const reads: Dynamic<unknown>[] = [];
-		const readSet = new Set<Dynamic<unknown>>();
-
-		const it = fn();
-		let value: unknown;
-		while (true) {
-			const next = it.next(value);
-			if (next.done) return [next.value, reads];
-
-			if (!readSet.has(next.value)) {
-				reads.push(next.value);
-				readSet.add(next.value);
-			}
-
-			value = next.value.read();
-		}
-	}
-
-	#readMode = ReadMode.Current;
-	get readMode() {
-		return this.#readMode;
-	}
-
-	withReadMode<U>(mode: ReadMode, fn: () => U): U {
-		const previousReadingNextValue = this.#readMode;
-		this.#readMode = mode;
-
-		try {
-			return fn();
-		} finally {
-			this.#readMode = previousReadingNextValue;
-		}
-	}
-
 	#tasksAfterProceed: (() => void)[] = [];
 	// @internal
 	queueTaskAfterProceed(fn: () => void) {
