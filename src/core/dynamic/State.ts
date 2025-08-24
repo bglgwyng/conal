@@ -38,7 +38,7 @@ export class State<T> extends Dynamic<T> {
 	}
 
 	readNext(): { value: T; isUpdated: boolean } {
-		const emission = this.updated.getEmission();
+		const emission = this.updated.safeGetEmission(this);
 
 		return emission
 			? { value: emission(), isUpdated: true }
