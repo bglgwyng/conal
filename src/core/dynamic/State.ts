@@ -1,6 +1,7 @@
 import assert from "node:assert";
 import type { Maybe } from "../../utils/Maybe";
 import type { Event } from "../event/Event";
+import { type ProceedEffect, propagate } from "../Node";
 import type { Timeline } from "../Timeline";
 import { Dynamic } from "./Dynamic";
 
@@ -46,10 +47,10 @@ export class State<T> extends Dynamic<T> {
 			: { value: this.readCurrent(), isUpdated: false };
 	}
 
-	*proceed() {
+	*proceed(): Generator<ProceedEffect> {
 		this.maybeNextValue = this.updated.safeGetEmission(this);
 
-		yield* this.dependedDynamics;
+		for (const dynamic of this.dependedDynamics) yield* propagate(dynamic);
 	}
 
 	commit(): void {

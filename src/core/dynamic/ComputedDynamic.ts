@@ -1,6 +1,7 @@
 import { assert } from "../../utils/assert";
 import { just } from "../../utils/Maybe";
 import { Event } from "../event/Event";
+import { type Node, type ProceedEffect, propagate } from "../Node";
 import { ReadMode, type Timeline } from "../Timeline";
 import { Dynamic } from "./Dynamic";
 
@@ -113,7 +114,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		return this.lastRead?.dependencies;
 	}
 
-	*proceed() {
+	*proceed(): Generator<ProceedEffect> {
 		const currentValue = this.timeline.withReadMode(
 			ReadMode.Current,
 			this.readCurrent,
@@ -130,8 +131,9 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		};
 		this.nextUpdate = nextUpdate;
 
-		yield this.updated;
-		yield* this.dependedDynamics;
+		// TODO: remove `as Node`
+		yield* propagate(this.updated as Node);
+		for (const dynamic of this.dependedDynamics) yield* propagate(dynamic);
 	}
 
 	commit(nextTimestamp: number) {

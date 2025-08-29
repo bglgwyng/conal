@@ -1,5 +1,5 @@
 import type { Event } from "../event/Event";
-import type { Node } from "../Node";
+import type { Node, ProceedEffect } from "../Node";
 import type { Timeline } from "../Timeline";
 import { Dynamic } from "./Dynamic";
 
@@ -30,7 +30,7 @@ export class ConstantDynamic<T> extends Dynamic<T> {
 		return this.dependedDynamics;
 	}
 
-	*proceed(): Iterable<Node> {}
+	*proceed(): Iterable<ProceedEffect> {}
 
 	commit(_nextTimestamp: number): void {}
 }

@@ -1,7 +1,7 @@
 import { assert } from "../../utils/assert";
 import { just, type Maybe } from "../../utils/Maybe";
 import type { Dynamic } from "../dynamic/Dynamic";
-import { Node } from "../Node";
+import { Node, type ProceedEffect, propagate } from "../Node";
 
 export abstract class Event<T> extends Node {
 	listeners: Set<
@@ -65,7 +65,7 @@ export abstract class Event<T> extends Node {
 		};
 	}
 
-	*proceed(): Iterable<Node> {
+	*proceed(): Iterable<ProceedEffect> {
 		assert(this.isActive, "Event is not active");
 
 		const emission = this.getEmission();
@@ -76,13 +76,13 @@ export abstract class Event<T> extends Node {
 		for (const [childEvent, emit] of this.listeners) {
 			if (!childEvent.isActive) continue;
 
-			yield childEvent;
+			yield* propagate(childEvent);
 			emit(value);
 		}
 
 		// TODO: run `getEmissions`s here
 		for (const state of this.dependedDynamics) {
-			yield state;
+			yield* propagate(state);
 		}
 
 		for (const [runEffect, effectEvent] of this.effects) {
@@ -92,7 +92,7 @@ export abstract class Event<T> extends Node {
 
 				effectEvent.emit(result);
 
-				yield effectEvent;
+				yield* propagate(effectEvent);
 			} catch (ex) {
 				console.warn("Effect failed", ex);
 			}

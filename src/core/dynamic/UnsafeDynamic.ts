@@ -1,6 +1,6 @@
 import { just, type Maybe } from "../../utils/Maybe";
 import type { Event } from "../event/Event";
-import type { Node } from "../Node";
+import type { Node, ProceedEffect } from "../Node";
 import type { Timeline } from "../Timeline";
 import { Dynamic } from "./Dynamic";
 
@@ -51,7 +51,7 @@ export class UnsafeDynamic<T> extends Dynamic<T> {
 			: { value: this.readCurrent(), isUpdated: false };
 	}
 
-	*proceed(): Iterable<Node> {}
+	*proceed(): Iterable<ProceedEffect> {}
 
 	commit() {
 		this.memoized = undefined;

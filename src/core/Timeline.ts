@@ -75,8 +75,10 @@ export class Timeline {
 					`Node(${node.getTag()}) is in wrong proceed state ${node.proceedState}`,
 				);
 
-				for (const childNode of node.proceed()) {
-					pushToQueue(childNode);
+				for (const effect of node.proceed()) {
+					if (effect[0] === "propagate") {
+						pushToQueue(effect[1]);
+					}
 				}
 				node.proceedState = ProceedState.Done;
 			}
