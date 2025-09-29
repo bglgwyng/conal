@@ -3,14 +3,15 @@ import type { Event } from "../event/Event";
 import type { ProceedEffect } from "../Node";
 import type { Timeline } from "../Timeline";
 import { Dynamic } from "./Dynamic";
+import { type Pull, pullCurrent, pullCurrentWithoutTracking } from "./pull";
 
 export class UnsafeDynamic<T> extends Dynamic<T> {
 	memoized: Maybe<T>;
-	#read: () => T;
+	#read: Pull<T>;
 
 	constructor(
 		timline: Timeline,
-		read: () => T,
+		read: Pull<T>,
 		readonly updated: Event<T>,
 	) {
 		super(timline);
@@ -37,7 +38,7 @@ export class UnsafeDynamic<T> extends Dynamic<T> {
 	readCurrent(): T {
 		if (this.memoized) return this.memoized();
 
-		const current = this.#read();
+		const current = pullCurrentWithoutTracking(this.#read);
 		this.memoized = just(current);
 
 		return current;

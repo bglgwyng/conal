@@ -1,3 +1,4 @@
+import type { Pull } from "./core/dynamic/pull";
 import { UnsafeDynamic } from "./core/dynamic/UnsafeDynamic";
 import { TransformedEvent } from "./core/event/TransformedEvent";
 import { Dynamic } from "./Dynamic";
@@ -9,7 +10,7 @@ export class UnsafeIncremental<T, D> extends Dynamic<T> {
 
 	constructor(
 		timeline: Timeline,
-		readCurrent: () => T,
+		readCurrent: Pull<T>,
 		readonly transition: Event<readonly [T, D]>,
 	) {
 		const internal = new UnsafeDynamic(

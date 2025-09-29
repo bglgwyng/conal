@@ -168,7 +168,9 @@ describe("Incremental", () => {
 
 			const accumulator = t.incremental<number, number>(0, event);
 			const doubledAccumulator = t.unsafeIncremental(
-				() => accumulator.read() * 2,
+				function* () {
+					return (yield* accumulator) * 2;
+				},
 				event.transform(([v, d]) => [v * 2, d * 2]),
 			);
 			const twiceDoubledAccumulator = t.computed(function* () {

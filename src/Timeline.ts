@@ -1,5 +1,6 @@
 import { ComputedDynamic } from "./core/dynamic/ComputedDynamic";
 import type { Dynamic as InternalDynamic } from "./core/dynamic/Dynamic";
+import type { Pull } from "./core/dynamic/pull";
 import { MergedEvent, type These } from "./core/event/MergedEvent";
 import { Source } from "./core/event/Source";
 import { SwitchingEvent } from "./core/event/SwitchingEvent";
@@ -64,7 +65,7 @@ export class Timeline {
 	}
 
 	unsafeIncremental<T, D>(
-		read: () => T,
+		read: Pull<T>,
 		transition: Event<readonly [T, D]>,
 	): Incremental<T, D> {
 		return new UnsafeIncremental(this, read, transition);

@@ -1,8 +1,8 @@
 import type { Dynamic } from "./Dynamic";
 
-export function pullCurrent<T>(
-	fn: () => Generator<Dynamic<unknown>, T>,
-): [T, Set<Dynamic<unknown>>] {
+export type Pull<T> = () => Generator<Dynamic<unknown>, T>;
+
+export function pullCurrent<T>(fn: Pull<T>): [T, Set<Dynamic<unknown>>] {
 	const deps = [];
 	const it = fn();
 	let value: unknown;
@@ -18,9 +18,7 @@ export function pullCurrent<T>(
 	}
 }
 
-export function pullCurrentWithoutTracking<T>(
-	fn: () => Generator<Dynamic<unknown>, T>,
-): T {
+export function pullCurrentWithoutTracking<T>(fn: Pull<T>): T {
 	const it = fn();
 	let value: unknown;
 
@@ -34,9 +32,7 @@ export function pullCurrentWithoutTracking<T>(
 	}
 }
 
-export function pullNext<T>(
-	fn: () => Generator<Dynamic<unknown>, T>,
-): [T, Set<Dynamic<unknown>>] {
+export function pullNext<T>(fn: Pull<T>): [T, Set<Dynamic<unknown>>] {
 	const deps = [];
 	const it = fn();
 	let value: unknown;
