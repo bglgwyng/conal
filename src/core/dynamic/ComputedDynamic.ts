@@ -2,8 +2,9 @@ import { assert } from "../../utils/assert";
 import { just } from "../../utils/Maybe";
 import { Event } from "../event/Event";
 import { type Node, type ProceedEffect, propagate } from "../Node";
-import { ReadMode, type Timeline } from "../Timeline";
+import type { Timeline } from "../Timeline";
 import { Dynamic } from "./Dynamic";
+import { pullCurrent, pullCurrentWithoutTracking, pullNext } from "./pull";
 
 export class ComputedDynamic<T> extends Dynamic<T> {
 	updated: Event<T> = new UpdatedEvent(this);
@@ -29,7 +30,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 
 		if (lastRead?.at === timeline.timestamp) {
 			if (isActive && !lastRead.dependencies) {
-				const [value, dependencies] = this.pullCurrent(this.fn);
+				const [value, dependencies] = pullCurrent(this.fn);
 				assert(value === lastRead.value, "Value should be the same");
 
 				this.updateDependencies(dependencies);
@@ -38,14 +39,14 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		}
 
 		if (isActive) {
-			const [value, dependencies] = this.pullCurrent(this.fn);
+			const [value, dependencies] = pullCurrent(this.fn);
 
 			this.lastRead = { value, at: timeline.timestamp };
 			this.updateDependencies(dependencies);
 
 			return value;
 		} else {
-			const value = this.pullCurrentWithoutTracking(this.fn);
+			const value = pullCurrentWithoutTracking(this.fn);
 			this.lastRead = { value, at: timeline.timestamp };
 
 			return value;
@@ -65,7 +66,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		if (this.nextUpdate) return this.nextUpdate;
 
 		const currentValue = this.readCurrent();
-		const [value, dependencies] = this.pullNext(this.fn);
+		const [value, dependencies] = pullNext(this.fn);
 
 		const nextUpdate = {
 			value,
@@ -89,56 +90,6 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		yield* this.dependedDynamics;
 	}
 
-	pullCurrent(
-		fn: () => Generator<Dynamic<unknown>, T>,
-	): [T, Set<Dynamic<unknown>>] {
-		const deps = [];
-		const it = fn();
-		let value: unknown;
-
-		while (true) {
-			const result = it.next(value);
-			if (result.done) {
-				return [result.value, new Set(deps)];
-			} else {
-				value = result.value.readCurrent();
-				deps.push(result.value);
-			}
-		}
-	}
-
-	pullCurrentWithoutTracking(fn: () => Generator<Dynamic<unknown>, T>): T {
-		const it = fn();
-		let value: unknown;
-
-		while (true) {
-			const result = it.next(value);
-			if (result.done) {
-				return result.value;
-			} else {
-				value = result.value.readCurrent();
-			}
-		}
-	}
-
-	pullNext(
-		fn: () => Generator<Dynamic<unknown>, T>,
-	): [T, Set<Dynamic<unknown>>] {
-		const deps = [];
-		const it = fn();
-		let value: unknown;
-
-		while (true) {
-			const result = it.next(value);
-			if (result.done) {
-				return [result.value, new Set(deps)];
-			} else {
-				value = result.value.readNext().value;
-				deps.push(result.value);
-			}
-		}
-	}
-
 	// biome-ignore lint/suspicious/noExplicitAny: to satisfy covariance
 	updateDependencies(newDependencies: Set<Dynamic<any>>) {
 		this.safeEstablishEdge(() => {
@@ -160,7 +111,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 
 	*proceed(): Generator<ProceedEffect> {
 		const currentValue = this.readCurrent();
-		const [value, dependencies] = this.pullNext(this.fn);
+		const [value, dependencies] = pullNext(this.fn);
 
 		const nextUpdate = {
 			value,
