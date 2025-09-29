@@ -17,7 +17,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 
 	constructor(
 		public timeline: Timeline,
-		public fn: () => T,
+		public fn: () => Generator<Dynamic<unknown>, T>,
 		public equal: (x: T, y: T) => boolean = (x, y) => Object.is(x, y),
 	) {
 		super(timeline);
@@ -25,15 +25,11 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 	}
 
 	readCurrent = (): T => {
-		assert(
-			this.timeline.readMode === ReadMode.Current,
-			"Timeline is reading next value",
-		);
 		const { lastRead, timeline, isActive } = this;
 
 		if (lastRead?.at === timeline.timestamp) {
 			if (isActive && !lastRead.dependencies) {
-				const [value, dependencies] = this.timeline.withTrackingRead(this.fn);
+				const [value, dependencies] = this.pullCurrent(this.fn);
 				assert(value === lastRead.value, "Value should be the same");
 
 				this.updateDependencies(dependencies);
@@ -42,42 +38,40 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		}
 
 		if (isActive) {
-			const [value, dependencies] = this.timeline.withTrackingRead(this.fn);
+			const [value, dependencies] = this.pullCurrent(this.fn);
 
 			this.lastRead = { value, at: timeline.timestamp };
 			this.updateDependencies(dependencies);
 
 			return value;
 		} else {
-			const value = this.fn();
+			const value = this.pullCurrentWithoutTracking(this.fn);
 			this.lastRead = { value, at: timeline.timestamp };
 
 			return value;
 		}
 	};
 
-	readNext = () => {
+	readNext = (): {
+		value: T;
+		isUpdated: boolean;
+		dependencies: Set<Dynamic<unknown>>;
+	} => {
 		const { timeline, isActive } = this;
 		assert(timeline.isProceeding, "Timeline is not proceeding");
-		assert(
-			timeline.readMode === ReadMode.Next,
-			"Timeline is not reading next value",
-		);
+		// TODO: remove
 		assert(isActive, "ComputedDynamic is not active");
+
 		if (this.nextUpdate) return this.nextUpdate;
 
-		const currentValue = this.timeline.withReadMode(
-			ReadMode.Current,
-			this.readCurrent,
-		);
-		const [value, dependencies] = this.timeline.withTrackingRead(this.fn);
+		const currentValue = this.readCurrent();
+		const [value, dependencies] = this.pullNext(this.fn);
 
 		const nextUpdate = {
 			value,
 			isUpdated: !this.equal(value, currentValue),
 			dependencies,
 		};
-
 		this.nextUpdate = nextUpdate;
 
 		return nextUpdate;
@@ -93,6 +87,56 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 	*outgoings() {
 		yield this.updated;
 		yield* this.dependedDynamics;
+	}
+
+	pullCurrent(
+		fn: () => Generator<Dynamic<unknown>, T>,
+	): [T, Set<Dynamic<unknown>>] {
+		const deps = [];
+		const it = fn();
+		let value: unknown;
+
+		while (true) {
+			const result = it.next(value);
+			if (result.done) {
+				return [result.value, new Set(deps)];
+			} else {
+				value = result.value.readCurrent();
+				deps.push(result.value);
+			}
+		}
+	}
+
+	pullCurrentWithoutTracking(fn: () => Generator<Dynamic<unknown>, T>): T {
+		const it = fn();
+		let value: unknown;
+
+		while (true) {
+			const result = it.next(value);
+			if (result.done) {
+				return result.value;
+			} else {
+				value = result.value.readCurrent();
+			}
+		}
+	}
+
+	pullNext(
+		fn: () => Generator<Dynamic<unknown>, T>,
+	): [T, Set<Dynamic<unknown>>] {
+		const deps = [];
+		const it = fn();
+		let value: unknown;
+
+		while (true) {
+			const result = it.next(value);
+			if (result.done) {
+				return [result.value, new Set(deps)];
+			} else {
+				value = result.value.readNext().value;
+				deps.push(result.value);
+			}
+		}
 	}
 
 	// biome-ignore lint/suspicious/noExplicitAny: to satisfy covariance
@@ -115,14 +159,8 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 	}
 
 	*proceed(): Generator<ProceedEffect> {
-		const currentValue = this.timeline.withReadMode(
-			ReadMode.Current,
-			this.readCurrent,
-		);
-		const [value, dependencies] = this.timeline.withReadMode(
-			ReadMode.Next,
-			() => this.timeline.withTrackingRead(this.fn),
-		);
+		const currentValue = this.readCurrent();
+		const [value, dependencies] = this.pullNext(this.fn);
 
 		const nextUpdate = {
 			value,
@@ -183,10 +221,7 @@ class UpdatedEvent<T> extends Event<T> {
 	}
 
 	getEmission() {
-		const { value, isUpdated } = this.timeline.withReadMode(
-			ReadMode.Next,
-			this.computed.readNext,
-		);
+		const { value, isUpdated } = this.computed.readNext();
 		if (!isUpdated) return;
 
 		return just(value);

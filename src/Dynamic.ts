@@ -26,6 +26,10 @@ export class Dynamic<T> {
 		return [new Dynamic(this.timeline, effectDynamic), dispose];
 	}
 
+	*[Symbol.iterator](): Generator<InternalDynamic<T>, T> {
+		return yield this.internal;
+	}
+
 	// @internal
 	tag(tag: string): Dynamic<T> {
 		this.internal.setTag(tag);

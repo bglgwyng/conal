@@ -1,4 +1,5 @@
 import { ComputedDynamic } from "./core/dynamic/ComputedDynamic";
+import type { Dynamic as InternalDynamic } from "./core/dynamic/Dynamic";
 import { MergedEvent, type These } from "./core/event/MergedEvent";
 import { Source } from "./core/event/Source";
 import { SwitchingEvent } from "./core/event/SwitchingEvent";
@@ -30,8 +31,11 @@ export class Timeline {
 		);
 	}
 
-	computed<T>(fn: () => T, equal?: (x: T, y: T) => boolean): Dynamic<T> {
-		return new Dynamic(this, new ComputedDynamic(this.internal, fn, equal));
+	computed<T>(
+		fn: () => Generator<InternalDynamic<unknown>, T>,
+		equal?: (x: T, y: T) => boolean,
+	): Dynamic<T> {
+		return new Dynamic<T>(this, new ComputedDynamic(this.internal, fn, equal));
 	}
 
 	switching<T>(dynamic: Dynamic<Event<T>>): Event<T> {

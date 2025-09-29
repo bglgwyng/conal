@@ -122,54 +122,6 @@ export class Timeline {
 		});
 	}
 
-	#readTrackings: Set<Dynamic<unknown>>[] = [];
-
-	read = <T>(dynamic: Dynamic<T>) => {
-		this.#readTrackings.at(-1)?.add(dynamic);
-
-		return this.readMode === ReadMode.Current
-			? dynamic.readCurrent()
-			: dynamic.readNext().value;
-	};
-
-	// @internal
-	withTrackingRead<T>(
-		fn: () => T,
-	): readonly [value: T, dependencies: Set<Dynamic<unknown>>] {
-		this.#readTrackings.push(new Set());
-
-		let value: T;
-		let dependencies: Set<Dynamic<unknown>>;
-		try {
-			value = fn();
-		} finally {
-			// biome-ignore lint/style/noNonNullAssertion: pop the last read trackings that was pushed above
-			dependencies = this.#readTrackings.pop()!;
-		}
-
-		return [value, dependencies] as const;
-	}
-
-	get isTracking() {
-		return this.#readTrackings.length > 0;
-	}
-
-	#readMode = ReadMode.Current;
-	get readMode() {
-		return this.#readMode;
-	}
-
-	withReadMode<U>(mode: ReadMode, fn: () => U): U {
-		const previousReadingNextValue = this.#readMode;
-		this.#readMode = mode;
-
-		try {
-			return fn();
-		} finally {
-			this.#readMode = previousReadingNextValue;
-		}
-	}
-
 	#tasksAfterProceed: (() => void)[] = [];
 	// @internal
 	queueTaskAfterProceed(fn: () => void) {

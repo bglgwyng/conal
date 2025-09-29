@@ -16,10 +16,9 @@ describe("ComputedDynamic - updated event", () => {
 		const state1 = timeline.state(0, source1);
 		const state2 = timeline.state(0, source2);
 
-		const computed = new ComputedDynamic(
-			timeline,
-			() => state1.read() + state2.read(),
-		);
+		const computed = new ComputedDynamic(timeline, function* () {
+			return (yield* state1) + (yield* state2);
+		});
 
 		// Set up a spy to track the updated event
 		const updateSpy = vi.fn();
@@ -62,10 +61,9 @@ describe("ComputedDynamic - updated event", () => {
 		const state1 = timeline.state(10, source1);
 		const state2 = timeline.state(20, source2);
 
-		const computed = new ComputedDynamic(
-			timeline,
-			() => state1.read() + state2.read(),
-		);
+		const computed = new ComputedDynamic(timeline, function* () {
+			return (yield* state1) + (yield* state2);
+		});
 
 		// Initially, no dependencies should be tracked
 		expect(computed.dependencies).toBeUndefined();
@@ -100,7 +98,9 @@ describe("ComputedDynamic - updated event", () => {
 		const source1 = timeline.source<number>();
 		const state1 = timeline.state(10, source1);
 
-		const computed = new ComputedDynamic(timeline, () => state1.read() * 2);
+		const computed = new ComputedDynamic(timeline, function* () {
+			return (yield* state1) * 2;
+		});
 
 		// No effect added, so no dependencies should be tracked
 		expect(computed.dependencies).toBeUndefined();
@@ -122,10 +122,9 @@ describe("ComputedDynamic - updated event", () => {
 		const state2 = timeline.state(20, source2);
 
 		// Create a computed dynamic that computes sum
-		const computed = new ComputedDynamic(
-			timeline,
-			() => state1.read() + state2.read(),
-		);
+		const computed = new ComputedDynamic(timeline, function* () {
+			return (yield* state1) + (yield* state2);
+		});
 
 		// Create a target state that will receive updates from computed
 		const targetState = timeline.state(0, computed.updated);
@@ -162,7 +161,9 @@ describe("ComputedDynamic - updated event", () => {
 		const source = timeline.source<number>();
 		const state = timeline.state(5, source);
 
-		const computed = new ComputedDynamic(timeline, () => state.read() * 3);
+		const computed = new ComputedDynamic(timeline, function* () {
+			return (yield* state) * 3;
+		});
 
 		// Create target state for writeOn
 		const targetState = timeline.state(0, computed.updated);
@@ -200,10 +201,9 @@ describe("ComputedDynamic - updated event", () => {
 		const state1 = timeline.state(10, source1);
 		const state2 = timeline.state(20, source2);
 
-		const computed = new ComputedDynamic(
-			timeline,
-			() => state1.read() + state2.read(),
-		);
+		const computed = new ComputedDynamic(timeline, function* () {
+			return (yield* state1) + (yield* state2);
+		});
 
 		// Spy on activate and deactivate methods
 		const activateSpy = vi.spyOn(computed, "activate");
@@ -243,7 +243,9 @@ describe("ComputedDynamic - updated event", () => {
 		const source = timeline.source<number>();
 		const state = timeline.state(5, source);
 
-		const computed = new ComputedDynamic(timeline, () => state.read() * 2);
+		const computed = new ComputedDynamic(timeline, function* () {
+			return (yield* state) * 2;
+		});
 
 		const activateSpy = vi.spyOn(computed, "activate");
 		const deactivateSpy = vi.spyOn(computed, "deactivate");
@@ -275,7 +277,9 @@ describe("ComputedDynamic - updated event", () => {
 		const source = timeline.source<number>();
 		const state = timeline.state(10, source);
 
-		const computed = new ComputedDynamic(timeline, () => state.read() + 5);
+		const computed = new ComputedDynamic(timeline, function* () {
+			return (yield* state) + 5;
+		});
 
 		const activateSpy = vi.spyOn(computed, "activate");
 		const deactivateSpy = vi.spyOn(computed, "deactivate");
@@ -301,10 +305,9 @@ describe("ComputedDynamic - updated event", () => {
 		const source = timeline.source<number>();
 		const state = timeline.state(10, source);
 
-		const computed = new ComputedDynamic(
-			timeline,
-			() => state.read() + 5,
-		).setTag("computed");
+		const computed = new ComputedDynamic(timeline, function* () {
+			return (yield* state) + 5;
+		}).setTag("computed");
 
 		const updateSpy = vi.fn();
 

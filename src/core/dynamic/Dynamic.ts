@@ -19,7 +19,11 @@ export abstract class Dynamic<T> extends Node {
 		];
 	}
 
+	*[Symbol.iterator](): Generator<Dynamic<T>, T> {
+		return yield this;
+	}
+
 	read() {
-		return this.timeline.read(this);
+		return this.readCurrent();
 	}
 }
