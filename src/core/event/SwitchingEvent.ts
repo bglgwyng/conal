@@ -1,4 +1,3 @@
-import assert from "assert";
 import { just, type Maybe } from "../../utils/Maybe";
 import type { Dynamic } from "../dynamic/Dynamic";
 import type { Timeline } from "../Timeline";
@@ -46,6 +45,7 @@ export class SwitchingEvent<U, T> extends Event<T> {
 		this.#dispose!();
 		this.#dispose = undefined;
 
+		// biome-ignore lint/style/noNonNullAssertion: `disposeSwitch` is set in activate
 		this.#disposeSwitch!();
 		this.#disposeSwitch = undefined;
 
@@ -59,6 +59,7 @@ export class SwitchingEvent<U, T> extends Event<T> {
 
 		this.#activeEvent = this.#nextActiveEvent;
 
+		// biome-ignore lint/style/noNonNullAssertion: `dispose` is set in activate
 		this.#dispose!();
 		this.#dispose = this.listen(this.#activeEvent, (value) => {
 			this.#activeEmission = just(value);

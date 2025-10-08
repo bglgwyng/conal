@@ -1,5 +1,4 @@
 import { assert } from "../utils/assert";
-import type { Dynamic } from "./dynamic/Dynamic";
 import { State } from "./dynamic/State";
 import { Event } from "./event/Event";
 import { Never } from "./event/Never";

@@ -95,7 +95,7 @@ describe("Timeline", () => {
 		});
 
 		it("should work with constant values", () => {
-			// biome-ignore lint/correctness/useYield: <explanation>
+			// biome-ignore lint/correctness/useYield: test pulling constant value
 			const result = t.computed(function* () {
 				return 42;
 			});

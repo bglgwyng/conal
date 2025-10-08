@@ -1,5 +1,5 @@
 import type { Event } from "../event/Event";
-import type { Node, ProceedEffect } from "../Node";
+import type { ProceedEffect } from "../Node";
 import type { Timeline } from "../Timeline";
 import { Dynamic } from "./Dynamic";
 

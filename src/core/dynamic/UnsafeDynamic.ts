@@ -3,7 +3,7 @@ import type { Event } from "../event/Event";
 import { type ProceedEffect, propagate } from "../Node";
 import type { Timeline } from "../Timeline";
 import { Dynamic } from "./Dynamic";
-import { type Pull, pullCurrent, pullCurrentWithoutTracking } from "./pull";
+import { type Pull, pullCurrentWithoutTracking } from "./pull";
 
 export class UnsafeDynamic<T> extends Dynamic<T> {
 	memoized: Maybe<T>;
