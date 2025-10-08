@@ -58,24 +58,9 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		isUpdated: boolean;
 		dependencies: Set<Dynamic<unknown>>;
 	} => {
-		const { timeline, isActive } = this;
-		assert(timeline.isProceeding, "Timeline is not proceeding");
-		// TODO: remove
-		assert(isActive, "ComputedDynamic is not active");
+		assert(this.nextUpdate, "nextUpdate is not set");
 
-		if (this.nextUpdate) return this.nextUpdate;
-
-		const currentValue = this.readCurrent();
-		const [value, dependencies] = pullNext(this.fn);
-
-		const nextUpdate = {
-			value,
-			isUpdated: !this.equal(value, currentValue),
-			dependencies,
-		};
-		this.nextUpdate = nextUpdate;
-
-		return nextUpdate;
+		return this.nextUpdate;
 	};
 
 	*incomings() {
@@ -110,8 +95,15 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 	}
 
 	*proceed(): Generator<ProceedEffect> {
+		const { timeline, isActive } = this;
+		assert(timeline.isProceeding, "Timeline is not proceeding");
+		// TODO: remove
+		assert(isActive, "ComputedDynamic is not active");
+		// TODO: remove
+		assert(!this.nextUpdate, "nextUpdate is not cleared");
+
 		const currentValue = this.readCurrent();
-		const [value, dependencies] = pullNext(this.fn);
+		const [value, dependencies] = yield* pullNext(this.fn);
 
 		const nextUpdate = {
 			value,

@@ -1,5 +1,4 @@
 import assert from "node:assert";
-import type { Dynamic } from "../Dynamic";
 import type { Timeline } from "./Timeline";
 import type { TopoNode } from "./utils/IncrementalTopo";
 
@@ -13,6 +12,8 @@ export abstract class Node implements TopoNode {
 	commit(_nextTimestamp: number) {}
 
 	proceedState = ProceedState.Idle;
+	pendingProceed?: Iterator<ProceedEffect>;
+	pendingNodes = new Set<Node>();
 	abstract proceed(): Iterable<ProceedEffect>;
 
 	abstract incomings(): Iterable<TopoNode>;
@@ -45,13 +46,14 @@ export abstract class Node implements TopoNode {
 }
 
 export enum ProceedState {
-	Idle,
-	Queued,
-	Done,
+	Idle = "Idle",
+	Queued = "Queued",
+	Done = "Done",
+	Pending = "Pending",
 }
 
-export function* wait<T>(dynamic: Dynamic<T>): Generator<WaitEffect, T, T> {
-	return yield ["wait", dynamic];
+export function* wait(node: Node): Generator<WaitEffect, void, void> {
+	yield ["wait", node];
 }
 
 export function* propagate(node: Node): Generator<PropagateEffect, void, void> {
@@ -59,5 +61,5 @@ export function* propagate(node: Node): Generator<PropagateEffect, void, void> {
 }
 
 export type PropagateEffect = readonly ["propagate", Node];
-export type WaitEffect = readonly ["wait", Dynamic<any>];
+export type WaitEffect = readonly ["wait", Node];
 export type ProceedEffect = PropagateEffect | WaitEffect;

@@ -64,24 +64,67 @@ export class Timeline {
 			this.#emittingSources.clear();
 
 			const processedNodes = [];
+			// TODO: remove
+			const everPendeds = new Set<Node>();
 
 			while (queue.size > 0) {
 				// biome-ignore lint/style/noNonNullAssertion: size checked
 				const node = queue.pop()!;
-				processedNodes.push(node);
 
 				assert(
 					node.proceedState === ProceedState.Queued,
 					`Node(${node.getTag()}) is in wrong proceed state ${node.proceedState}`,
 				);
 
-				for (const effect of node.proceed()) {
+				const it = node.pendingProceed ?? node.proceed()[Symbol.iterator]();
+
+				while (true) {
+					const { value: effect, done } = it.next();
+					if (done) {
+						everPendeds.delete(node);
+
+						node.pendingProceed = undefined;
+						node.proceedState = ProceedState.Done;
+
+						processedNodes.push(node);
+
+						for (const pendingNode of node.pendingNodes) {
+							assert(
+								pendingNode.proceedState === ProceedState.Pending,
+								`Node(${pendingNode.getTag()}) is in wrong proceed state ${pendingNode.proceedState}`,
+							);
+							queue.push(pendingNode);
+							pendingNode.proceedState = ProceedState.Queued;
+						}
+						node.pendingNodes.clear();
+
+						break;
+					}
+
 					if (effect[0] === "propagate") {
 						pushToQueue(effect[1]);
+					} else {
+						assert(effect[0] === "wait", "Unknown effect");
+						const [, toWaitNode] = effect;
+						if (toWaitNode.proceedState === ProceedState.Done) {
+							// do nothing
+						} else {
+							everPendeds.add(node);
+
+							node.proceedState = ProceedState.Pending;
+							node.pendingProceed = it;
+
+							toWaitNode.pendingNodes.add(node);
+
+							pushToQueue(toWaitNode);
+
+							break;
+						}
 					}
 				}
-				node.proceedState = ProceedState.Done;
 			}
+
+			assert(everPendeds.size === 0, "There are nodes that are still pending");
 
 			for (const node of processedNodes) {
 				node.commit(nextTimestamp);
@@ -100,8 +143,7 @@ export class Timeline {
 
 		function pushToQueue(node: Node) {
 			if (node.proceedState === ProceedState.Queued) return;
-
-			assert(node.proceedState === ProceedState.Idle, "Node is not idle");
+			if (node.proceedState === ProceedState.Pending) return;
 
 			queue.push(node);
 			node.proceedState = ProceedState.Queued;
