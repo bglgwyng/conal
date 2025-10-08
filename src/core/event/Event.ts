@@ -43,6 +43,7 @@ export abstract class Event<T> extends Node {
 
 	*outgoings(): Iterable<Node> {
 		for (const [event] of this.listeners) yield event;
+		for (const [, event] of this.effects) yield event;
 		yield* this.dependedDynamics;
 	}
 

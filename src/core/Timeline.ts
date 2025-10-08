@@ -101,6 +101,10 @@ export class Timeline {
 					}
 
 					if (effect[0] === "propagate") {
+						assertInternal(
+							new Set(node.outgoings()).has(effect[1]),
+							`Node(${effect[1].getTag()}) is not Node(${node.getTag()})'s outgoing node`,
+						);
 						pushToQueue(effect[1]);
 					} else {
 						assertInternal(effect[0] === "wait", "Unknown effect");
