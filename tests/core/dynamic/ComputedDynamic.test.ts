@@ -73,9 +73,9 @@ describe("ComputedDynamic", () => {
 		expect(result).toBe(0);
 
 		// Should now track dependencies when active
-		expect(computed.dependencies?.size).toBe(2);
-		expect(computed.dependencies?.has(state1)).toBe(true);
-		expect(computed.dependencies?.has(state2)).toBe(true);
+		expect(computed.dependencies?.length).toBe(2);
+		expect(computed.dependencies?.includes(state1)).toBe(true);
+		expect(computed.dependencies?.includes(state2)).toBe(true);
 		expect(state1.dependedDynamics.has(computed)).toBe(true);
 		expect(state2.dependedDynamics.has(computed)).toBe(true);
 
@@ -105,9 +105,9 @@ describe("ComputedDynamic", () => {
 		expect(outerComputed.readCurrent()).toBe(0); // 0*2 + 0 = 0
 
 		// Verify dependencies
-		expect(outerComputed.dependencies?.has(innerComputed)).toBe(true);
-		expect(outerComputed.dependencies?.has(state2)).toBe(true);
-		expect(innerComputed.dependencies?.has(state1)).toBe(true);
+		expect(outerComputed.dependencies?.includes(innerComputed)).toBe(true);
+		expect(outerComputed.dependencies?.includes(state2)).toBe(true);
+		expect(innerComputed.dependencies?.includes(state1)).toBe(true);
 
 		// Verify dependedDynamics
 		expect(innerComputed.dependedDynamics.has(outerComputed)).toBe(true);

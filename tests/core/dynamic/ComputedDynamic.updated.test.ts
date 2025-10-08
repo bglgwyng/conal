@@ -74,9 +74,9 @@ describe("ComputedDynamic - updated event", () => {
 
 		// After adding the effect, dependencies should be tracked due to activate() call
 		expect(computed.dependencies).toBeDefined();
-		expect(computed.dependencies?.size).toBe(2);
-		expect(computed.dependencies?.has(state1)).toBe(true);
-		expect(computed.dependencies?.has(state2)).toBe(true);
+		expect(computed.dependencies?.length).toBe(2);
+		expect(computed.dependencies?.includes(state1)).toBe(true);
+		expect(computed.dependencies?.includes(state2)).toBe(true);
 
 		// Verify that the computed dynamic is registered as a dependent
 		expect(state1.dependedDynamics.has(computed)).toBe(true);
@@ -131,9 +131,9 @@ describe("ComputedDynamic - updated event", () => {
 
 		// After writeOn, dependencies should be tracked due to activate() call
 		expect(computed.dependencies).toBeDefined();
-		expect(computed.dependencies?.size).toBe(2);
-		expect(computed.dependencies?.has(state1)).toBe(true);
-		expect(computed.dependencies?.has(state2)).toBe(true);
+		expect(computed.dependencies?.length).toBe(2);
+		expect(computed.dependencies?.includes(state1)).toBe(true);
+		expect(computed.dependencies?.includes(state2)).toBe(true);
 
 		// Verify that the computed dynamic is registered as a dependent
 		expect(state1.dependedDynamics.has(computed)).toBe(true);
@@ -174,8 +174,8 @@ describe("ComputedDynamic - updated event", () => {
 
 		// Dependencies should be tracked
 		expect(computed.dependencies).toBeDefined();
-		expect(computed.dependencies?.size).toBe(1);
-		expect(computed.dependencies?.has(state)).toBe(true);
+		expect(computed.dependencies?.length).toBe(1);
+		expect(computed.dependencies?.includes(state)).toBe(true);
 		expect(state.dependedDynamics.has(computed)).toBe(true);
 
 		// Both effect and writeOn should be registered
@@ -223,7 +223,7 @@ describe("ComputedDynamic - updated event", () => {
 
 		// Dependencies should now be tracked
 		expect(computed.dependencies).toBeDefined();
-		expect(computed.dependencies?.size).toBe(2);
+		expect(computed.dependencies?.length).toBe(2);
 		expect(state1.dependedDynamics.has(computed)).toBe(true);
 		expect(state2.dependedDynamics.has(computed)).toBe(true);
 

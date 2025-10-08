@@ -3,7 +3,8 @@ import type { Dynamic } from "./Dynamic";
 
 export type Pull<T> = () => Generator<Dynamic<unknown>, T>;
 
-export function pullCurrent<T>(fn: Pull<T>): [T, Set<Dynamic<unknown>>] {
+export function pullCurrent<T>(fn: Pull<T>): [T, Dynamic<unknown>[]] {
+	const depsSet = new Set<Dynamic<unknown>>();
 	const deps = [];
 	const it = fn();
 	let value: unknown;
@@ -11,10 +12,14 @@ export function pullCurrent<T>(fn: Pull<T>): [T, Set<Dynamic<unknown>>] {
 	while (true) {
 		const result = it.next(value);
 		if (result.done) {
-			return [result.value, new Set(deps)];
+			return [result.value, deps];
 		} else {
 			value = result.value.readCurrent();
-			deps.push(result.value);
+
+			if (!depsSet.has(result.value)) {
+				depsSet.add(result.value);
+				deps.push(result.value);
+			}
 		}
 	}
 }
@@ -35,7 +40,8 @@ export function pullCurrentWithoutTracking<T>(fn: Pull<T>): T {
 
 export function* pullNext<T>(
 	fn: Pull<T>,
-): Generator<WaitEffect, [T, Set<Dynamic<unknown>>]> {
+): Generator<WaitEffect, [T, Dynamic<unknown>[]]> {
+	const depsSet = new Set<Dynamic<unknown>>();
 	const deps = [];
 	const it = fn();
 	let value: unknown;
@@ -43,11 +49,15 @@ export function* pullNext<T>(
 	while (true) {
 		const result = it.next(value);
 		if (result.done) {
-			return [result.value, new Set(deps)];
+			return [result.value, deps];
 		} else {
 			yield* wait(result.value);
 			value = result.value.readNext().value;
-			deps.push(result.value);
+
+			if (!depsSet.has(result.value)) {
+				depsSet.add(result.value);
+				deps.push(result.value);
+			}
 		}
 	}
 }
