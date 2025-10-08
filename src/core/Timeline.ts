@@ -1,4 +1,4 @@
-import { assert } from "../utils/assert";
+import { assert, assertInternal } from "../utils/assert";
 import { State } from "./dynamic/State";
 import { Event } from "./event/Event";
 import { Never } from "./event/Never";
@@ -42,7 +42,7 @@ export class Timeline {
 
 	// @internal
 	proceed() {
-		assert(!this.#isProceeding, "Timeline is already proceeding");
+		assertInternal(!this.#isProceeding, "Timeline is already proceeding");
 
 		this.#isProceeding = true;
 
@@ -70,7 +70,7 @@ export class Timeline {
 				// biome-ignore lint/style/noNonNullAssertion: size checked
 				const node = queue.pop()!;
 
-				assert(
+				assertInternal(
 					node.proceedState === ProceedState.Queued,
 					`Node(${node.getTag()}) is in wrong proceed state ${node.proceedState}`,
 				);
@@ -88,7 +88,7 @@ export class Timeline {
 						processedNodes.push(node);
 
 						for (const pendingNode of node.pendingNodes) {
-							assert(
+							assertInternal(
 								pendingNode.proceedState === ProceedState.Pending,
 								`Node(${pendingNode.getTag()}) is in wrong proceed state ${pendingNode.proceedState}`,
 							);
@@ -103,7 +103,7 @@ export class Timeline {
 					if (effect[0] === "propagate") {
 						pushToQueue(effect[1]);
 					} else {
-						assert(effect[0] === "wait", "Unknown effect");
+						assertInternal(effect[0] === "wait", "Unknown effect");
 						const [, toWaitNode] = effect;
 						if (toWaitNode.proceedState === ProceedState.Done) {
 							// do nothing
@@ -123,7 +123,10 @@ export class Timeline {
 				}
 			}
 
-			assert(everPendeds.size === 0, "There are nodes that are still pending");
+			assertInternal(
+				everPendeds.size === 0,
+				"There are nodes that are still pending",
+			);
 
 			for (const node of processedNodes) {
 				node.commit(nextTimestamp);
@@ -157,8 +160,9 @@ export class Timeline {
 
 		const { timestamp } = this;
 		this.#onSourceEmission(event, () => {
+			// TODO: report linearity violation
 			assert(timestamp === this.timestamp, "Timeline has already proceeded");
-			assert(!this.isProceeding, "Timeline is already proceeding");
+			assertInternal(!this.isProceeding, "Timeline is already proceeding");
 			this.proceed();
 		});
 	}
@@ -166,7 +170,7 @@ export class Timeline {
 	#tasksAfterProceed: (() => void)[] = [];
 	// @internal
 	queueTaskAfterProceed(fn: () => void) {
-		assert(this.#isProceeding, "Timeline is not proceeding");
+		assertInternal(this.#isProceeding, "Timeline is not proceeding");
 		this.#tasksAfterProceed.push(fn);
 	}
 
@@ -177,15 +181,15 @@ export class Timeline {
 	}
 
 	reorder(u: Node, v: Node) {
-		if (u instanceof Event) assert(u.isActive, "Event is not active");
-		if (v instanceof Event) assert(v.isActive, "Event is not active");
+		if (u instanceof Event) assertInternal(u.isActive, "Event is not active");
+		if (v instanceof Event) assertInternal(v.isActive, "Event is not active");
 
 		// TODO: remove this
-		assert(
+		assertInternal(
 			new Set(u.outgoings()).has(v),
 			`Node(${u.getTag()}) is not Node(${v.getTag()})'s outgoing node`,
 		);
-		assert(
+		assertInternal(
 			new Set(v.incomings()).has(u),
 			`Node(${u.getTag()}) is not Node(${v.getTag()})'s incoming node`,
 		);

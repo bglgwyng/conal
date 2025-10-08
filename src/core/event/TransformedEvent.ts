@@ -1,4 +1,4 @@
-import { assert } from "../../utils/assert";
+import { assertInternal } from "../../utils/assert";
 import { just, type Maybe } from "../../utils/Maybe";
 import type { Timeline } from "../Timeline";
 import { DerivedEvent } from "./DerivedEvent";
@@ -36,7 +36,7 @@ export class TransformedEvent<T, U> extends DerivedEvent<T> {
 	}
 
 	activate() {
-		assert(this.isActive, "Event is not active");
+		assertInternal(this.isActive, "Event is not active");
 
 		this.safeEstablishEdge(() => {
 			this.dispose = this.listen(this.parent, (value) => {

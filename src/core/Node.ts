@@ -1,4 +1,4 @@
-import assert from "node:assert";
+import { assertInternal } from "../utils/assert";
 import type { Timeline } from "./Timeline";
 import type { TopoNode } from "./utils/IncrementalTopo";
 
@@ -34,10 +34,15 @@ export abstract class Node implements TopoNode {
 
 		const updatedIncomings = new Set(this.incomings());
 		for (const incoming of newIncomings) {
-			assert(updatedIncomings.has(incoming), "Incoming node is not added");
-			assert(incoming.rank < this.rank, "Incoming node is not well-ordered");
-
-			assert(
+			assertInternal(
+				updatedIncomings.has(incoming),
+				"Incoming node is not added",
+			);
+			assertInternal(
+				incoming.rank < this.rank,
+				"Incoming node is not well-ordered",
+			);
+			assertInternal(
 				new Set(incoming.outgoings()).has(this),
 				"Outgoing node is not added",
 			);

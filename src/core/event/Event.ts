@@ -1,4 +1,4 @@
-import { assert } from "../../utils/assert";
+import { assertInternal } from "../../utils/assert";
 import { just, type Maybe } from "../../utils/Maybe";
 import type { Dynamic } from "../dynamic/Dynamic";
 import { Node, type ProceedEffect, propagate } from "../Node";
@@ -66,7 +66,7 @@ export abstract class Event<T> extends Node {
 	}
 
 	*proceed(): Iterable<ProceedEffect> {
-		assert(this.isActive, "Event is not active");
+		assertInternal(this.isActive, "Event is not active");
 
 		const emission = this.getEmission();
 		if (!emission) return;
@@ -102,15 +102,15 @@ export abstract class Event<T> extends Node {
 	abstract getEmission(): Maybe<T>;
 
 	safeGetEmission(from: Node): Maybe<T> {
-		assert(
+		assertInternal(
 			new Set(from.incomings()).has(this),
 			`Node(${from.getTag()}) does not have Event(${this.getTag()}) as incoming`,
 		);
-		assert(
+		assertInternal(
 			new Set(this.outgoings()).has(from),
 			`Event(${this.getTag()}) does not have Node(${from.getTag()}) as outgoing`,
 		);
-		assert(this.rank < from.rank, "Event ordering is incorrect");
+		assertInternal(this.rank < from.rank, "Event ordering is incorrect");
 
 		return this.getEmission();
 	}

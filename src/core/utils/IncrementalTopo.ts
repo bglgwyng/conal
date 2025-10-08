@@ -1,4 +1,4 @@
-import assert from "node:assert";
+import { assert } from "../../utils/assert";
 
 export interface TopoNode {
 	rank: number;

@@ -1,4 +1,4 @@
-import { assert } from "../../utils/assert";
+import { assert, assertInternal } from "../../utils/assert";
 import { just } from "../../utils/Maybe";
 import { Event } from "../event/Event";
 import { type Node, type ProceedEffect, propagate } from "../Node";
@@ -58,7 +58,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		isUpdated: boolean;
 		dependencies: Dynamic<unknown>[];
 	} => {
-		assert(this.nextUpdate, "nextUpdate is not set");
+		assertInternal(this.nextUpdate, "nextUpdate is not set");
 
 		return this.nextUpdate;
 	};
@@ -78,7 +78,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 	// biome-ignore lint/suspicious/noExplicitAny: to satisfy covariance
 	updateDependencies(newDependencies: Dynamic<any>[]) {
 		this.safeEstablishEdge(() => {
-			assert(this.lastRead, "lastRead is not set");
+			assertInternal(this.lastRead, "lastRead is not set");
 
 			this.lastRead.dependencies = newDependencies;
 			for (const dependency of newDependencies) {
@@ -96,11 +96,11 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 
 	*proceed(): Generator<ProceedEffect> {
 		const { timeline, isActive } = this;
-		assert(timeline.isProceeding, "Timeline is not proceeding");
+		assertInternal(timeline.isProceeding, "Timeline is not proceeding");
 		// TODO: remove
-		assert(isActive, "ComputedDynamic is not active");
+		assertInternal(isActive, "ComputedDynamic is not active");
 		// TODO: remove
-		assert(!this.nextUpdate, "nextUpdate is not cleared");
+		assertInternal(!this.nextUpdate, "nextUpdate is not cleared");
 
 		const currentValue = this.readCurrent();
 		const [value, dependencies] = yield* pullNext(this.fn);
@@ -118,7 +118,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 	}
 
 	commit(nextTimestamp: number) {
-		assert(this.nextUpdate, "nextUpdate is not set");
+		assertInternal(this.nextUpdate, "nextUpdate is not set");
 
 		const { value, isUpdated, dependencies } = this.nextUpdate;
 		this.nextUpdate = undefined;
