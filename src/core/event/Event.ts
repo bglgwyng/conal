@@ -23,8 +23,7 @@ export abstract class Event<T> extends Node {
 	on<U>(fn: (value: T) => U): readonly [Event<U>, () => void] {
 		const { isActive } = this;
 
-		const effectEvent = new Emmittable<U>(this.timeline);
-		effectEvent.setTag(`Effect(${this._tag})`);
+		const effectEvent = new EffectEvent<U>(this);
 
 		const effect = [fn, effectEvent] as const;
 		this.effects.push(effect);
@@ -150,5 +149,15 @@ export class Emmittable<T> extends Event<T> {
 
 	commit() {
 		this.maybeLastEmission = undefined;
+	}
+}
+
+export class EffectEvent<T> extends Emmittable<T> {
+	constructor(public readonly source: Event<unknown>) {
+		super(source.timeline);
+	}
+
+	getTag(): string | undefined {
+		return this._tag ?? `EffectEvent(${this.source.getTag()})`;
 	}
 }
