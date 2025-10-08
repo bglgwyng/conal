@@ -31,10 +31,6 @@ export class UnsafeDynamic<T> extends Dynamic<T> {
 		yield this.updated;
 	}
 
-	*outgoings() {
-		yield* this.dependedDynamics;
-	}
-
 	readCurrent(): T {
 		if (this.memoized) return this.memoized();
 

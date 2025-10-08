@@ -1,5 +1,6 @@
 import type { Event } from "../event/Event";
 import { Node } from "../Node";
+import type { TopoNode } from "../utils/IncrementalTopo";
 import type { ComputedDynamic } from "./ComputedDynamic";
 import type { State } from "./State";
 
@@ -22,6 +23,10 @@ export abstract class Dynamic<T> extends Node {
 
 	*[Symbol.iterator](): Generator<Dynamic<T>, T> {
 		return yield this;
+	}
+
+	*outgoings(): Iterable<TopoNode> {
+		yield* this.dependedDynamics;
 	}
 
 	read() {

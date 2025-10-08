@@ -72,7 +72,7 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 
 	*outgoings() {
 		yield this.updated;
-		yield* this.dependedDynamics;
+		yield* super.outgoings();
 	}
 
 	// biome-ignore lint/suspicious/noExplicitAny: to satisfy covariance

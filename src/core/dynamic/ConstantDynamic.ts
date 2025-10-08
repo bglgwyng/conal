@@ -26,10 +26,6 @@ export class ConstantDynamic<T> extends Dynamic<T> {
 		return [];
 	}
 
-	outgoings() {
-		return this.dependedDynamics;
-	}
-
 	*proceed(): Iterable<ProceedEffect> {}
 
 	commit(_nextTimestamp: number): void {}

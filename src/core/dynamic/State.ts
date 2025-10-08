@@ -30,10 +30,6 @@ export class State<T> extends Dynamic<T> {
 		yield this.updated;
 	}
 
-	*outgoings() {
-		yield* this.dependedDynamics;
-	}
-
 	readCurrent(): T {
 		return this.value;
 	}
