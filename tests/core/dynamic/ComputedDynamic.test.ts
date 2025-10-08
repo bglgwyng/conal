@@ -5,6 +5,9 @@ import { Timeline } from "../../../src/core/Timeline";
 describe("ComputedDynamic", () => {
 	let timeline: Timeline;
 
+	const asComputedUnknown = <T>(computed: ComputedDynamic<T>) =>
+		computed as unknown as ComputedDynamic<unknown>;
+
 	beforeEach(() => {
 		timeline = new Timeline({ onSourceEmission() {} });
 	});
@@ -50,8 +53,8 @@ describe("ComputedDynamic", () => {
 
 		// Should still not track dependencies when inactive
 		expect(computed.dependencies).toBeUndefined();
-		expect(state1.dependedDynamics.has(computed)).toBe(false);
-		expect(state2.dependedDynamics.has(computed)).toBe(false);
+		expect(state1.dependedDynamics.has(asComputedUnknown(computed))).toBe(false);
+		expect(state2.dependedDynamics.has(asComputedUnknown(computed))).toBe(false);
 	});
 
 	it("should track dependencies when active", () => {
@@ -59,28 +62,59 @@ describe("ComputedDynamic", () => {
 		const source2 = timeline.source<number>();
 		const state1 = timeline.state(0, source1);
 		const state2 = timeline.state(0, source2);
-		// Create a computed dynamic that depends on two states
+		// Make it active by adding an effect
 		const computed = new ComputedDynamic(timeline, function* () {
 			return (yield* state1) + (yield* state2);
 		});
-
-		// Make it active by adding an effect
 		const [, dispose] = computed.updated.on(() => {});
 		expect(computed.isActive).toBe(true);
-
 		// Read when active - should track dependencies
 		const result = computed.readCurrent();
 		expect(result).toBe(0);
-
 		// Should now track dependencies when active
 		expect(computed.dependencies?.length).toBe(2);
 		expect(computed.dependencies?.includes(state1)).toBe(true);
 		expect(computed.dependencies?.includes(state2)).toBe(true);
-		expect(state1.dependedDynamics.has(computed)).toBe(true);
-		expect(state2.dependedDynamics.has(computed)).toBe(true);
-
+		expect(state1.dependedDynamics.has(asComputedUnknown(computed))).toBe(true);
+		expect(state2.dependedDynamics.has(asComputedUnknown(computed))).toBe(true);
 		// Clean up
 		dispose();
+	});
+
+	it("should remove stale dependencies when dependencies change", () => {
+		const toggleSource = timeline.source<number>();
+		const source1 = timeline.source<number>();
+		const source2 = timeline.source<number>();
+		const toggleState = timeline.state(0, toggleSource);
+		const state1 = timeline.state(1, source1);
+		const state2 = timeline.state(2, source2);
+
+		const computed = new ComputedDynamic(timeline, function* () {
+			const useFirst = (yield* toggleState) === 0;
+			if (useFirst) {
+				return yield* state1;
+			}
+			return yield* state2;
+		});
+
+		computed.updated.on(() => {});
+
+		expect(computed.readCurrent()).toBe(1);
+		expect(state1.dependedDynamics.has(asComputedUnknown(computed))).toBe(true);
+		expect(state2.dependedDynamics.has(asComputedUnknown(computed))).toBe(false);
+		expect(computed.dependencies?.includes(toggleState)).toBe(true);
+		expect(computed.dependencies?.includes(state1)).toBe(true);
+		expect(computed.dependencies?.includes(state2)).toBe(false);
+
+		toggleSource.emit(1);
+		timeline.proceed();
+
+		expect(computed.readCurrent()).toBe(2);
+		expect(state1.dependedDynamics.has(asComputedUnknown(computed))).toBe(false);
+		expect(state2.dependedDynamics.has(asComputedUnknown(computed))).toBe(true);
+		expect(computed.dependencies?.includes(toggleState)).toBe(true);
+		expect(computed.dependencies?.includes(state1)).toBe(false);
+		expect(computed.dependencies?.includes(state2)).toBe(true);
 	});
 	it("should track dependencies correctly with nested reads", () => {
 		// Create source states
@@ -110,9 +144,9 @@ describe("ComputedDynamic", () => {
 		expect(innerComputed.dependencies?.includes(state1)).toBe(true);
 
 		// Verify dependedDynamics
-		expect(innerComputed.dependedDynamics.has(outerComputed)).toBe(true);
-		expect(state1.dependedDynamics.has(innerComputed)).toBe(true);
-		expect(state2.dependedDynamics.has(outerComputed)).toBe(true);
+		expect(innerComputed.dependedDynamics.has(asComputedUnknown(outerComputed))).toBe(true);
+		expect(state1.dependedDynamics.has(asComputedUnknown(innerComputed))).toBe(true);
+		expect(state2.dependedDynamics.has(asComputedUnknown(outerComputed))).toBe(true);
 
 		// Update state1 and verify the update propagates through the chain
 		source1.emit(5);

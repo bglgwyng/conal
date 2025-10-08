@@ -80,8 +80,19 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		this.safeEstablishEdge(() => {
 			assertInternal(this.lastRead, "lastRead is not set");
 
+			const oldDependencies = this.lastRead.dependencies ?? [];
+			const newDependencySet = new Set(newDependencies);
+			for (const dependency of oldDependencies) {
+				if (!newDependencySet.has(dependency)) {
+					dependency.dependedDynamics.delete(this as ComputedDynamic<unknown>);
+				}
+			}
+
 			this.lastRead.dependencies = newDependencies;
 			for (const dependency of newDependencies) {
+				if (dependency.dependedDynamics.has(this as ComputedDynamic<unknown>))
+					continue;
+
 				dependency.dependedDynamics.add(this as ComputedDynamic<unknown>);
 
 				this.timeline.topo.reorder(dependency, this);
