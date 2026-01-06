@@ -60,6 +60,16 @@ export class IncrementalTopo {
 		}
 	}
 
+	// @internal
+	increaseRank(node: TopoNode, newRank: number) {
+		assert(newRank >= node.rank, "Rank cannot decrease");
+
+		node.rank = newRank;
+		for (const outgoing of node.outgoings()) {
+			this.reorder(node, outgoing);
+		}
+	}
+	// @internal
 	checkWellOrdered() {
 		for (const node of this.nodes) {
 			for (const incoming of node.incomings()) {

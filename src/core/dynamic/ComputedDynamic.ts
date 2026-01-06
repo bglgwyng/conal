@@ -1,7 +1,12 @@
 import { assert, assertInternal } from "../../utils/assert";
 import { just } from "../../utils/Maybe";
 import { Event } from "../event/Event";
-import { type Node, type ProceedEffect, propagate } from "../Node";
+import {
+	type Node,
+	type ProceedEffect,
+	ProceedState,
+	propagate,
+} from "../Node";
 import type { Timeline } from "../Timeline";
 import { Dynamic } from "./Dynamic";
 import { pullCurrent, pullCurrentWithoutTracking, pullNext } from "./pull";
@@ -58,6 +63,8 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		isUpdated: boolean;
 		dependencies: Dynamic<unknown>[];
 	} => {
+		console.info("readNext", this.getTag(), this.proceedState);
+		assertInternal(this.proceedState === ProceedState.Done);
 		assertInternal(this.nextUpdate, "nextUpdate is not set");
 
 		return this.nextUpdate;
@@ -97,6 +104,12 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 
 				this.timeline.topo.reorder(dependency, this);
 			}
+
+			const firstDependency = newDependencies[0];
+			if (!firstDependency) return;
+
+			console.info("reorder!!!", firstDependency.getTag(), this.getTag());
+			this.timeline.reorder(firstDependency, this);
 		}, newDependencies);
 	}
 
@@ -114,7 +127,9 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 		assertInternal(!this.nextUpdate, "nextUpdate is not cleared");
 
 		const currentValue = this.readCurrent();
+		// console.group(`pull next ${this.getTag()}`);
 		const [value, dependencies] = yield* pullNext(this.fn);
+		// console.groupEnd();
 
 		const nextUpdate = {
 			value,
@@ -125,6 +140,10 @@ export class ComputedDynamic<T> extends Dynamic<T> {
 
 		// TODO: remove `as Node`
 		yield* propagate(this.updated as Node);
+		// console.info(
+		// 	"##",
+		// 	[...this.dependedDynamics].map((x) => x.getTag()),
+		// );
 		for (const dynamic of this.dependedDynamics) yield* propagate(dynamic);
 	}
 
@@ -175,6 +194,8 @@ class UpdatedEvent<T> extends Event<T> {
 	}
 
 	getEmission() {
+		// assert(this.computed.proceedState !== ProceedState.Pending);
+		console.info("HERE?");
 		const { value, isUpdated } = this.computed.readNext();
 		if (!isUpdated) return;
 

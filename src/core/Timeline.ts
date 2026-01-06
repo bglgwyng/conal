@@ -52,6 +52,7 @@ export class Timeline {
 			x.rank < y.rank ? -1 : x.rank > y.rank ? 1 : 0,
 		);
 
+		console.group("proceed", this.timestamp);
 		try {
 			for (const source of this.#emittingSources) {
 				if (!source.isActive) continue;
@@ -69,6 +70,7 @@ export class Timeline {
 			while (queue.size > 0) {
 				// biome-ignore lint/style/noNonNullAssertion: size checked
 				const node = queue.pop()!;
+				console.group("process", node.getTag(), node.rank);
 
 				assertInternal(
 					node.proceedState === ProceedState.Queued,
@@ -125,6 +127,7 @@ export class Timeline {
 						}
 					}
 				}
+				console.groupEnd();
 			}
 
 			assertInternal(
@@ -139,6 +142,7 @@ export class Timeline {
 		} finally {
 			this.#isProceeding = false;
 		}
+		console.groupEnd();
 
 		this.#timestamp = nextTimestamp;
 
@@ -151,6 +155,7 @@ export class Timeline {
 			if (node.proceedState === ProceedState.Queued) return;
 			if (node.proceedState === ProceedState.Pending) return;
 
+			console.info("push", node.getTag());
 			queue.push(node);
 			node.proceedState = ProceedState.Queued;
 		}

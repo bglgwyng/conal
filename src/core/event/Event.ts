@@ -56,6 +56,7 @@ export abstract class Event<T> extends Node {
 
 		if (!wasActive && event.isActive) event.activate();
 
+		console.info("Reorder", event.getTag(), this.getTag());
 		this.timeline.reorder(event, this);
 
 		return () => {

@@ -1,4 +1,6 @@
+import { assert } from "../../utils/assert";
 import { just, type Maybe } from "../../utils/Maybe";
+import { ProceedState } from "../Node";
 import type { Timeline } from "../Timeline";
 import { DerivedEvent } from "./DerivedEvent";
 import type { Event } from "./Event";
@@ -16,6 +18,9 @@ export class MergedEvent<L, R> extends DerivedEvent<These<L, R>> {
 	}
 
 	deriveEmission() {
+		assert(this.left.proceedState !== ProceedState.Pending);
+		assert(this.right.proceedState !== ProceedState.Pending);
+
 		const leftEmission = this.#leftEmission;
 		const rightEmission = this.#rightEmission;
 

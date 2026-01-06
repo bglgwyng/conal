@@ -438,6 +438,77 @@ describe("Dynamic", () => {
 			emit1(2.6); // 2.6 + 2 = 4.6, rounds to 5, floor(5) !== floor(3)
 			expect(callback).toHaveBeenCalledWith(5);
 		});
+
+		// it("pending readNext", () => {
+		// 	const [source1, emit1] = t.source<number>();
+		// 	source1.tag("source1");
+		// 	const [source2, emit2] = t.source<number>();
+		// 	source2.tag("source2");
+		// 	const [source3, emit3] = t.source<number>();
+		// 	source3.tag("source3");
+		// 	const [source4, emit4] = t.source<number>();
+		// 	source4.tag("source4");
+		// 	const state1 = t.state(0, source1);
+		// 	state1.tag("state1");
+		// 	const state2 = t.state(0, source2);
+		// 	state2.tag("state2");
+		// 	const state3 = t.state(0, source3);
+		// 	state3.tag("state3");
+		// 	const state4 = t.state(0, source4);
+		// 	state4.tag("state4");
+
+		// 	const computed1 = t.computed(function* () {
+		// 		return yield* state1;
+		// 	});
+		// 	computed1.tag("computed1");
+		// 	const computed2 = t.computed(function* () {
+		// 		return yield* state2;
+		// 	});
+		// 	computed2.tag("computed2");
+		// 	const computed3 = t.computed(function* () {
+		// 		if ((yield* state2) === 0) {
+		// 			return -1;
+		// 		}
+		// 		return (yield* computed2) * 2;
+		// 	});
+		// 	computed3.tag("computed3");
+		// 	const computed4 = t.computed(function* () {
+		// 		return 0;
+		// 	});
+		// 	computed4.tag("computed4");
+
+		// 	const em = t.merge(source1, computed3.updated).tag("em");
+		// 	const [e] = em.on((x) => {
+		// 		console.info(x);
+		// 	});
+		// 	e.tag("e");
+
+		// 	const [e1] = computed1.on(() => {});
+		// 	e1.tag("e1");
+		// 	const [e2] = computed2.on(() => {});
+		// 	e2.tag("e2");
+		// 	const [e3] = computed3.on(() => {});
+		// 	e3.tag("e3");
+		// 	const [e4] = computed4.on(() => {});
+		// 	e4.tag("e4");
+
+		// 	expect(state1.internal.rank).toBe(1);
+		// 	expect(state2.internal.rank).toBe(1);
+		// 	expect(state3.internal.rank).toBe(1);
+		// 	expect(state4.internal.rank).toBe(1);
+
+		// 	emit1(10);
+
+		// 	expect(computed1.internal.rank).toBe(2);
+		// 	expect(computed2.internal.rank).toBe(2);
+		// 	expect(computed3.internal.rank).toBe(2);
+		// 	expect(computed4.internal.rank).toBe(0);
+
+		// 	emit2(1);
+
+		// 	expect(computed3.internal.rank).toBe(3);
+		// 	emit1(5);
+		// });
 	});
 
 	describe("integration tests", () => {
